@@ -7,7 +7,7 @@ const AIChatPage = () => {
   const navigate = useNavigate()
   const { 
     isAuthenticated, 
-    user, 
+    // user, // 사용하지 않으면 제거하거나 유지
     chatHistories, 
     setChatHistories, 
     currentChatId, 
@@ -15,26 +15,44 @@ const AIChatPage = () => {
   } = useStore()
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isWelcomeMode, setIsWelcomeMode] = useState(!currentChatId) // 채팅방이 선택되어 있으면 웰컴모드 끔
-  const [messages, setMessages] = useState<Message[]>([]) // 현재 화면용 로컬 상태
+  const [isWelcomeMode, setIsWelcomeMode] = useState(!currentChatId)
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
+  
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // ⚡ 수정: 새 채팅 생성 중인지 추적하는 Ref (useEffect 충돌 방지용)
+  const isCreatingChat = useRef(false)
+
+  // 🔴 수정 1: 인증 리다이렉트는 반드시 useEffect 안에서 처리해야 함
+  useEffect(() => {
+    if (!isAuthenticated) {
+       navigate('/') 
+    }
+  }, [isAuthenticated, navigate])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-  // 페이지 들어왔을 때: 현재 선택된 채팅방이 있다면 그 메시지 불러오기
+
+  // 페이지 들어왔을 때 & 채팅방 변경 시 메시지 불러오기
   useEffect(() => {
+    // ⚡ 수정: 새 채팅을 만드는 중이라면 로컬 상태(handleSend)를 우선하고 이 이펙트는 건너뜀
+    if (isCreatingChat.current) {
+      isCreatingChat.current = false
+      return
+    }
+
     if (currentChatId) {
       const currentChat = chatHistories.find(ch => ch.id === currentChatId)
       if (currentChat) {
         setMessages(currentChat.messages)
         setIsWelcomeMode(false)
       } else {
-        // ID는 있는데 실제 데이터가 없으면 초기화
+        // ID는 있지만 히스토리에 없는 경우 (예외 처리)
         setIsWelcomeMode(true)
         setMessages([])
       }
@@ -42,7 +60,8 @@ const AIChatPage = () => {
       setIsWelcomeMode(true)
       setMessages([])
     }
-  }, [currentChatId]) // chatHistories는 제외 (무한루프 방지), ID가 바뀔 때만 실행
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentChatId]) 
 
   // 메시지 스크롤 자동 이동
   useEffect(() => {
@@ -60,17 +79,19 @@ const AIChatPage = () => {
           : chat
       ))
     }
-  }, [messages]) // currentChatId 제거 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]) 
 
   const handleNewChat = () => {
     setMessages([])
-    setCurrentChatId(null) // 전역 상태 변경
+    setCurrentChatId(null)
     setIsWelcomeMode(true)
     setInput('')
+    isCreatingChat.current = false
   }
 
   const handleChatClick = (chatId: string) => {
-    setCurrentChatId(chatId) // 전역 상태만 바꾸면 위의 useEffect가 알아서 메시지 로드함
+    setCurrentChatId(chatId)
   }
 
   const handleChatDelete = (chatId: string, e: React.MouseEvent) => {
@@ -104,24 +125,6 @@ const AIChatPage = () => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
 
-    // 새 채팅 시작 로직
-    if (isWelcomeMode || !currentChatId) {
-      const newChatId = Date.now().toString()
-      const newChat: ChatHistory = {
-        id: newChatId,
-        name: input.substring(0, 20) + (input.length > 20 ? '...' : ''),
-        messages: [],
-        createdAt: new Date().toISOString() // Date -> String 변환
-      }
-      
-      // 순서 중요: 먼저 히스토리에 추가하고 -> ID를 설정
-      setChatHistories(prev => [newChat, ...prev])
-      setCurrentChatId(newChatId)
-      setIsWelcomeMode(false)
-      // 메시지 전송 로직이 useEffect 의존성 때문에 꼬일 수 있으므로 여기서 바로 처리하지 않고 return 후 다음 렌더링에 맡기거나
-      // 로컬 메시지 업데이트를 진행합니다.
-    }
-
     const userMessage: Message = {
       id: Date.now(),
       text: input,
@@ -129,10 +132,34 @@ const AIChatPage = () => {
       timestamp: new Date().toISOString()
     }
 
-    setMessages(prev => [...prev, userMessage])
+    // ⚡ 수정 2: 새 채팅 시작 로직 개선
+    if (isWelcomeMode || !currentChatId) {
+      const newChatId = Date.now().toString()
+      
+      // Ref를 true로 설정하여 useEffect가 초기화하는 것을 방지
+      isCreatingChat.current = true
+
+      const newChat: ChatHistory = {
+        id: newChatId,
+        name: input.substring(0, 20) + (input.length > 20 ? '...' : ''),
+        messages: [userMessage], // ⚡ 여기서 바로 첫 메시지를 포함시킴
+        createdAt: new Date().toISOString()
+      }
+      
+      // 히스토리 추가 -> ID 변경 -> 로컬 메시지 설정 순서
+      setChatHistories(prev => [newChat, ...prev])
+      setCurrentChatId(newChatId)
+      setIsWelcomeMode(false)
+      setMessages([userMessage]) 
+    } else {
+      // 기존 채팅방일 경우
+      setMessages(prev => [...prev, userMessage])
+    }
+
     setInput('')
     setIsLoading(true)
 
+    // AI 응답 시뮬레이션
     setTimeout(() => {
       const aiMessage: Message = {
         id: Date.now() + 1,
@@ -148,10 +175,6 @@ const AIChatPage = () => {
 
   const handleResultClick = (resultId: number) => {
     navigate(`/judgment/${resultId}`)
-  }
-
-  if (!isAuthenticated) {
-    // navigate('/') 
   }
 
   return (
@@ -187,7 +210,7 @@ const AIChatPage = () => {
             <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-hide">
               <div className="text-xs font-semibold text-gray-400 mb-3 px-2">최근 기록</div>
               <div className="space-y-1">
-                {chatHistories.map((chat) => (
+                {chatHistories?.map((chat) => ( // chatHistories가 없을 경우 대비 (?.)
                   <div
                     key={chat.id}
                     onClick={() => handleChatClick(chat.id)}
@@ -271,8 +294,9 @@ const AIChatPage = () => {
                     <button
                       key={prompt}
                       onClick={() => {
+                        // ⚡ 수정: setInput 후 바로 전송이 아니라 입력창에만 들어가도록 수정 (사용자 경험상 더 안전함)
+                        // 바로 전송하려면 handleSend를 호출하되 event 객체 모킹 필요
                         setInput(prompt)
-                        setTimeout(() => {}, 0)
                       }}
                       className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors"
                     >
@@ -323,9 +347,9 @@ const AIChatPage = () => {
                   <div className="flex justify-start gap-3">
                     <div className="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-blue-600 text-sm">AI</div>
                     <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                       <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                       <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-                       <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
                     </div>
                   </div>
                 )}
