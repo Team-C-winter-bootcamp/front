@@ -24,10 +24,10 @@ const AIChatPage = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
-  // ⚡ 수정: 새 채팅 생성 중인지 추적하는 Ref (useEffect 충돌 방지용)
+  // 새 채팅 생성 중인지 추적하는 Ref (useEffect 충돌 방지용)
   const isCreatingChat = useRef(false)
 
-  // 🔴 수정 1: 인증 리다이렉트는 반드시 useEffect 안에서 처리해야 함
+  // 인증 useEffect 안에서 처리해야 함
   useEffect(() => {
     if (!isAuthenticated) {
        navigate('/') 
@@ -94,11 +94,16 @@ const AIChatPage = () => {
     setCurrentChatId(chatId)
   }
 
+  // ✅ 수정된 부분: 삭제 시 확인 창 띄우기
   const handleChatDelete = (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
-    if (currentChatId === chatId) {
-      handleNewChat()
+    
+    // confirm 창 추가
+    if (window.confirm('이 채팅방을 삭제하시겠습니까?')) {
+        setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
+        if (currentChatId === chatId) {
+          handleNewChat()
+        }
     }
   }
 
@@ -174,7 +179,7 @@ const AIChatPage = () => {
   }
 
   const handleResultClick = (resultId: number) => {
-    navigate(`/judgment/${resultId}`)
+    navigate(`/judgment/${resultId}`, { state: { from: 'chat' } })
   }
 
   return (
