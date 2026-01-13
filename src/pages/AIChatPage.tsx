@@ -1,360 +1,104 @@
-import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useStore, Message, ChatHistory } from '../store/useStore'
+import { useState } from 'react'
 import Header from '../components/Header'
+import DeleteAlertModal from '../components/DeleteAlertModal'
+import { ChatSidebar } from '../components/ai-chat/ChatSidebar'
+import { ChatMessage } from '../components/ai-chat/ChatMessage'
+import { WelcomeScreen } from '../components/ai-chat/WelcomeScreen'
+import { useAIChat } from '../hooks/useAIChat'
 
 const AIChatPage = () => {
-  const navigate = useNavigate()
-  const { 
-    isAuthenticated, 
-    // user, // 사용하지 않으면 제거하거나 유지
-    chatHistories, 
-    setChatHistories, 
-    currentChatId, 
-    setCurrentChatId 
-  } = useStore()
-
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isWelcomeMode, setIsWelcomeMode] = useState(!currentChatId)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [editingChatId, setEditingChatId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
+  const [deleteChatTargetId, setDeleteChatTargetId] = useState<string | null>(null)
   
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  
-  // 새 채팅 생성 중인지 추적하는 Ref (useEffect 충돌 방지용)
-  const isCreatingChat = useRef(false)
+  const {
+    isSidebarCollapsed,
+    setIsSidebarCollapsed,
+    isWelcomeMode,
+    messages,
+    input,
+    setInput,
+    isLoading,
+    editingChatId,
+    editingName,
+    setEditingName,
+    messagesEndRef,
+    chatHistories,
+    currentChatId,
+    handleNewChat,
+    handleChatClick,
+    handleChatDelete,
+    handleChatRename,
+    handleRenameSave,
+    handleSend,
+    handleResultClick,
+    confirmChatDelete
+  } = useAIChat()
 
-  // 인증 useEffect 안에서 처리해야 함
-  useEffect(() => {
-    if (!isAuthenticated) {
-       navigate('/') 
-    }
-  }, [isAuthenticated, navigate])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  const handleDeleteClick = (chatId: string, e: React.MouseEvent) => {
+    handleChatDelete(chatId, e)
+    setDeleteChatTargetId(chatId)
   }
 
-  // 페이지 들어왔을 때 & 채팅방 변경 시 메시지 불러오기
-  useEffect(() => {
-    // ⚡ 수정: 새 채팅을 만드는 중이라면 로컬 상태(handleSend)를 우선하고 이 이펙트는 건너뜀
-    if (isCreatingChat.current) {
-      isCreatingChat.current = false
-      return
+  const handleConfirmDelete = () => {
+    if (deleteChatTargetId) {
+      confirmChatDelete(deleteChatTargetId)
+      setDeleteChatTargetId(null)
     }
-
-    if (currentChatId) {
-      const currentChat = chatHistories.find(ch => ch.id === currentChatId)
-      if (currentChat) {
-        setMessages(currentChat.messages)
-        setIsWelcomeMode(false)
-      } else {
-        // ID는 있지만 히스토리에 없는 경우 (예외 처리)
-        setIsWelcomeMode(true)
-        setMessages([])
-      }
-    } else {
-      setIsWelcomeMode(true)
-      setMessages([])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChatId]) 
-
-  // 메시지 스크롤 자동 이동
-  useEffect(() => {
-    if (!isWelcomeMode) {
-      scrollToBottom()
-    }
-  }, [messages, isWelcomeMode])
-
-  // 메시지가 변경되면 -> chatHistories에 자동 저장
-  useEffect(() => {
-    if (currentChatId && messages.length > 0) {
-      setChatHistories(prev => prev.map(chat => 
-        chat.id === currentChatId 
-          ? { ...chat, messages: messages } 
-          : chat
-      ))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]) 
-
-  const handleNewChat = () => {
-    setMessages([])
-    setCurrentChatId(null)
-    setIsWelcomeMode(true)
-    setInput('')
-    isCreatingChat.current = false
-  }
-
-  const handleChatClick = (chatId: string) => {
-    setCurrentChatId(chatId)
-  }
-
-  // ✅ 수정된 부분: 삭제 시 확인 창 띄우기
-  const handleChatDelete = (chatId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    
-    // confirm 창 추가
-    if (window.confirm('이 채팅방을 삭제하시겠습니까?')) {
-        setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
-        if (currentChatId === chatId) {
-          handleNewChat()
-        }
-    }
-  }
-
-  const handleChatRename = (chatId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    const chat = chatHistories.find(ch => ch.id === chatId)
-    if (chat) {
-      setEditingChatId(chatId)
-      setEditingName(chat.name)
-    }
-  }
-
-  const handleRenameSave = () => {
-    if (editingChatId && editingName.trim()) {
-      setChatHistories(prev => prev.map(ch =>
-        ch.id === editingChatId ? { ...ch, name: editingName.trim() } : ch
-      ))
-      setEditingChatId(null)
-      setEditingName('')
-    }
-  }
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-
-    const userMessage: Message = {
-      id: Date.now(),
-      text: input,
-      isUser: true,
-      timestamp: new Date().toISOString()
-    }
-
-    // ⚡ 수정 2: 새 채팅 시작 로직 개선
-    if (isWelcomeMode || !currentChatId) {
-      const newChatId = Date.now().toString()
-      
-      // Ref를 true로 설정하여 useEffect가 초기화하는 것을 방지
-      isCreatingChat.current = true
-
-      const newChat: ChatHistory = {
-        id: newChatId,
-        name: input.substring(0, 20) + (input.length > 20 ? '...' : ''),
-        messages: [userMessage], // ⚡ 여기서 바로 첫 메시지를 포함시킴
-        createdAt: new Date().toISOString()
-      }
-      
-      // 히스토리 추가 -> ID 변경 -> 로컬 메시지 설정 순서
-      setChatHistories(prev => [newChat, ...prev])
-      setCurrentChatId(newChatId)
-      setIsWelcomeMode(false)
-      setMessages([userMessage]) 
-    } else {
-      // 기존 채팅방일 경우
-      setMessages(prev => [...prev, userMessage])
-    }
-
-    setInput('')
-    setIsLoading(true)
-
-    // AI 응답 시뮬레이션
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        text: `질문에 대한 답변입니다. "${userMessage.text}"에 대해 법률적으로 검토한 결과...`,
-        isUser: false,
-        timestamp: new Date().toISOString(),
-        resultId: Math.floor(Math.random() * 100)
-      }
-      setMessages(prev => [...prev, aiMessage])
-      setIsLoading(false)
-    }, 1000)
-  }
-
-  const handleResultClick = (resultId: number) => {
-    navigate(`/judgment/${resultId}`, { state: { from: 'chat' } })
   }
 
   return (
     <div className="h-screen bg-white flex flex-col text-gray-900 font-sans overflow-hidden">
       <Header />
       
+      {/* 삭제 확인 모달 */}
+      <DeleteAlertModal 
+        isOpen={!!deleteChatTargetId} 
+        onClose={() => setDeleteChatTargetId(null)}
+        onConfirm={handleConfirmDelete}
+      />
+      
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <aside
-          className={`bg-gray-50 border-r border-gray-200 transition-all duration-300 ${
-            isSidebarCollapsed ? 'w-16' : 'w-64'
-          } flex-shrink-0 flex flex-col h-full`}
-        >
-          <div className="p-4 flex items-center justify-between flex-shrink-0">
-            {!isSidebarCollapsed && (
-              <button
-                onClick={handleNewChat}
-                className="w-full px-4 py-2.5 bg-white border border-gray-300 text-black rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm font-medium"
-              >
-                <span>+</span>
-                <span>새로운 채팅</span>
-              </button>
-            )}
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className={`p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors ${isSidebarCollapsed ? 'mx-auto' : 'ml-2'}`}
-            >
-              {isSidebarCollapsed ? '➜' : '☰'}
-            </button>
-          </div>
-
-          {!isSidebarCollapsed && (
-            <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-hide">
-              <div className="text-xs font-semibold text-gray-400 mb-3 px-2">최근 기록</div>
-              <div className="space-y-1">
-                {chatHistories?.map((chat) => ( // chatHistories가 없을 경우 대비 (?.)
-                  <div
-                    key={chat.id}
-                    onClick={() => handleChatClick(chat.id)}
-                    className={`group relative p-3 rounded-lg cursor-pointer transition-colors text-sm flex items-center ${
-                      currentChatId === chat.id 
-                        ? 'bg-gray-200 text-black font-medium' 
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="mr-2 text-lg">💬</span>
-                    {editingChatId === chat.id ? (
-                      <input
-                        type="text"
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        onBlur={handleRenameSave}
-                        onKeyDown={(e) => e.key === 'Enter' && handleRenameSave()}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full bg-white border border-blue-500 rounded px-1 py-0.5 outline-none"
-                        autoFocus
-                      />
-                    ) : (
-                      <>
-                        <span className="truncate flex-1">{chat.name}</span>
-                        <div className="hidden group-hover:flex gap-1 absolute right-2 bg-inherit pl-2">
-                          <button onClick={(e) => handleChatRename(chat.id, e)} className="hover:text-blue-600">✏️</button>
-                          <button onClick={(e) => handleChatDelete(chat.id, e)} className="hover:text-red-500">🗑️</button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {isSidebarCollapsed && (
-            <div className="p-2 flex flex-col items-center gap-4">
-               <button onClick={handleNewChat} className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 shadow-sm">
-                 ➕
-               </button>
-            </div>
-          )}
-        </aside>
+        <ChatSidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onNewChat={handleNewChat}
+          chatHistories={chatHistories}
+          currentChatId={currentChatId}
+          editingChatId={editingChatId}
+          editingName={editingName}
+          setEditingName={setEditingName}
+          onChatClick={handleChatClick}
+          onChatRename={handleChatRename}
+          onRenameSave={handleRenameSave}
+          onChatDelete={handleDeleteClick}
+        />
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col bg-white relative overflow-hidden">
           
           {isWelcomeMode ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto">
-              <div className="text-center max-w-2xl w-full">
-                <div className="mb-8">
-                  <span className="inline-block p-4 rounded-full bg-gray-100 mb-4 text-4xl">⚖️</span>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    무엇을 도와드릴까요?
-                  </h1>
-                  <p className="text-gray-500">
-                    Law딩중 AI가 판례 검색과 법률 조언을 도와드립니다.
-                  </p>
-                </div>
-                
-                <form onSubmit={handleSend} className="relative w-full shadow-lg rounded-2xl">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="예) 전세 보증금을 돌려받지 못하고 있어요..."
-                    className="w-full p-5 pr-16 text-lg border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all placeholder-gray-400"
-                  />
-                  <button 
-                    type="submit"
-                    disabled={!input.trim()}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 bg-black text-white rounded-lg disabled:opacity-30 hover:bg-gray-800 transition-colors"
-                  >
-                    ➤
-                  </button>
-                </form>
-
-                <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                  {['📜 계약서 검토', '💰 임금 체불 상담', '🏠 부동산 분쟁', '🚗 교통사고 과실'].map((prompt) => (
-                    <button
-                      key={prompt}
-                      onClick={() => {
-                        // ⚡ 수정: setInput 후 바로 전송이 아니라 입력창에만 들어가도록 수정 (사용자 경험상 더 안전함)
-                        // 바로 전송하려면 handleSend를 호출하되 event 객체 모킹 필요
-                        setInput(prompt)
-                      }}
-                      className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <WelcomeScreen
+              input={input}
+              setInput={setInput}
+              onSend={handleSend}
+            />
           ) : (
             <>
               <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scrollbar-hide">
                 {messages.map((message) => (
-                  <div
+                  <ChatMessage
                     key={message.id}
-                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-3xl flex gap-3 ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm border ${
-                        message.isUser ? 'bg-black text-white border-black' : 'bg-white text-blue-600 border-gray-200'
-                      }`}>
-                        {message.isUser ? '나' : 'AI'}
-                      </div>
-
-                      <div className={`px-5 py-3.5 rounded-2xl shadow-sm text-base leading-relaxed ${
-                        message.isUser 
-                          ? 'bg-black text-white rounded-tr-none' 
-                          : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'
-                      }`}>
-                        <p className="whitespace-pre-wrap">{message.text}</p>
-                        
-                        {!message.isUser && message.resultId && (
-                          <div className="mt-4 pt-3 border-t border-gray-100">
-                            <button
-                              onClick={() => handleResultClick(message.resultId!)}
-                              className="flex items-center gap-2 text-sm text-blue-600 hover:underline font-medium"
-                            >
-                              📄 관련 판결문 분석 보기
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    message={message}
+                    onResultClick={handleResultClick}
+                  />
                 ))}
                 
                 {isLoading && (
                   <div className="flex justify-start gap-3">
                     <div className="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-blue-600 text-sm">AI</div>
                     <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
                     </div>
                   </div>
                 )}
