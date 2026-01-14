@@ -2,6 +2,7 @@ import { useStore } from '../../store/useStore'
 import undo from '../../assets/undo.png'
 import redo from '../../assets/redo.png'
 import copy from '../../assets/copy.png'
+import burger from '../../assets/burger.png'
 
 interface MemoPanelProps {
   selectedMemoId: string | null
@@ -22,6 +23,7 @@ interface MemoPanelProps {
   onConvertToHWP: () => void
   onConvertToWord: () => void
   onTogglePanel: () => void
+  onOpenPanel: () => void
   isRightPanelOpen: boolean
   memoWidth: number
 }
@@ -45,26 +47,55 @@ export const MemoPanel = ({
   onConvertToHWP,
   onConvertToWord,
   onTogglePanel,
+  onOpenPanel,
   isRightPanelOpen,
   memoWidth
 }: MemoPanelProps) => {
   const { memos } = useStore()
   const selectedMemo = memos.find(m => m.id === selectedMemoId)
 
-  if (!isRightPanelOpen) return null
+  // 패널이 닫혔을 때 사이드바 열기 버튼만 표시
+  if (!isRightPanelOpen) {
+    return (
+      <div className="bg-gray-50 border-l border-gray-200 flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16">
+        <div className="p-2 flex flex-col items-center gap-4 mt-4">
+          <button 
+            onClick={onOpenPanel}
+            className="p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors"
+            title="메모장 열기"
+          >
+            <div className="inline-block p-1 rounded-full">
+              <img 
+                src={burger} 
+                alt="burger" 
+                className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+              />
+            </div>
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div 
-      className="bg-gray-50 p-4 flex-shrink-0 overflow-y-auto flex flex-col h-full border-l border-gray-200"
+      className="bg-gray-50 p-4 flex-shrink-0 overflow-y-auto flex flex-col h-full border-l border-gray-200 transition-all duration-300"
       style={{ width: `${memoWidth}px` }}
     >
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-2">
           <button 
             onClick={onTogglePanel}
-            className="p-1 text-gray-500 hover:bg-gray-200 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors"
+            title="메모장 접기"
           >
-            ☰
+            <div className="inline-block p-1 rounded-full">
+              <img 
+                src={burger} 
+                alt="burger" 
+                className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+              />
+            </div>
           </button>
           <h3 className="font-semibold text-gray-800">메모장 <span className="text-xs font-normal text-gray-500">({memos.length}/10)</span></h3>
         </div>

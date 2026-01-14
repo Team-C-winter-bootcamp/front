@@ -10,6 +10,9 @@ interface ChatAreaProps {
   onAddToMemo: (content: string, titleHint?: string) => void
   chatEndRef: React.RefObject<HTMLDivElement>
   sessionName: string
+  // 버튼은 사라졌지만 부모 컴포넌트와의 호환성을 위해 Props 타입은 유지하거나,
+  // 필요 없다면 부모에서 전달하는 부분도 같이 수정해야 합니다.
+  // 여기서는 타입 에러 방지를 위해 Props는 그대로 두었습니다.
   isLeftPanelOpen: boolean
   isRightPanelOpen: boolean
   onLeftPanelToggle: () => void
@@ -25,10 +28,6 @@ export const ChatArea = ({
   onAddToMemo,
   chatEndRef,
   sessionName,
-  isLeftPanelOpen,
-  isRightPanelOpen,
-  onLeftPanelToggle,
-  onRightPanelToggle
 }: ChatAreaProps) => {
   // 메시지가 변경되거나 처리 중일 때 스크롤
   useEffect(() => {
@@ -37,29 +36,8 @@ export const ChatArea = ({
 
   return (
     <div className="flex-1 flex flex-col bg-white overflow-hidden relative border-r border-gray-200">
-      {/* 패널 펼치기 버튼 (왼쪽) */}
-{!isLeftPanelOpen && (
-  <div className="absolute top-0 left-0 z-20 h-full w-16 bg-white border-r border-gray-100 flex items-center justify-center shadow-sm">
-    <button 
-      onClick={onLeftPanelToggle} 
-      className="p-3 bg-white rounded-xl shadow border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
-    >
-      →
-    </button>
-  </div>
-)}
+      
 
-      {/* 패널 펼치기 버튼 (오른쪽) */}
-      {!isRightPanelOpen && (
-        <div className="absolute top-0 right-0 z-20 h-full w-12 bg-white border-l border-gray-200 flex items-center justify-center">
-          <button 
-            onClick={onRightPanelToggle} 
-            className="p-3 bg-white rounded-xl shadow border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
-          >
-            ←
-          </button>
-        </div>
-      )}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
         {messages.length === 0 && !isProcessing && (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
@@ -114,7 +92,7 @@ export const ChatArea = ({
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                     메모에 추가
+                      메모에 추가
                     </button>
                   </div>
                 )}
@@ -138,13 +116,13 @@ export const ChatArea = ({
         <div ref={chatEndRef} />
       </div>
       
-      <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0 z-10">
-        <form onSubmit={onChatSend} className="max-w-4xl mx-auto relative flex gap-2">
+      <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0 z-10 p-8">
+        <form onSubmit={onChatSend} className="max-w-5xl mx-auto relative flex gap-2">
           <input
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            placeholder="문서 내용에 대해 질문해보세요..."
+            placeholder="LAWDING에게 물어보기"
             className="flex-1 pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
           />
           <button

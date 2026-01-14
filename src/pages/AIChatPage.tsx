@@ -116,7 +116,7 @@ const AIChatPage = () => {
                         handleSend(e)
                       }
                     }}
-                    placeholder="무엇이든 물어보세요..."
+                    placeholder="LAWDING에게 물어보기"
                     rows={1}
                     className="w-full pl-4 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:bg-white resize-none max-h-32 text-gray-900 placeholder-gray-400 shadow-sm"
                     style={{ minHeight: '56px' }}

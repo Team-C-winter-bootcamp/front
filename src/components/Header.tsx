@@ -7,7 +7,7 @@ const Header = () => {
   const { isAuthenticated, user, logout } = useStore()
 
   return (
-    <header className="flex justify-between items-center px-7 py-3 border-b border-gray-200">
+    <header className="flex justify-between items-center px-7 py-1 border-b border-gray-200">
       <button
         onClick={() => navigate('/')}
         className="text-xl font-bold text-black hover:opacity-70 transition-opacity"
