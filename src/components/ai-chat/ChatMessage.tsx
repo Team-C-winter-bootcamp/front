@@ -1,4 +1,5 @@
 import { Message } from '../../store/useStore'
+import paper from '../../assets/paper.png'
 
 interface ChatMessageProps {
   message: Message
@@ -28,7 +29,17 @@ export const ChatMessage = ({ message, onResultClick }: ChatMessageProps) => {
                 onClick={() => onResultClick(message.resultId!)}
                 className="flex items-center gap-2 text-sm text-blue-600 hover:underline font-medium"
               >
-                📄 관련 판결문 분석 보기
+                <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={paper} 
+                        alt="paper" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
+                
+                
+                
+                관련 판결문 분석 보기
               </button>
             </div>
           )}

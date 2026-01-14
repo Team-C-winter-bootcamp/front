@@ -38,32 +38,32 @@ export const ChatArea = ({
   return (
     <div className="flex-1 flex flex-col bg-white overflow-hidden relative border-r border-gray-200">
       {/* 패널 펼치기 버튼 (왼쪽) */}
-      {!isLeftPanelOpen && (
-        <div className="absolute top-4 left-4 z-20">
-          <button 
-            onClick={onLeftPanelToggle} 
-            className="p-3 bg-white rounded-xl shadow-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
-          >
-            ➜
-          </button>
-        </div>
-      )}
+{!isLeftPanelOpen && (
+  <div className="absolute top-0 left-0 z-20 h-full w-16 bg-white border-r border-gray-100 flex items-center justify-center shadow-sm">
+    <button 
+      onClick={onLeftPanelToggle} 
+      className="p-3 bg-white rounded-xl shadow border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
+    >
+      →
+    </button>
+  </div>
+)}
 
       {/* 패널 펼치기 버튼 (오른쪽) */}
       {!isRightPanelOpen && (
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-0 right-0 z-20 h-full w-12 bg-white border-l border-gray-200 flex items-center justify-center">
           <button 
             onClick={onRightPanelToggle} 
-            className="p-3 bg-white rounded-xl shadow-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
+            className="p-3 bg-white rounded-xl shadow border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-bold"
           >
-            ⬅
+            ←
           </button>
         </div>
       )}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
         {messages.length === 0 && !isProcessing && (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <div className="text-6xl mb-4 opacity-20">💬</div>
+            
             <h3 className="text-xl font-bold text-gray-600 mb-2">
               {sessionName}
             </h3>
@@ -96,7 +96,7 @@ export const ChatArea = ({
               >
                 {msg.isSummary && (
                   <div className="font-bold text-blue-800 mb-2 pb-2 border-b border-blue-100 flex items-center gap-2">
-                    <span>📑</span> 문서 분석 결과
+                    문서 분석 결과
                   </div>
                 )}
 
@@ -114,7 +114,7 @@ export const ChatArea = ({
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      <span>📝</span> 메모에 추가
+                     메모에 추가
                     </button>
                   </div>
                 )}

@@ -1,4 +1,7 @@
 import { useStore } from '../../store/useStore'
+import undo from '../../assets/undo.png'
+import redo from '../../assets/redo.png'
+import copy from '../../assets/copy.png'
 
 interface MemoPanelProps {
   selectedMemoId: string | null
@@ -125,9 +128,31 @@ export const MemoPanel = ({
           </div>
           
           <div className="flex items-center gap-1 p-2 border-b border-gray-100 bg-white flex-wrap">
-            <button onClick={onUndo} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="실행 취소">↩</button>
-            <button onClick={onRedo} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="다시 실행">↪</button>
-            <button onClick={onPaste} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="붙여넣기">📋</button>
+            <button onClick={onUndo} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="실행 취소"><div className="inline-block p-1 rounded-full ">
+            <img 
+              src={undo} 
+              alt="undo" 
+              className="w-4 h-4 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div></button>
+            <button onClick={onRedo} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="다시 실행">
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={redo} 
+              alt="redo" 
+              className="w-4 h-4 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
+            </button>
+            <button onClick={onPaste} className="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="붙여넣기">
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={copy} 
+              alt="copy" 
+              className="w-4 h-4 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
+            </button>
             
             <div className="w-px h-4 bg-gray-200 mx-1"></div>
             

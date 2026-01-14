@@ -1,3 +1,5 @@
+import logoImage from '../../assets/logo.png'
+import enter from '../../assets/enter.png'
 interface WelcomeScreenProps {
   input: string
   setInput: (value: string) => void
@@ -11,7 +13,13 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
     <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto">
       <div className="text-center max-w-2xl w-full">
         <div className="mb-8">
-          <span className="inline-block p-4 rounded-full bg-gray-100 mb-4 text-4xl">⚖️</span>
+        <div className="inline-block p-4 rounded-full mb-4">
+            <img 
+              src={logoImage} 
+              alt="Law딩중 로고" 
+              className="w-20 h-20 object-contain" 
+            />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             무엇을 도와드릴까요?
           </h1>
@@ -31,9 +39,15 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
           <button 
             type="submit"
             disabled={!input.trim()}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 bg-black text-white rounded-lg disabled:opacity-30 hover:bg-gray-800 transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 bg-gray-400 rounded-lg disabled:opacity-30 hover:bg-gray-300 transition-colors"
           >
-            ➤
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={enter} 
+              alt="enter" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
           </button>
         </form>
 

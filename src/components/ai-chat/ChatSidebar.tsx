@@ -1,4 +1,8 @@
 import { ChatHistory } from '../../store/useStore'
+import pencil from '../../assets/pencil.png'
+import bin from '../../assets/bin.png'
+import plus from '../../assets/plus.png'
+import burger from '../../assets/burger.png'
 
 interface ChatSidebarProps {
   isCollapsed: boolean
@@ -49,7 +53,13 @@ export const ChatSidebar = ({
           onClick={onToggleCollapse}
           className={`p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors ${isCollapsed ? 'mx-auto' : 'ml-2'}`}
         >
-          {isCollapsed ? '➜' : '☰'}
+          {isCollapsed ? '➜' : <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={burger} 
+                        alt="burger" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>}
         </button>
       </div>
 
@@ -67,7 +77,7 @@ export const ChatSidebar = ({
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <span className="mr-2 text-lg">💬</span>
+                
                 {editingChatId === chat.id ? (
                   <input
                     type="text"
@@ -83,8 +93,24 @@ export const ChatSidebar = ({
                   <>
                     <span className="truncate flex-1">{chat.name}</span>
                     <div className="hidden group-hover:flex gap-1 absolute right-2 bg-inherit pl-2">
-                      <button onClick={(e) => onChatRename(chat.id, e)} className="hover:text-blue-600">✏️</button>
-                      <button onClick={(e) => onChatDelete(chat.id, e)} className="hover:text-red-500">🗑️</button>
+                      <button onClick={(e) => onChatRename(chat.id, e)} className="hover:text-blue-600">
+                      <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={pencil} 
+                        alt="pencil" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
+                      </button>
+                      <button onClick={(e) => onChatDelete(chat.id, e)} className="hover:text-red-500">
+                      <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={bin} 
+                        alt="bin" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
+                      </button>
                     </div>
                   </>
                 )}
@@ -97,7 +123,13 @@ export const ChatSidebar = ({
       {isCollapsed && (
         <div className="p-2 flex flex-col items-center gap-4">
           <button onClick={onNewChat} className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 shadow-sm">
-            ➕
+          <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={plus} 
+              alt="plus" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
           </button>
         </div>
       )}

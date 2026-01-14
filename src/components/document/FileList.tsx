@@ -1,4 +1,5 @@
 import { FileItem } from '../../hooks/useChatSessions'
+import pencil from '../../assets/pencil.png'
 
 interface FileListProps {
   files: FileItem[]
@@ -69,7 +70,7 @@ export const FileList = ({
       >
         {files.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 text-xs">
-            <span className="text-2xl mb-1">📂</span>
+            <span className="text-2xl mb-1"></span>
             <p>여기에 파일을 드래그하세요</p>
           </div>
         ) : (
@@ -98,22 +99,28 @@ export const FileList = ({
                       className="text-gray-400 hover:text-blue-500 p-1 flex-shrink-0"
                       title="이름 변경"
                     >
-                      ✏️
+                      <div className="inline-block p-1 rounded-full ">
+                        <img 
+                          src={pencil} 
+                          alt="pencil" 
+                          className="w-4 h-4 object-contain justify-center items-center pt-1 opacity-60" 
+                        />
+                      </div>
                     </button>
                     <span className="text-xs truncate">{file.name}</span>
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0 ">
                 <input
                   type="checkbox"
                   checked={file.isSelected}
                   onChange={() => onFileToggle(file.id)}
-                  className="cursor-pointer"
+                  className="cursor-pointer pt-5"
                 />
                 <button
                   onClick={() => onFileDeleteClick(file.id)}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-gray-400 hover:text-red-500 pd-1"
                 >
                   ×
                 </button>
