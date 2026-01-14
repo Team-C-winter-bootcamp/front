@@ -19,7 +19,7 @@ interface GraphLink {
 
 const CENTER_NODE: GraphNode = {
   id: 'center',
-  name: '이번주\n키워드',
+  name: '핫이슈\n키워드',
   category: 0,
   symbolSize: 110,
   label: {
@@ -153,7 +153,7 @@ const DynamicGraph = () => {
           },
           force: {
             repulsion: 1000,
-            edgeLength: [110, 270],
+            edgeLength: [110, 320],
             gravity: 0.1,
             friction: 0.6
           },
@@ -168,10 +168,10 @@ const DynamicGraph = () => {
 
   return ( 
     <div className="w-full h-auto bg-white rounded-xl shadow-lg border border-gray-200 p-2 relative">
-      <h2 className="text-xl font-bold mb-4 px-2">최근 핫이슈 법률 키워드</h2>
+      <h2 className="text-xl border-b border-gray-200 font-bold mb-2 px-2 pr-10 pt-2 pb-3">최근 핫이슈 법률 키워드</h2>
       <ReactECharts
         option={graphOption}
-        style={{ height: '500%', width: '100%' }}
+        style={{ height: '600%', width: '100%' }}
         onEvents={{ 'click': handleChartClick }}
         
         notMerge={false} 

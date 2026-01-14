@@ -6,7 +6,6 @@ import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
 import logotext from '../assets/logotext.png'
 
 // 1. DynamicGraph 컴포넌트 import
-// (폴더명이 component인지 components인지 확인해주세요. 기존 코드 패턴에 맞춰 components로 작성했습니다.)
 import DynamicGraph from '../components/Graph/DynamicGraph' 
 
 const HomePage = () => {
@@ -51,58 +50,69 @@ const HomePage = () => {
     navigate('/document')
   }
 
-
-
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
       {/* 메인 검색 부분 */}
-      <div className="flex flex-col items-center justify-center px-4 py-16">
-        <div className="bg-gray-100 rounded-lg p-12 w-full max-w-4xl flex flex-col items-center">
-          <button 
-            onClick={() => navigate('/')} 
-            className="mb-1 transition-opacity hover:opacity-80" 
-          >
-            <img 
-              src={logotext} 
-              alt="logotext" 
-              className="w-[220px] h-auto object-contain" 
-            />
-          </button>
+      <div className="flex flex-col items-center justify-center px-4 pt-4 pb-4">
+        
+        {/* 회색 박스 */}
+        <div className="bg-gray-100 rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
           
-          <p className="text-sm text-black text-center mb-3 font-bold">
-            국내 최초 Ai 판례 검색 로딩중
-          </p>
-          <form onSubmit={handleSearch} className="w-full">
+          {/* 로고 영역 */}
+          <div className="flex flex-col items-center">
+            <button 
+              onClick={() => navigate('/')} 
+              className="mb-2 transition-opacity hover:opacity-80" 
+            >
+              <img 
+                src={logotext} 
+                alt="logotext" 
+                className="w-[300px] h-auto object-contain" 
+              />
+            </button>
+            <p className="text-base text-gray-600 text-center font-bold">
+              국내 최초 Ai 판례 검색 로딩중
+            </p>
+          </div>
+
+          {/* 검색창 영역 */}
+          <form onSubmit={handleSearch} className="w-full flex justify-center">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="키워드를 입력하세요"
-              className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full max-w-2xl px-6 py-4 text-lg rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
             />
           </form>
         </div>
 
-        {/* 바로가기 버튼 2개 */}
-        <div className="flex gap-4 mt-8 w-full max-w-4xl">
+        {/* ▼▼▼ [추가된 부분] 텍스트 영역 ▼▼▼ */}
+        {/* 버튼 박스와 너비(max-w-4xl)를 맞춰서 라인을 정렬했습니다 */}
+        <div className="w-full max-w-6xl mt-10 mb-7 mb-2 px-1">
+          <h2 className="text-2xl font-bold text-gray-800">로딩중 활용하기</h2>
+        </div>
+
+        {/* 버튼 영역 */}
+        <div className="flex gap-4 w-full max-w-4xl">
           <button
             onClick={handleAIChatClick}
-            className={`flex-1 px-6 py-4 rounded-lg transition-colors ${
+            className={`flex-1 px-1 py-6 rounded-lg transition-colors shadow-sm ${
               isAuthenticated
-                ? 'bg-blue-200 font-bold text-black hover:bg-blue-300'
-                : 'bg-blue-200 font-bold text-black hover:bg-blue-300 '
+                ? 'bg-blue-200 font-bold text-xl text-black hover:bg-blue-300'
+                : 'bg-blue-200 font-bold text-xl text-black hover:bg-blue-300 '
             }`}
           >
             Ai로 나와 유사한 판례찾기
           </button>
           <button
             onClick={handleDocumentClick}
-            className={`flex-1 px-6 py-4 rounded-lg transition-colors ${
+            className={`flex-1 px-1 py-6 rounded-lg transition-colors shadow-sm ${
               isAuthenticated
-                ? 'bg-pink-200 font-bold text-black hover:bg-pink-300'
-                : 'bg-pink-200 font-bold text-black hover:bg-pink-300 '
+                ? 'bg-pink-200 font-bold text-xl text-black hover:bg-pink-300'
+                : 'bg-pink-200 font-bold text-xl text-black hover:bg-pink-300 '
             }`}
           >
             문서 작성하러 가기
@@ -110,9 +120,8 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* 3. [교체됨] 키워드 섹션을 DynamicGraph로 대체 */}
-      <div className="px-6 py-8 w-full max-w-5xl mx-auto">
-        {/* 그래프 컴포넌트 렌더링 */}
+      {/* 그래프 섹션 */}
+      <div className="px-6 py-8 w-full max-w-7xl mx-auto">
         <DynamicGraph />
       </div>
 

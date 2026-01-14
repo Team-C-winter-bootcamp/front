@@ -8,10 +8,9 @@ import { useFileManagement } from '../hooks/useFileManagement'
 import { useMemoManagement } from '../hooks/useMemoManagement'
 import { useResize } from '../hooks/useResize'
 import { useChat } from '../hooks/useChat'
-import { ChatSessionList } from '../components/document/ChatSessionList'
-import { FileList } from '../components/document/FileList'
+import { LeftSidebar } from '../components/document/LeftSidebar'
 import { ChatArea } from '../components/document/ChatArea'
-import { MemoPanel } from '../components/document/MemoPanel'
+import { MemoPanel } from '../components/document/MemoPanel' 
 
 const DocumentPage = () => {
   // 패널 접기/펼치기 State
@@ -77,84 +76,45 @@ const DocumentPage = () => {
 
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* Left Panel - Chat List & Source (Collapsible) */}
-        {isLeftPanelOpen && (
-            <div
-            className="border-r border-gray-200 bg-gray-50 flex flex-col flex-shrink-0 z-10"
-            style={{ width: `${resize.sourceWidth}px` }}
-            >
-            {/* 상단: 새 채팅 버튼 (햄버거 메뉴 포함) */}
-            <div className="p-4 pb-2 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                    <button
-                  onClick={chatSessions.handleNewChat}
-                        className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-black rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm font-medium"
-                    >
-                        <span>+</span>
-                        <span>새 채팅</span>
-                    </button>
-                    {/* 패널 접기 버튼 (햄버거) */}
-                    <button 
-                        onClick={() => setIsLeftPanelOpen(false)}
-                        className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="패널 접기"
-                    >
-                        ☰
-                    </button>
-                </div>
-            </div>
+        {/* ================= 왼쪽 패널 영역 ================= */}
+        <LeftSidebar
+          isLeftPanelOpen={isLeftPanelOpen}
+          onTogglePanel={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+          sourceWidth={resize.sourceWidth}
+          sourceResizeRef={resize.sourceResizeRef}
+          onResizeStart={() => resize.setIsResizingSource(true)}
+          fileAreaHeight={resize.fileAreaHeight}
+          fileDividerResizeRef={resize.fileDividerResizeRef}
+          onFileDividerResizeStart={() => resize.setIsResizingFileDivider(true)}
+          leftSidebarRef={resize.leftSidebarRef}
+          sessions={chatSessions.sessions}
+          currentSessionId={chatSessions.currentSessionId}
+          editingSessionId={chatSessions.editingSessionId}
+          editingSessionName={chatSessions.editingSessionName}
+          setEditingSessionName={chatSessions.setEditingSessionName}
+          onSessionClick={chatSessions.handleSessionClick}
+          onSessionRename={chatSessions.handleSessionRename}
+          onSessionRenameSave={chatSessions.handleSessionRenameSave}
+          onSessionDeleteClick={handleSessionDeleteClick}
+          onNewChat={chatSessions.handleNewChat}
+          files={chatSessions.currentSession?.files || []}
+          editingFileId={fileManagement.editingFileId}
+          editingFileName={fileManagement.editingFileName}
+          setEditingFileName={fileManagement.setEditingFileName}
+          isDragging={fileManagement.isDragging}
+          fileInputRef={fileManagement.fileInputRef}
+          onFileAdd={fileManagement.handleFileAdd}
+          onFileChange={fileManagement.handleFileChange}
+          onFileDeleteClick={fileManagement.handleFileDeleteClick}
+          onFileRenameClick={fileManagement.handleFileRenameClick}
+          onFileRenameSave={fileManagement.handleFileRenameSave}
+          onFileToggle={fileManagement.handleFileToggle}
+          onDragOver={fileManagement.handleDragOver}
+          onDragLeave={fileManagement.handleDragLeave}
+          onDrop={fileManagement.handleDrop}
+        />
 
-            {/* 중단: 채팅 세션 리스트 */}
-            <ChatSessionList
-              sessions={chatSessions.sessions}
-              currentSessionId={chatSessions.currentSessionId}
-              editingSessionId={chatSessions.editingSessionId}
-              editingSessionName={chatSessions.editingSessionName}
-              setEditingSessionName={chatSessions.setEditingSessionName}
-              onSessionClick={chatSessions.handleSessionClick}
-              onSessionRename={chatSessions.handleSessionRename}
-              onSessionRenameSave={chatSessions.handleSessionRenameSave}
-              onSessionDeleteClick={handleSessionDeleteClick}
-              onNewChat={chatSessions.handleNewChat}
-              onTogglePanel={() => setIsLeftPanelOpen(false)}
-              isLeftPanelOpen={isLeftPanelOpen}
-            />
-            
-            <div className="h-px bg-gray-200 mx-4 my-2"></div>
-
-            {/* 하단: 소스 (파일 목록) */}
-            <FileList
-              files={chatSessions.currentSession?.files || []}
-              editingFileId={fileManagement.editingFileId}
-              editingFileName={fileManagement.editingFileName}
-              setEditingFileName={fileManagement.setEditingFileName}
-              isDragging={fileManagement.isDragging}
-              fileInputRef={fileManagement.fileInputRef}
-              onFileAdd={fileManagement.handleFileAdd}
-              onFileChange={fileManagement.handleFileChange}
-              onFileDeleteClick={fileManagement.handleFileDeleteClick}
-              onFileRenameClick={fileManagement.handleFileRenameClick}
-              onFileRenameSave={fileManagement.handleFileRenameSave}
-              onFileToggle={fileManagement.handleFileToggle}
-              onDragOver={fileManagement.handleDragOver}
-              onDragLeave={fileManagement.handleDragLeave}
-              onDrop={fileManagement.handleDrop}
-            />
-            </div>
-        )}
-
-        {isLeftPanelOpen && (
-            <div
-            ref={resize.sourceResizeRef}
-            onMouseDown={(e) => {
-                e.preventDefault()
-              resize.setIsResizingSource(true)
-            }}
-            className="w-1 bg-gray-200 cursor-ew-resize hover:bg-blue-400 transition-colors flex-shrink-0"
-            />
-        )}
-
-        {/* Center Panel - Chat */}
+        {/* ================= 중앙 채팅 영역 ================= */}
         <ChatArea
           messages={chatSessions.currentSession.messages}
           isProcessing={chat.isProcessing}
@@ -166,23 +126,25 @@ const DocumentPage = () => {
           sessionName={chatSessions.currentSession.name}
           isLeftPanelOpen={isLeftPanelOpen}
           isRightPanelOpen={isRightPanelOpen}
-          onLeftPanelToggle={() => setIsLeftPanelOpen(true)}
-          onRightPanelToggle={() => setIsRightPanelOpen(true)}
+          onLeftPanelToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+          onRightPanelToggle={() => setIsRightPanelOpen(!isRightPanelOpen)}
         />
 
         {/* 채팅-메모 사이 드래그 핸들 (Right Resize Handle) */}
         {isRightPanelOpen && (
-            <div
+          <div
             ref={resize.memoResizeRef}
             onMouseDown={(e) => {
-                e.preventDefault()
+              e.preventDefault()
               resize.setIsResizingMemo(true)
             }}
             className="w-1 bg-gray-200 cursor-ew-resize hover:bg-blue-400 transition-colors flex-shrink-0"
-            />
+          />
         )}
 
-        {/* Right Panel - Memo (Collapsible) */}
+        {/* ================= 오른쪽 메모 패널 영역 ================= */}
+        {/* 중요: 여기서 {isRightPanelOpen && ...} 조건문을 꼭 제거해야 합니다! */}
+        {/* MemoPanel 내부에서 닫힘 상태를 처리하므로 항상 렌더링해야 합니다. */}
         <MemoPanel
           selectedMemoId={memoManagement.selectedMemoId}
           editingMemoName={memoManagement.editingMemoName}
@@ -202,6 +164,7 @@ const DocumentPage = () => {
           onConvertToHWP={memoManagement.handleConvertToHWP}
           onConvertToWord={memoManagement.handleConvertToWord}
           onTogglePanel={() => setIsRightPanelOpen(false)}
+          onOpenPanel={() => setIsRightPanelOpen(true)}
           isRightPanelOpen={isRightPanelOpen}
           memoWidth={resize.memoWidth}
         />
