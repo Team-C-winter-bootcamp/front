@@ -7,7 +7,7 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) => {
-  const prompts = ['📜 계약서 검토', '💰 임금 체불 상담', '🏠 부동산 분쟁', '🚗 교통사고 과실']
+  const prompts = ['계약서 검토', '임금 체불 상담', '부동산 분쟁', '교통사고 과실']
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto">

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import logo from '../assets/logo.png'
 
 const Header = () => {
   const navigate = useNavigate()
@@ -11,7 +12,12 @@ const Header = () => {
         onClick={() => navigate('/')}
         className="text-xl font-bold text-black hover:opacity-70 transition-opacity"
       >
-        Law딩중
+        <div className="inline-block p-1 rounded-full ">
+          <img 
+              src={logo} 
+              alt="logo" 
+          className="w-12 h-12 object-contain justify-center items-center opacity-60" />
+              </div>
       </button>
       
       <div className="flex gap-5 items-center">

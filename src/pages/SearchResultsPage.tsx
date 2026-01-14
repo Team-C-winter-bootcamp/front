@@ -217,8 +217,7 @@ const SearchResultsPage = () => {
               ))
             ) : (
               <div className="text-center py-20 bg-gray-50 rounded-lg">
-                <span className="text-4xl block mb-4">🔍</span>
-                <p className="text-gray-500 text-lg">검색 결과가 없습니다.</p>
+                <p className="text-black text-3xl font-bold">검색 결과가 없습니다.</p>
                 <p className="text-gray-400 text-sm mt-2">단어의 철자가 정확한지 확인해 보세요.</p>
               </div>
             )}

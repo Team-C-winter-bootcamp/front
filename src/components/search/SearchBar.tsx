@@ -1,5 +1,4 @@
-import { useNavigate } from 'react-router-dom'
-import search from '../../assets/search.png'
+import Search from '../../assets/Search.png'
 
 interface SearchBarProps {
   searchInput: string
@@ -20,7 +19,7 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <div className="inline-block p-1 rounded-full ">
                     <img 
-                    src={search} 
+                    src={Search} 
                     alt="search" 
                     className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
                     />
