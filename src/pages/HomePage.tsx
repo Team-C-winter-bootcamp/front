@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom' // 이동 시켜주는 놈 import
 import { useStore } from '../store/useStore' // Zustand에 박아놓은 함수들 import
 import Header from '../components/Header' // Header가 공통되어 있어 만들어왔음 
 import LoginAlertModal from '../components/LoginAlertModal' //로그인 필요 시 알림창 import
+import logotext from '../assets/logotext.png'
 
 const HomePage = () => {
   const navigate = useNavigate()
@@ -68,13 +69,20 @@ const HomePage = () => {
       {/* 메인 검색 부분분 */}
       <div className="flex flex-col items-center justify-center px-4 py-16">
         <div className="bg-gray-100 rounded-lg p-12 w-full max-w-4xl flex flex-col items-center">
-          <button onClick={() => navigate('/') } className=" text-5xl font-bold text-black mb-2 "
-            >
-            Law딩중
+          {/* 로고 버튼 수정됨 */}
+          <button 
+            onClick={() => navigate('/')} 
+            className="mb-1 transition-opacity hover:opacity-80" 
+          >
+            <img 
+              src={logotext} 
+              alt="logotext" 
+              className="w-[220px] h-auto object-contain" 
+            />
           </button>
           
-          <p className="text-lg text-black text-center mb-8">
-            법률 검색앤진
+          <p className="text-sm text-black text-center mb-3 font-bold">
+            국내 최초 Ai 판례 검색 로딩중
           </p>
           <form onSubmit={handleSearch} className="w-full">
             <input

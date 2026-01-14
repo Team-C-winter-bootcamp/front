@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
-// useLocation 추가
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import {useMemo, useState} from 'react'
+import { useNavigate, useParams} from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import Header from '../components/Header'
 // MOCK_RESULTS를 가져오거나, 실제 API 호출로 대체할 준비
@@ -9,13 +8,24 @@ import { MOCK_RESULTS } from './SearchResultsPage'
 import download from '../assets/download.png'
 import link from '../assets/link.png'
 import bookmark from '../assets/bookmark.png'
+import Search from '../assets/Search.png'
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
-  const location = useLocation() //  어디서 왔는지 확인용
   const { isAuthenticated } = useStore()
   
+
+  const [searchInput, setSearchInput] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchInput.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`)
+    } else {
+      navigate('/search')
+    }
+  }
 
   // URL 파라미터(id)에 맞는 데이터를 임시시 DB에서 찾아옴
   // 나중에 이 부분을 API fetch로 바꾸면 됨됨
@@ -31,20 +41,6 @@ const JudgmentDetailPage = () => {
     date: '',
     caseType: '',
     judgmentType: ''
-  }
-
-  // ✅ [수정] 뒤로가기 버튼 클릭 핸들러
-  const handleBack = () => {
-    // location.state.from 값을 확인해서 라우팅 분기
-    const from = location.state?.from
-    
-    if (from === 'chat') {
-      navigate('/ai-chat') // AI 채팅방으로
-    } else if (from === 'search') {
-      navigate(-1) // 검색 결과 페이지로 (검색어 유지됨)
-    } else {
-      navigate('/') // 정보 없으면 메인으로
-    }
   }
 
   // 실제 판결문 상세 데이터 (구조 유지하되 제목 등은 동적으로 연결)
@@ -93,24 +89,38 @@ const JudgmentDetailPage = () => {
     <div className="min-h-screen bg-white">
       <Header />
       
-      {/* Search Bar & Back Button */}
-      <div className="px-4 md:px-6 py-4 border-b">
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* 뒤로가기 버튼에 핸들러 연결 */}
-          <button onClick={handleBack} className="text-lg">
-            ←
-          </button>
-          
-          <div className="flex-1 max-w-2xl relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2">🔍</span>
-            <input
-              type="text"
-              readOnly
-              placeholder={displayData.title} // 현재 보고 있는 판결문 제목 표시
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded bg-gray-50 text-gray-600 focus:outline-none cursor-default"
-              onClick={() => navigate('/search')} // 클릭하면 다시 검색하러 감
-            />
-          </div>
+      {/* Search Bar - SearchResultsPage와 동일한 위치 및 디자인 */}
+      <div className="px-4 md:px-6 py-4 border-b sticky top-0 bg-white z-10">
+        <div className="pl-16 flex items-center gap-2 md:gap-4">
+          <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <div className="inline-block p-1 rounded-full ">
+                  <img 
+                    src={Search} 
+                    alt="search" 
+                    className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                  />
+                </div>
+              </span>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="키워드를 입력하세요"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => setSearchInput('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </form>
         </div>
       </div>
 
