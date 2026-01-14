@@ -1,4 +1,6 @@
 import { ChatSession } from '../../hooks/useChatSessions'
+import pencil from '../../assets/pencil.png'
+import bin from '../../assets/bin.png'
 
 interface ChatSessionListProps {
   sessions: ChatSession[]
@@ -45,7 +47,7 @@ export const ChatSessionList = ({
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <span className="mr-2">💬</span>
+            
             {editingSessionId === session.id ? (
               <input
                 type="text"
@@ -60,9 +62,25 @@ export const ChatSessionList = ({
             ) : (
               <>
                 <span className="truncate flex-1">{session.name}</span>
-                <div className="hidden group-hover:flex gap-1 absolute right-2 bg-inherit pl-1">
-                  <button onClick={(e) => onSessionRename(session.id, e)} className="hover:text-blue-600 p-1">✏️</button>
-                  <button onClick={(e) => onSessionDeleteClick(session.id, e)} className="hover:text-red-500 p-1">🗑️</button>
+                <div className="hidden group-hover:flex absolute right-2 bg-inherit pl-1">
+                  <button onClick={(e) => onSessionRename(session.id, e)} className="hover:text-blue-600 p-1">
+                  <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={pencil} 
+                        alt="pencil" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
+                  </button>
+                  <button onClick={(e) => onSessionDeleteClick(session.id, e)} className="hover:text-red-500 p-1">
+                  <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={bin} 
+                        alt="bin" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
+                  </button>
                 </div>
               </>
             )}

@@ -189,7 +189,7 @@ const SearchResultsPage = () => {
                 activeTab === 'ai' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
               }`}
             >
-              <span>🤖</span> AI 유사 판례 추천
+               나의 유사 판례 찾기
             </button>
           </div>
 

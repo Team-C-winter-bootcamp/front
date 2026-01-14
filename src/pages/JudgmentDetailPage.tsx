@@ -1,17 +1,21 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 // useLocation 추가
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import Header from '../components/Header'
 // MOCK_RESULTS를 가져오거나, 실제 API 호출로 대체할 준비
 import { MOCK_RESULTS } from './SearchResultsPage' 
+//이미지
+import download from '../assets/download.png'
+import link from '../assets/link.png'
+import bookmark from '../assets/bookmark.png'
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const location = useLocation() //  어디서 왔는지 확인용
   const { isAuthenticated } = useStore()
-  const [activeTab, setActiveTab] = useState<'order' | 'reason'>('order')
+  
 
   // URL 파라미터(id)에 맞는 데이터를 임시시 DB에서 찾아옴
   // 나중에 이 부분을 API fetch로 바꾸면 됨됨
@@ -116,9 +120,33 @@ const JudgmentDetailPage = () => {
           <div className="text-sm text-gray-500 mb-2">{judgmentData.summary}</div>
           <h1 className="text-2xl md:text-3xl font-bold mb-4">{judgmentData.title}</h1>
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-100 rounded">⬇️</button>
-            <button className="p-2 hover:bg-gray-100 rounded">🔗</button>
-            <button className="p-2 hover:bg-gray-100 rounded">⭐</button>
+            <button className="p-2 hover:bg-gray-100 rounded">
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={download} 
+              alt="download" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded">
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={link} 
+              alt="link" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded">
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={bookmark} 
+              alt="bookmark" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
+          </div>
+            </button>
           </div>
         </div>
 
