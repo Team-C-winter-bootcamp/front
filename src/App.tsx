@@ -8,7 +8,6 @@ import DocumentPage from './pages/DocumentPage'
 import JudgmentDetailPage from './pages/JudgmentDetailPage'
 
 function App() {
-  <head></head>
   return (
     <BrowserRouter>
       <Routes>

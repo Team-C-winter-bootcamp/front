@@ -72,7 +72,7 @@ export const useStore = create<StoreState>()(
       deleteMemo: (id: string) =>
         set((state) => ({ memos: state.memos.filter((m) => m.id !== id) })),
 
-      // 4. ✨ [신규] 채팅 구현
+      // 채팅 구현
       chatHistories: [],
       currentChatId: null,
 
@@ -96,7 +96,7 @@ export const useStore = create<StoreState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         memos: state.memos,
-        // 👇 채팅 관련 데이터도 저장되도록 추가!
+        // 채팅 관련 데이터도 저장되도록 추가
         chatHistories: state.chatHistories,
         currentChatId: state.currentChatId, 
       }),
