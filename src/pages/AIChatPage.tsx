@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Header from '../components/Header'
-import DeleteAlertModal from '../components/DeleteAlertModal'
+import DeleteAlertModal from '../components/AlertModal/DeleteAlertModal'
 import { ChatSidebar } from '../components/ai-chat/ChatSidebar'
 import { ChatMessage } from '../components/ai-chat/ChatMessage'
 import { WelcomeScreen } from '../components/ai-chat/WelcomeScreen'

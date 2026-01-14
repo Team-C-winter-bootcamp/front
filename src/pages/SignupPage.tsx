@@ -1,7 +1,7 @@
 import { useState, useEffect , FormEvent} from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
-import SignupAlertModal from '../components/SignupAlertModal'
+import SignupAlertModal from '../components/AlertModal/SignupAlertModal'
 const SignupPage = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -23,7 +23,7 @@ const SignupPage = () => {
   const [passwordMessage, setPasswordMessage] = useState<string>('')
   const [matchMessage, setMatchMessage] = useState<string>('')
 
-  // 🚫 테스트용 가짜(Mock) 데이터베이스 (이 이메일들은 이미 가입된 걸로 칩니다)
+  // 테스트용 가짜(Mock) 데이터베이스 
   const MOCK_EXISTING_EMAILS = ['test@gmail.com', 'lawding@gmail.com', 'admin@lawyers.com']
 
   // 아이디(이메일) 중복 검사 - useEffect: 일단 한 번 실행 뒤 조건에 따라 몇 번 할 지 정해짐짐
