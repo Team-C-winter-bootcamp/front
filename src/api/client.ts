@@ -1,6 +1,14 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useStore } from '../store/useStore'
-import { ApiError, ApiResponse, ApiErrorResponse } from './types'
+import { ApiResponse } from './types'
+
+// 에러 객체 타입 (인터셉터에서 반환)
+interface ApiError {
+  message: string
+  status?: number
+  code?: string
+  detail?: Record<string, string[]>
+}
 
 /**
  * API Base URL 설정
@@ -68,7 +76,7 @@ apiClient.interceptors.response.use(
 
     return response
   },
-  async (error: AxiosError<ApiResponse>) => {
+  async (error: AxiosError<ApiResponse<null> | { message?: string }>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
     // 개발 환경에서 에러 로깅
@@ -103,57 +111,58 @@ apiClient.interceptors.response.use(
 
     // 400 Bad Request - 유효성 검사 실패 등
     if (error.response?.status === 400) {
-      const errorData = error.response.data as ApiErrorResponse | ApiResponse
+      const errorData = error.response.data as ApiResponse<null> | { message?: string }
       
-      // 명세서에 따른 에러 응답 구조 처리
-      if ('error_code' in errorData) {
-        const apiError = errorData as ApiErrorResponse
+      // ApiResponse 형태인 경우
+      if (errorData && 'code' in errorData && 'message' in errorData) {
+        const apiResponse = errorData as ApiResponse<null>
         return Promise.reject({
-          message: apiError.message || '요청이 올바르지 않습니다.',
+          message: apiResponse.message || '요청이 올바르지 않습니다.',
           status: 400,
-          code: apiError.error_code,
-          detail: apiError.detail,
-        } as ApiError & { code?: string; detail?: Record<string, string[]> })
+          code: apiResponse.code,
+        } as ApiError)
       }
       
       return Promise.reject({
-        message: (errorData as ApiResponse).message || '요청이 올바르지 않습니다.',
+        message: errorData?.message || '요청이 올바르지 않습니다.',
         status: 400,
       } as ApiError)
     }
 
     // 403 Forbidden
     if (error.response?.status === 403) {
-      const errorData = error.response.data as ApiErrorResponse | ApiResponse
+      const errorData = error.response.data as ApiResponse<null> | { code?: string; message?: string }
       
-      // 명세서에 따른 에러 응답 구조 처리 (AUTH_403)
-      if ('error_code' in errorData || 'code' in errorData) {
-        const apiError = errorData as ApiErrorResponse | { code: string; message: string }
+      // ApiResponse 형태인 경우
+      if (errorData && 'code' in errorData && 'message' in errorData) {
+        const apiResponse = errorData as ApiResponse<null>
         return Promise.reject({
-          message: apiError.message || '접근 권한이 없습니다.',
+          message: apiResponse.message || '접근 권한이 없습니다.',
           status: 403,
-          code: 'error_code' in apiError ? apiError.error_code : apiError.code,
-        } as ApiError & { code?: string })
+          code: apiResponse.code,
+        } as ApiError)
       }
       
       return Promise.reject({
-        message: error.response.data?.message || '접근 권한이 없습니다.',
+        message: errorData?.message || '접근 권한이 없습니다.',
         status: 403,
       } as ApiError)
     }
 
     // 404 Not Found
     if (error.response?.status === 404) {
+      const errorData = error.response.data as ApiResponse<null> | { message?: string }
       return Promise.reject({
-        message: error.response.data?.message || '요청한 리소스를 찾을 수 없습니다.',
+        message: (errorData && 'message' in errorData ? errorData.message : undefined) || '요청한 리소스를 찾을 수 없습니다.',
         status: 404,
       } as ApiError)
     }
 
     // 500 Internal Server Error
     if (error.response?.status === 500) {
+      const errorData = error.response.data as ApiResponse<null> | { message?: string }
       return Promise.reject({
-        message: error.response.data?.message || '서버 오류가 발생했습니다.',
+        message: (errorData && 'message' in errorData ? errorData.message : undefined) || '서버 오류가 발생했습니다.',
         status: 500,
       } as ApiError)
     }
@@ -167,8 +176,9 @@ apiClient.interceptors.response.use(
     }
 
     // 기타 에러
+    const errorData = error.response.data as ApiResponse<null> | { message?: string }
     return Promise.reject({
-      message: error.response.data?.message || error.message || '알 수 없는 오류가 발생했습니다.',
+      message: (errorData && 'message' in errorData ? errorData.message : undefined) || error.message || '알 수 없는 오류가 발생했습니다.',
       status: error.response.status,
     } as ApiError)
   }

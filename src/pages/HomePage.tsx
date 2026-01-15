@@ -58,7 +58,7 @@ const HomePage = () => {
       <div className="flex flex-col items-center justify-center px-4 pt-4 pb-4">
         
         {/* 메인 박스 */}
-        <div className="bg-gray-400 rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
+        <div className="bg-black shadow-xl rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
           
           {/* 로고 영역 */}
           <div className="flex flex-col items-center">

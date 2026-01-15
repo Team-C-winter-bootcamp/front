@@ -1,26 +1,28 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useStore } from '../../store/useStore'
 import undo from '../../assets/undo.png'
 import redo from '../../assets/redo.png'
 import copy from '../../assets/copy.png'
 import burger from '../../assets/burger.png'
+import b from '../../assets/b.png'
+import I from '../../assets/I.png'
 
 interface MemoPanelProps {
   selectedMemoId: string | null
   editingMemoName: boolean
   editingMemoNameValue: string
   setEditingMemoNameValue: (value: string) => void
-  textareaRef: React.RefObject<HTMLDivElement> 
+  textareaRef: React.RefObject<HTMLDivElement>
   onMemoClick: (memoId: string) => void
   onMemoDeleteClick: (id: string) => void
   onMemoNameEdit: () => void
   onMemoNameSave: () => void
-  onMemoContentChange: (e: any) => void 
+  onMemoContentChange: (e: any) => void
   onAddNewMemo: () => void
   onUndo: () => void
   onRedo: () => void
   onPaste: () => void
-  onWrapText: (wrapper: string) => void 
+  onWrapText: (wrapper: string) => void
   onConvertToHWP: () => void
   onConvertToWord: () => void
   onTogglePanel: () => void
@@ -53,6 +55,11 @@ export const MemoPanel = ({
   const { memos } = useStore()
   const selectedMemo = memos.find(m => m.id === selectedMemoId)
 
+  // --- [추가됨] 리사이징 관련 State ---
+  const [memoListHeight, setMemoListHeight] = useState(110); // 초기 높이 (기존 max-h 값과 비슷하게 설정)
+  const [isResizing, setIsResizing] = useState(false);
+  const resizingRef = useRef(false); // 이벤트 리스너 내부에서 최신 상태 참조용
+
   useEffect(() => {
     if (textareaRef.current && selectedMemo) {
       if (textareaRef.current.innerHTML !== selectedMemo.content) {
@@ -60,6 +67,50 @@ export const MemoPanel = ({
       }
     }
   }, [selectedMemoId, selectedMemo, textareaRef])
+
+  // --- [추가됨] 리사이징 로직 ---
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    resizingRef.current = true;
+    document.body.style.cursor = 'row-resize'; // 드래그 중 커서 변경
+    document.body.style.userSelect = 'none'; // 드래그 중 텍스트 선택 방지
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+    resizingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (resizingRef.current) {
+      // movementY를 사용하여 증감 계산
+      setMemoListHeight((prevHeight) => {
+        const newHeight = prevHeight + e.movementY;
+        // 최소 높이: 60px (약 1개), 최대 높이: 240px (약 4개)
+        if (newHeight < 60) return 60;
+        if (newHeight > 240) return 240;
+        return newHeight;
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+  // ---------------------------------
 
   const triggerChange = () => {
     if (textareaRef.current) {
@@ -71,11 +122,10 @@ export const MemoPanel = ({
     }
   }
 
-  // 스타일 적용 (클릭 시 포커스 유지를 위해 e.preventDefault 권장)
   const applyStyle = (e: React.MouseEvent, command: string) => {
-    e.preventDefault(); 
+    e.preventDefault();
     document.execCommand(command, false);
-    textareaRef.current?.focus(); // 확실하게 포커스 유지
+    textareaRef.current?.focus();
     triggerChange();
   };
 
@@ -121,8 +171,8 @@ export const MemoPanel = ({
   }
 
   return (
-    <div 
-      className="bg-gray-50 p-4 flex-shrink-0 overflow-y-auto flex flex-col h-full border-l border-gray-200 transition-all duration-300"
+    <div
+      className="bg-gray-50 p-4 flex-shrink-0 overflow-hidden flex flex-col h-full border-l border-gray-200 transition-all duration-300"
       style={{ width: `${memoWidth}px` }}
     >
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
@@ -139,7 +189,11 @@ export const MemoPanel = ({
         </button>
       </div>
 
-      <div className="space-y-2 mb-4 flex-shrink-0 max-h-[110px] overflow-y-auto custom-scrollbar border-b pb-2">
+      {/* --- [수정됨] 메모 리스트 영역: 높이를 State로 제어 --- */}
+      <div 
+        className="space-y-2 flex-shrink-0 overflow-y-auto custom-scrollbar"
+        style={{ height: `${memoListHeight}px` }}
+      >
         {memos.map((memo) => (
           <div
             key={memo.id}
@@ -156,6 +210,16 @@ export const MemoPanel = ({
           </div>
         ))}
       </div>
+
+      {/* --- [추가됨] 드래그 핸들바 (Resizer) --- */}
+      <div 
+        onMouseDown={startResizing}
+        className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-gray-100 transition-colors my-1 select-none"
+      >
+         {/* 시각적으로 보이는 회색 선 */}
+        <div className="w-8 h-1 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+      </div>
+      {/* ------------------------------------- */}
 
       {selectedMemo ? (
         <div className="flex flex-col flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -191,17 +255,19 @@ export const MemoPanel = ({
             
             <div className="w-px h-4 bg-gray-200 mx-1"></div>
             
-            {/* Bold, Italic 버튼: onMouseDown 사용 권장 (클릭 시 포커스 유지) */}
-            <button onMouseDown={(e) => applyStyle(e, 'bold')} className="p-1.5 hover:bg-gray-100 rounded font-bold text-gray-600" title="굵게">B</button>
-            <button onMouseDown={(e) => applyStyle(e, 'italic')} className="p-1.5 hover:bg-gray-100 rounded italic text-gray-600" title="기울임">I</button>
-            {/* 리스트 버튼 제거됨 */}
+            <button onMouseDown={(e) => applyStyle(e, 'bold')} className="p-1.5 hover:bg-gray-100 rounded font-bold text-gray-600" title="굵게">
+            <div className="inline-block p-1 rounded-full"><img src={b} alt="bold" className="w-3 h-3 object-contain opacity-60" /></div>
+            </button>
+            <button onMouseDown={(e) => applyStyle(e, 'italic')} className="p-1.5 hover:bg-gray-100 rounded italic text-gray-600" title="기울임">
+            <div className="inline-block p-1 rounded-full"><img src={I} alt="i" className="w-3 h-3 object-contain opacity-60" /></div>
+            </button>
           </div>
 
           <div
             ref={textareaRef}
             contentEditable={true}
             onInput={handleContentInput}
-            onPaste={handlePasteOnDiv} 
+            onPaste={handlePasteOnDiv}
             className="flex-1 w-full p-4 focus:outline-none text-sm leading-relaxed overflow-y-auto custom-scrollbar"
             suppressContentEditableWarning={true}
           />

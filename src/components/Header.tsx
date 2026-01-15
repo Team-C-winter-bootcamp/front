@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import logo from '../assets/logo.png'
-import LogoutAlertModal from '../components/AlertModal/logoutAlertModal'
+import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 
 const Header = () => {
   const navigate = useNavigate()
@@ -40,7 +40,7 @@ const Header = () => {
               <span className="text-sm">환영합니다 {user.id}님!</span>
               <button
                 onClick={handleLogoutClick}
-                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
               >
                 로그아웃
               </button>
@@ -55,7 +55,7 @@ const Header = () => {
               </button>
               <button
                 onClick={() => navigate('/signup')}
-                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
               >
                 회원가입
               </button>

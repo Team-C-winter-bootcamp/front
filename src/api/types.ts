@@ -1,117 +1,144 @@
-/**
- * API 응답 타입 정의
- */
-
-// 공통 API 응답 타입
-export interface ApiResponse<T = any> {
-  success: boolean
-  data?: T
-  message?: string
-  error?: string
+// 공통 응답 
+export interface ApiResponse<T> {
+  status: string; 
+  code: string;
+  message: string;
+  data: T | null;
 }
 
-// 에러 응답 타입
-export interface ApiError {
-  message: string
-  status?: number
-  code?: string
+// 유저 프로필 데이터(GET)
+export interface UserProfile {
+  email_address: string;
+  name: string;
 }
 
-// 페이지네이션 타입
-export interface PaginationParams {
-  page?: number
-  limit?: number
-  offset?: number
+
+// NEWCHAT(POST)
+export interface NEWCHATRequest {
+  message: string;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
+export interface NEWCHATRequestData {
+  session_id: number;
+  title: string;
 }
 
-// 인증 관련 타입
-export interface LoginRequest {
-  email: string
-  password: string
+
+//GETLIST(GET) 나중에 [] 붙이기 
+export interface GETLISTData {
+  id: number;
+  title: string;
+  bookmark: boolean;
 }
 
-export interface LoginResponse {
-  token: string
-  user: {
-    id: string
-    email: string
-    name?: string
-  }
+
+//MODIFY(PATCH)
+export interface MODIFYRequest{
+  title: string;
+  bookmark: boolean;
 }
 
-// 회원가입 요청 타입 (API 명세서에 따라 업데이트)
-export interface SignupRequest {
-  username: string
-  password: string
-  email: string
+export interface MODIFYData{
+  title: string;
+  bookmark: boolean;
 }
 
-// 회원가입 응답 타입 (API 명세서에 따라 업데이트)
-export interface SignupResponse {
-  message: string
-  user: {
-    username: string
-    email: string
-  }
+//DELETE(DELETE)
+export interface DELETEData{
+  session_id: number;
+  title:string
 }
 
-// API 에러 응답 타입 (명세서에 따른 에러 구조)
-export interface ApiErrorResponse {
-  error_code: string
-  message: string
-  detail?: Record<string, string[]>
+//GETMESSAGE(GET)
+export interface GETMESSAGE{
+  id: number;
+  sender_id: number;    // 메시지 내용
+  role: string; // 보낸 사람
+  content: string;  // 보낸 시간
 }
 
-// 에러 코드 상수
-export const ERROR_CODES = {
-  DUPLICATE_RESOURCE: 'DUPLICATE_RESOURCE',
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  FIELD_REQUIRED: 'FIELD_REQUIRED',
-  AUTH_403: 'AUTH_403',
-} as const
-
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES]
-
-// 검색 관련 타입
-export interface SearchRequest {
-  query: string
-  page?: number
-  limit?: number
-  filters?: {
-    caseType?: string[]
-    court?: string[]
-    judgmentType?: string
-    period?: string
-  }
+export interface GETMESSAGEData{
+  messages: GETMESSAGE[];
 }
 
-export interface SearchResult {
-  id: number
-  title: string
-  content: string
-  court: string
-  date: string
-  caseType: string
-  judgmentType: string
+//SENDMESSAGE(POST)
+export interface SENDMESSAGERequest{
+  message: string;
 }
 
-// 판례 상세 타입
-export interface JudgmentDetail {
-  id: number
-  title: string
-  content: string
-  court: string
-  date: string
-  caseType: string
-  judgmentType: string
-  fullText?: string
-  relatedCases?: number[]
+export interface SENDMESSAGEData{
+  id: number;
+  order: number;
+  role: string;
+  content: string;
+}
+
+//MODIFYMESSAGE(PATCH)
+export interface MODIFYMESSAGERequest{
+  message: string;
+}
+
+export interface MODIFYMESSAGEData{
+  id: number;
+  order: number;
+  role: string;
+  content: string;
+}
+
+// //INIT(GET)
+// // 1. 공통으로 쓰이는 필터 아이템 (code, label)
+// export interface FilterOption {
+//   code: number; // 명세서의 int는 number로 작성
+//   label: string;
+// }
+
+// // 2. data 안의 각 부분 정의
+// export interface SearchFilters {
+//   outcomes: FilterOption[];
+//   courts: FilterOption[];
+//   categories: FilterOption[];
+// }
+
+// export interface DefaultSearch {
+//   sort: string;
+//   page_size: number;
+// }
+
+// // 3. 최종 [Data] 알맹이
+// export interface INITData {
+//   filters: SearchFilters;
+//   default_search: DefaultSearch;
+// }
+//PREVIEW
+export interface PREVIEWMata{
+  total_count: number;
+  page: string;
+  limit: boolean;
+  total_page:string
+}
+
+export interface PREVIEWData{
+  precedents_id: string;
+  case_title: string;
+  case_preview: string;
+  outcome_display: string;
+}
+
+export interface PREVIEW{
+  code: string;
+  status: number
+  message: string;
+  meta:PREVIEWMata
+  data:PREVIEWData
+}
+//TOTALDATA
+export interface TOTALDATAData{
+  case_title: string;
+  case_name: string;
+  defendant: string;
+  petitioner: string;
+  pleader: string;
+  original_judgment: string;
+  main_sentence: string;
+  reason: string;
 }
