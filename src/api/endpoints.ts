@@ -3,44 +3,27 @@
  */
 
 export const API_ENDPOINTS = {
-  // 인증
-  AUTH: {
-    LOGIN: '/auth/login',
-    LOGOUT: '/auth/logout',
-    SIGNUP: '/auth/signup',
-    REFRESH: '/auth/refresh',
-    ME: '/auth/me',
+  // user
+  user: {
+    SIGNUP: '/users/signup', // 회원가입
+    LOGIN: '/users/login', // 로그인
+    LOGOUT: '/users/logout', // 로그아웃
+    REFRESH: '/users/token/refresh', // 토큰 재발급
+    VERIFY: '/users/token/verify', // 토큰 유효성 확인
+    ME: '/users/me', // 사용자 정보 조회
   },
 
-  // 검색
-  SEARCH: {
+  //webhook 이거 뭐지? 질문하기기
+  webhook: {
+    CREATE: '/webhooks/clerk' //사용자 데이터 동기화
+  },
+
+  // session
+  session: {
     SEARCH: '/search',
     DETAIL: '/judgment/:id',
   },
 
-  // AI 채팅
-  AI: {
-    CHAT: '/ai/chat',
-    HISTORY: '/ai/chat/history',
-    HISTORY_DETAIL: '/ai/chat/history/:id',
-  },
-
-  // 문서
-  DOCUMENT: {
-    SESSIONS: '/document/sessions',
-    SESSION_DETAIL: '/document/sessions/:id',
-    FILES: '/document/files',
-    FILE_UPLOAD: '/document/files/upload',
-  },
-
-  // 메모
-  MEMO: {
-    LIST: '/memo',
-    DETAIL: '/memo/:id',
-    CREATE: '/memo',
-    UPDATE: '/memo/:id',
-    DELETE: '/memo/:id',
-  },
 } as const
 
 /**

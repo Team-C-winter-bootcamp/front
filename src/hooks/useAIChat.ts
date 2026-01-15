@@ -22,6 +22,8 @@ export const useAIChat = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isCreatingChat = useRef(false)
+  const previousMessagesRef = useRef<Message[]>([])
+  const previousChatIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -39,18 +41,26 @@ export const useAIChat = () => {
       return
     }
 
-    if (currentChatId) {
-      const currentChat = chatHistories.find(ch => ch.id === currentChatId)
-      if (currentChat) {
-        setMessages(currentChat.messages)
-        setIsWelcomeMode(false)
+    // currentChatId가 변경되었을 때만 chatHistories에서 메시지 로드
+    if (currentChatId !== previousChatIdRef.current) {
+      previousChatIdRef.current = currentChatId
+      
+      if (currentChatId) {
+        const currentChat = chatHistories.find(ch => ch.id === currentChatId)
+        if (currentChat) {
+          setMessages(currentChat.messages)
+          previousMessagesRef.current = currentChat.messages
+          setIsWelcomeMode(false)
+        } else {
+          setIsWelcomeMode(true)
+          setMessages([])
+          previousMessagesRef.current = []
+        }
       } else {
         setIsWelcomeMode(true)
         setMessages([])
+        previousMessagesRef.current = []
       }
-    } else {
-      setIsWelcomeMode(true)
-      setMessages([])
     }
   }, [currentChatId, chatHistories])
 
@@ -60,19 +70,47 @@ export const useAIChat = () => {
     }
   }, [messages, isWelcomeMode])
 
+  // 메시지가 변경될 때마다 chatHistories에 저장
   useEffect(() => {
     if (currentChatId && messages.length > 0) {
-      setChatHistories(prev => prev.map(chat => 
-        chat.id === currentChatId 
-          ? { ...chat, messages: messages } 
-          : chat
-      ))
+      // 메시지가 실제로 변경되었을 때만 업데이트 (무한 루프 방지)
+      const messagesChanged = 
+        previousMessagesRef.current.length !== messages.length ||
+        previousMessagesRef.current.some((msg, idx) => 
+          msg.id !== messages[idx]?.id || msg.text !== messages[idx]?.text
+        )
+      
+      if (messagesChanged) {
+        setChatHistories(prev => {
+          const existingChat = prev.find(chat => chat.id === currentChatId)
+          if (existingChat) {
+            return prev.map(chat => 
+              chat.id === currentChatId 
+                ? { ...chat, messages: [...messages] } 
+                : chat
+            )
+          }
+          return prev
+        })
+        previousMessagesRef.current = [...messages]
+      }
     }
   }, [messages, currentChatId, setChatHistories])
 
   const handleNewChat = () => {
+    // 현재 채팅의 메시지를 먼저 저장
+    if (currentChatId && messages.length > 0) {
+      setChatHistories(prev => prev.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, messages: [...messages] } 
+          : chat
+      ))
+    }
+    
     setMessages([])
+    previousMessagesRef.current = []
     setCurrentChatId(null)
+    previousChatIdRef.current = null
     setIsWelcomeMode(true)
     setInput('')
     isCreatingChat.current = false
@@ -125,6 +163,8 @@ export const useAIChat = () => {
     }
 
     if (isWelcomeMode || !currentChatId) {
+      // 새로운 채팅을 생성하기 전에, 이전에 다른 채팅이 있었다면 그 메시지를 저장
+      // (이미 handleNewChat에서 저장했지만, 안전을 위해 확인)
       const newChatId = Date.now().toString()
       
       isCreatingChat.current = true
@@ -138,9 +178,12 @@ export const useAIChat = () => {
       
       setChatHistories(prev => [newChat, ...prev])
       setCurrentChatId(newChatId)
+      previousChatIdRef.current = newChatId
       setIsWelcomeMode(false)
-      setMessages([userMessage]) 
+      setMessages([userMessage])
+      previousMessagesRef.current = [userMessage]
     } else {
+      // 기존 채팅에 메시지 추가
       setMessages(prev => [...prev, userMessage])
     }
 
