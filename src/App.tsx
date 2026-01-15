@@ -8,6 +8,7 @@ import DocumentPage from './pages/DocumentPage'
 import JudgmentDetailPage from './pages/JudgmentDetailPage'
 
 function App() {
+  //console.log(import.meta.env.VITE_API_BASE_URL) // 환경변수 확인 F12 툴러서서
   return (
     <BrowserRouter>
       <Routes>
