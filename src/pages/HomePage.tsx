@@ -57,8 +57,8 @@ const HomePage = () => {
       {/* 메인 검색 부분 */}
       <div className="flex flex-col items-center justify-center px-4 pt-4 pb-4">
         
-        {/* 회색 박스 */}
-        <div className="bg-gray-100 rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
+        {/* 메인 박스 */}
+        <div className="bg-gray-400 rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
           
           {/* 로고 영역 */}
           <div className="flex flex-col items-center">
@@ -69,10 +69,10 @@ const HomePage = () => {
               <img 
                 src={logotext} 
                 alt="logotext" 
-                className="w-[300px] h-auto object-contain" 
+                className="w-[400px] h-auto object-contain" 
               />
             </button>
-            <p className="text-base text-gray-600 text-center font-bold">
+            <p className="text-base text-white text-center font-bold">
               국내 최초 Ai 판례 검색 로딩중
             </p>
           </div>
@@ -89,33 +89,47 @@ const HomePage = () => {
           </form>
         </div>
 
-        {/* ▼▼▼ [추가된 부분] 텍스트 영역 ▼▼▼ */}
-        {/* 버튼 박스와 너비(max-w-4xl)를 맞춰서 라인을 정렬했습니다 */}
-        <div className="w-full max-w-6xl mt-10 mb-7 mb-2 px-1">
+        <div className="w-full max-w-7xl mt-8 mb-9 mb-2 px-1">
           <h2 className="text-2xl font-bold text-gray-800">로딩중 활용하기</h2>
         </div>
 
         {/* 버튼 영역 */}
-        <div className="flex gap-4 w-full max-w-4xl">
+        <div className="flex gap-10 w-full max-w-5xl">
           <button
             onClick={handleAIChatClick}
-            className={`flex-1 px-1 py-6 rounded-lg transition-colors shadow-sm ${
+            className={`flex-1 px-1 py-6 rounded-lg transition-colors ${
               isAuthenticated
-                ? 'bg-blue-200 font-bold text-xl text-black hover:bg-blue-300'
-                : 'bg-blue-200 font-bold text-xl text-black hover:bg-blue-300 '
+                ? 'bg-yellow-100 font-bold text-xl text-black hover:bg-yellow-200 shadow-lg'
+                : 'bg-yellow-100 font-bold text-xl text-black hover:bg-yellow-200 shadow-lg'
             }`}
           >
-            Ai로 나와 유사한 판례찾기
+            {/* 1. 왼쪽 텍스트 영역 */}
+            <div className="flex flex-col items-start text-left pl-7">
+              <span className="text-2xg font-bold font-semibold text-black mb-1">
+                나와 유사한 판례 찾기
+              </span>
+              <span className="text-sm text-gray-600">
+                Ai 챗봇으로 필요한 판례를 찾아보세요!
+              </span>
+            </div>
+
           </button>
           <button
             onClick={handleDocumentClick}
-            className={`flex-1 px-1 py-6 rounded-lg transition-colors shadow-sm ${
+            className={`flex-1 px-1 py-6 rounded-lg transition-colors ${
               isAuthenticated
-                ? 'bg-pink-200 font-bold text-xl text-black hover:bg-pink-300'
-                : 'bg-pink-200 font-bold text-xl text-black hover:bg-pink-300 '
+                ? 'bg-purple-100 font-bold text-xl text-black hover:bg-purple-200 shadow-lg'
+                : 'bg-purple-100 font-bold text-xl text-black hover:bg-purple-200 shadow-lg'
             }`}
           >
-            문서 작성하러 가기
+              <div className="flex flex-col items-start text-left pl-7">
+              <span className="text-2xg font-bold font-semibold text-black mb-1">
+                문서 작성하러 가기
+              </span>
+              <span className="text-sm text-gray-600">
+                문서 정리를 Ai로 간단하게!
+              </span>
+            </div>
           </button>
         </div>
       </div>

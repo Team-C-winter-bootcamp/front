@@ -7,9 +7,10 @@ export const useMemoManagement = () => {
   const [editingMemoName, setEditingMemoName] = useState(false)
   const [editingMemoNameValue, setEditingMemoNameValue] = useState('')
   const [deleteMemoTargetId, setDeleteMemoTargetId] = useState<string | null>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLDivElement>(null)
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  const isUndoRedoRef = useRef(false) // undo/redo 중인지 추적
 
   useEffect(() => {
     if (memos.length === 0) {
@@ -22,11 +23,13 @@ export const useMemoManagement = () => {
     if (selectedMemoId) {
       const memo = memos.find(m => m.id === selectedMemoId)
       if (memo) {
+        // 메모 선택 시 히스토리 초기화
         setHistory([memo.content])
         setHistoryIndex(0)
+        isUndoRedoRef.current = false
       }
     }
-  }, [selectedMemoId, memos])
+  }, [selectedMemoId])
 
   const handleAddToMemo = (content: string, titleHint?: string) => {
     if (!content) return
@@ -94,30 +97,46 @@ export const useMemoManagement = () => {
     }
   }
 
-  const handleMemoContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value
+  const handleMemoContentChange = (e: any) => {
+    const newValue = e.target?.value || e.currentTarget?.innerHTML || ''
     if (selectedMemoId) {
       updateMemo(selectedMemoId, { content: newValue })
-      const newHistory = history.slice(0, historyIndex + 1)
-      newHistory.push(newValue)
-      setHistory(newHistory)
-      setHistoryIndex(newHistory.length - 1)
+      
+      // undo/redo로 인한 변경이 아닐 때만 히스토리에 추가
+      if (!isUndoRedoRef.current) {
+        const newHistory = history.slice(0, historyIndex + 1)
+        newHistory.push(newValue)
+        // 히스토리 크기 제한 (최대 50개)
+        if (newHistory.length > 50) {
+          newHistory.shift()
+        } else {
+          setHistoryIndex(newHistory.length - 1)
+        }
+        setHistory(newHistory)
+      } else {
+        // undo/redo 후에는 플래그 리셋
+        isUndoRedoRef.current = false
+      }
     }
   }
 
   const handleUndo = () => {
     if (historyIndex > 0 && selectedMemoId) {
       const prevContent = history[historyIndex - 1]
+      const newIndex = historyIndex - 1
+      isUndoRedoRef.current = true
+      setHistoryIndex(newIndex)
       updateMemo(selectedMemoId, { content: prevContent })
-      setHistoryIndex(historyIndex - 1)
     }
   }
 
   const handleRedo = () => {
     if (historyIndex < history.length - 1 && selectedMemoId) {
       const nextContent = history[historyIndex + 1]
+      const newIndex = historyIndex + 1
+      isUndoRedoRef.current = true
+      setHistoryIndex(newIndex)
       updateMemo(selectedMemoId, { content: nextContent })
-      setHistoryIndex(historyIndex + 1)
     }
   }
 
@@ -125,11 +144,13 @@ export const useMemoManagement = () => {
     try {
       const text = await navigator.clipboard.readText()
       if (selectedMemoId && textareaRef.current) {
-        const start = textareaRef.current.selectionStart
-        const end = textareaRef.current.selectionEnd
-        const currentContent = textareaRef.current.value
-        const newContent = currentContent.substring(0, start) + text + currentContent.substring(end)
-        updateMemo(selectedMemoId, { content: newContent })
+        textareaRef.current.focus()
+        document.execCommand('insertText', false, text)
+        // contentEditable div의 내용을 업데이트
+        if (textareaRef.current) {
+          const content = textareaRef.current.innerHTML
+          updateMemo(selectedMemoId, { content })
+        }
       }
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err)
@@ -139,12 +160,57 @@ export const useMemoManagement = () => {
 
   const wrapText = (wrapper: string) => {
     if (selectedMemoId && textareaRef.current) {
-      const start = textareaRef.current.selectionStart
-      const end = textareaRef.current.selectionEnd
-      const currentContent = textareaRef.current.value
-      const selectedText = currentContent.substring(start, end)
-      const newContent = currentContent.substring(0, start) + `${wrapper}${selectedText}${wrapper}` + currentContent.substring(end)
-      updateMemo(selectedMemoId, { content: newContent })
+      const selection = window.getSelection()
+      if (!selection || selection.rangeCount === 0) return
+      
+      const range = selection.getRangeAt(0)
+      const selectedText = range.toString()
+      
+      // 선택 영역 앞뒤의 텍스트를 확인하여 이미 wrapper로 감싸져 있는지 체크
+      const beforeRange = range.cloneRange()
+      beforeRange.setStart(range.startContainer, Math.max(0, range.startOffset - wrapper.length))
+      beforeRange.setEnd(range.startContainer, range.startOffset)
+      const beforeText = beforeRange.toString()
+      
+      const afterRange = range.cloneRange()
+      afterRange.setStart(range.endContainer, range.endOffset)
+      afterRange.setEnd(range.endContainer, Math.min(
+        range.endContainer.nodeType === Node.TEXT_NODE 
+          ? (range.endContainer as Text).length 
+          : range.endContainer.childNodes.length,
+        range.endOffset + wrapper.length
+      ))
+      const afterText = afterRange.toString()
+      
+      // 이미 wrapper로 감싸져 있는지 확인
+      const isWrapped = beforeText === wrapper && afterText === wrapper
+      
+      if (isWrapped) {
+        // 이미 감싸져 있으면 제거
+        beforeRange.deleteContents()
+        afterRange.deleteContents()
+        range.insertNode(document.createTextNode(selectedText))
+      } else {
+        // 감싸져 있지 않으면 추가
+        const wrapperBefore = document.createTextNode(wrapper)
+        const wrapperAfter = document.createTextNode(wrapper)
+        range.insertNode(wrapperAfter)
+        range.insertNode(document.createTextNode(selectedText))
+        range.insertNode(wrapperBefore)
+      }
+      
+      // contentEditable div의 내용을 업데이트
+      if (textareaRef.current) {
+        const content = textareaRef.current.innerHTML
+        updateMemo(selectedMemoId, { content })
+      }
+      
+      isUndoRedoRef.current = false
+      textareaRef.current.focus()
+      
+      // input 이벤트 발생시켜서 상태 동기화
+      const event = new Event('input', { bubbles: true })
+      textareaRef.current.dispatchEvent(event)
     }
   }
 

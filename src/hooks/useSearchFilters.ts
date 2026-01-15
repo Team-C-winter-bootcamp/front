@@ -1,8 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { SearchResult } from '../pages/SearchResultsPage'
 
-const CASE_TYPES = ['민사', '형사', '행정', '가사', '특허', '선거']
-
 export const useSearchFilters = (
   results: SearchResult[],
   query: string,

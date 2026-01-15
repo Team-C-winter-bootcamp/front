@@ -7,6 +7,7 @@ import { FilterSidebar } from '../components/search/FilterSidebar'
 import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
 import { useSearchFilters } from '../hooks/useSearchFilters'
+import SearchPageAlertModal from '../components/AlertModal/SearchPageAlertModal'
 
 export interface SearchResult {
   id: number
@@ -91,6 +92,7 @@ const SearchResultsPage = () => {
   const { isAuthenticated } = useStore()
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
@@ -127,13 +129,16 @@ const SearchResultsPage = () => {
 
   const handleAITabClick = () => {
     if (!isAuthenticated) {
-      if (window.confirm('로그인이 필요합니다.\n확인 버튼을 누르면 이전 페이지로 돌아갑니다.')) {
-        navigate(-1)
-      }
+      setIsAlertModalOpen(true)
       return
     }
     setActiveTab('ai')
     navigate('/ai-chat')
+  }
+
+  const handleAlertModalConfirm = () => {
+    setIsAlertModalOpen(false)
+    navigate('/login', { state: { from: '/search' } })
   }
 
   const handleResultClick = (id: number) => {
@@ -160,7 +165,7 @@ const SearchResultsPage = () => {
       </div>
 
       {/* Mobile Filter Toggle */}
-      <div className="lg:hidden px-4 py-3 border-b bg-gray-50 overflow-x-auto whitespace-nowrap">
+      <div className="md:hidden px-4 py-3 border-b bg-gray-50 overflow-x-auto whitespace-nowrap">
         {/* ... (필터 버튼 코드 기존 유지) ... */}
         <div className="flex gap-2">
           {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
@@ -266,7 +271,7 @@ const SearchResultsPage = () => {
       <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-1 py-6 max-w-[1400px] mx-auto lg:mx-0 lg:ml-[5%]">
         
         {/* Main Content */}
-        <div className="flex-1 order-2 lg:order-1 lg:min-w-[1200px]">
+        <div className="flex-1 order-2 lg:order-1 lg:min-w-[1100px]">
           {/* Tabs: onClick 핸들러를 handleTabChange로 교체 */}
           <div className="flex flex-wrap gap-2 mb-6">
             <button
@@ -346,6 +351,12 @@ const SearchResultsPage = () => {
           />
         </div>
       </div>
+
+      <SearchPageAlertModal 
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        onConfirm={handleAlertModalConfirm}
+      />
     </div>
   )
 }

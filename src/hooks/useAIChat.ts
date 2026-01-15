@@ -82,7 +82,7 @@ export const useAIChat = () => {
     setCurrentChatId(chatId)
   }
 
-  const handleChatDelete = (chatId: string, e: React.MouseEvent) => {
+  const handleChatDelete = (_chatId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     // 모달을 열기만 함 (실제 삭제는 confirmChatDelete에서 처리)
   }
