@@ -114,7 +114,7 @@ export const LeftSidebar = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onNewChat}
-              className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-black rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm font-medium"
+              className="flex-1 px-4 py-2.5 font-bold bg-white border border-gray-300 text-black mt-1 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm"
             >
               <span>+</span>
               <span>새 채팅</span>
@@ -161,10 +161,10 @@ export const LeftSidebar = ({
             e.preventDefault()
             onFileDividerResizeStart()
           }}
-          className="h-2 bg-gray-200 cursor-ns-resize hover:bg-blue-400 transition-colors flex-shrink-0 relative group mx-4 my-2"
+          className="h-6 bg-gray-0 cursor-ns-resize flex-shrink-0 relative group mx-4 my-2 rounded-md flex items-center justify-center transition-colors hover:bg-gray-100"
           title="드래그하여 높이 조절"
         >
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-gray-300 group-hover:bg-blue-400"></div>
+          <div className="h-1 w-8 bg-gray-300 hover:bg-gray-400 rounded-full"></div>
         </div>
 
         {/* 하단: 소스 (파일 목록) */}

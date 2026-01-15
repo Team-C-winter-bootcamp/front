@@ -42,7 +42,7 @@ export const ChatArea = ({
         {messages.length === 0 && !isProcessing && (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
             
-            <h3 className="text-xl font-bold text-gray-600 mb-2">
+            <h3 className="text-3xl font-bold text-gray-600 mb-2">
               {sessionName}
             </h3>
             <p className="text-sm">왼쪽 하단 '소스'에 파일을 올려 대화를 시작하세요.</p>
@@ -116,7 +116,7 @@ export const ChatArea = ({
         <div ref={chatEndRef} />
       </div>
       
-      <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0 z-10 p-8">
+      <div className="p-4 bg-white border-t border-gray-300 flex-shrink-0 z-10 p-8">
         <form onSubmit={onChatSend} className="max-w-5xl mx-auto relative flex gap-2">
           <input
             type="text"

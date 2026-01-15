@@ -218,7 +218,7 @@ const JudgmentDetailPage = () => {
           <div className="flex-1 min-w-0" ref={contentRef}>
             
             {/* Tabs (Navigation) */}
-            <div className="flex border-b border-gray-200 mb-6 sticky top-[80px] bg-[#F9FAFB] z-40 pt-2">
+            <div className="flex border-b border-gray-200 mb-6 sticky top-[60px] bg-[#F9FAFB] z-40 pt-2">
               <button
                 onClick={() => scrollToSection('ai')}
                 className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
