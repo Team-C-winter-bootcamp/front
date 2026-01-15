@@ -47,19 +47,38 @@ export interface LoginResponse {
   }
 }
 
+// 회원가입 요청 타입 (API 명세서에 따라 업데이트)
 export interface SignupRequest {
-  email: string
+  username: string
   password: string
-  name?: string
+  email: string
 }
 
+// 회원가입 응답 타입 (API 명세서에 따라 업데이트)
 export interface SignupResponse {
+  message: string
   user: {
-    id: string
+    username: string
     email: string
-    name?: string
   }
 }
+
+// API 에러 응답 타입 (명세서에 따른 에러 구조)
+export interface ApiErrorResponse {
+  error_code: string
+  message: string
+  detail?: Record<string, string[]>
+}
+
+// 에러 코드 상수
+export const ERROR_CODES = {
+  DUPLICATE_RESOURCE: 'DUPLICATE_RESOURCE',
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  FIELD_REQUIRED: 'FIELD_REQUIRED',
+  AUTH_403: 'AUTH_403',
+} as const
+
+export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES]
 
 // 검색 관련 타입
 export interface SearchRequest {

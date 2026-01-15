@@ -1,5 +1,12 @@
 import apiClient from '../client'
-import { LoginRequest, LoginResponse, SignupRequest, SignupResponse, ApiResponse } from '../types'
+import { 
+  LoginRequest, 
+  LoginResponse, 
+  SignupRequest, 
+  SignupResponse, 
+  ApiResponse,
+  ApiErrorResponse 
+} from '../types'
 import { API_ENDPOINTS } from '../endpoints'
 
 /**
@@ -26,18 +33,51 @@ export const authService = {
 
   /**
    * 회원가입
+   * API 명세서에 따라 업데이트된 엔드포인트 및 응답 구조
    */
   signup: async (data: SignupRequest): Promise<SignupResponse> => {
-    const response = await apiClient.post<ApiResponse<SignupResponse>>(
-      API_ENDPOINTS.AUTH.SIGNUP,
-      data
-    )
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
+    try {
+      // 명세서에 따르면 응답이 { message, user } 형태로 직접 반환됨
+      const response = await apiClient.post<SignupResponse>(
+        API_ENDPOINTS.AUTH.SIGNUP,
+        data
+      )
+      
+      // 200 OK 응답 처리
+      return response.data
+    } catch (error: any) {
+      // 에러 응답 처리
+      if (error.response?.data) {
+        const errorData = error.response.data as ApiErrorResponse
+        
+        // 명세서에 따른 에러 코드별 처리
+        switch (errorData.error_code) {
+          case 'DUPLICATE_RESOURCE':
+            throw new Error(
+              errorData.detail 
+                ? Object.values(errorData.detail).flat().join(', ')
+                : errorData.message || '이미 존재하는 정보입니다.'
+            )
+          case 'VALIDATION_FAILED':
+            throw new Error(
+              errorData.detail
+                ? Object.values(errorData.detail).flat().join(', ')
+                : errorData.message || '입력값이 올바르지 않습니다.'
+            )
+          case 'FIELD_REQUIRED':
+            throw new Error(
+              errorData.detail
+                ? Object.values(errorData.detail).flat().join(', ')
+                : errorData.message || '필수 항목이 누락되었습니다.'
+            )
+          default:
+            throw new Error(errorData.message || '회원가입에 실패했습니다.')
+        }
+      }
+      
+      // 네트워크 오류 등 기타 에러
+      throw error
     }
-    
-    throw new Error(response.data.message || '회원가입에 실패했습니다.')
   },
 
   /**

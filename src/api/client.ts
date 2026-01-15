@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useStore } from '../store/useStore'
-import { ApiError, ApiResponse } from './types'
+import { ApiError, ApiResponse, ApiErrorResponse } from './types'
 
 /**
  * API Base URL 설정
@@ -101,8 +101,41 @@ apiClient.interceptors.response.use(
       } as ApiError)
     }
 
+    // 400 Bad Request - 유효성 검사 실패 등
+    if (error.response?.status === 400) {
+      const errorData = error.response.data as ApiErrorResponse | ApiResponse
+      
+      // 명세서에 따른 에러 응답 구조 처리
+      if ('error_code' in errorData) {
+        const apiError = errorData as ApiErrorResponse
+        return Promise.reject({
+          message: apiError.message || '요청이 올바르지 않습니다.',
+          status: 400,
+          code: apiError.error_code,
+          detail: apiError.detail,
+        } as ApiError & { code?: string; detail?: Record<string, string[]> })
+      }
+      
+      return Promise.reject({
+        message: (errorData as ApiResponse).message || '요청이 올바르지 않습니다.',
+        status: 400,
+      } as ApiError)
+    }
+
     // 403 Forbidden
     if (error.response?.status === 403) {
+      const errorData = error.response.data as ApiErrorResponse | ApiResponse
+      
+      // 명세서에 따른 에러 응답 구조 처리 (AUTH_403)
+      if ('error_code' in errorData || 'code' in errorData) {
+        const apiError = errorData as ApiErrorResponse | { code: string; message: string }
+        return Promise.reject({
+          message: apiError.message || '접근 권한이 없습니다.',
+          status: 403,
+          code: 'error_code' in apiError ? apiError.error_code : apiError.code,
+        } as ApiError & { code?: string })
+      }
+      
       return Promise.reject({
         message: error.response.data?.message || '접근 권한이 없습니다.',
         status: 403,
