@@ -65,7 +65,7 @@ apiClient.interceptors.request.use(
  * - 응답 로깅 (개발 환경)
  */
 apiClient.interceptors.response.use(
-  (response) => {
+  (response: any) => {
     // 개발 환경에서 응답 로깅
     if (import.meta.env.DEV) {
       console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {

@@ -36,7 +36,8 @@ const DocumentPage = () => {
   const chat = useChat({
     currentSessionFiles: chatSessions.currentSession.files,
     updateCurrentSessionMessages: chatSessions.updateCurrentSessionMessages,
-    setIsProcessing
+    setIsProcessing,
+    currentSessionId: chatSessions.currentSessionId
   })
 
   // 세션 삭제 핸들러
