@@ -9,9 +9,8 @@ src/api/
 ├── client.ts              # Axios 인스턴스 및 인터셉터 설정
 ├── types.ts               # API 타입 정의
 ├── endpoints.ts           # API 엔드포인트 상수
-├── services/             # API 서비스 함수들
-│   ├── authService.ts     # 인증 관련 API
-│   └── searchService.ts   # 검색 관련 API
+├── services/              # API 서비스 함수들
+│   └── Service.ts         # 관련 API
 ├── index.ts               # 통합 export
 └── README.md              # 이 파일
 ```
@@ -49,11 +48,11 @@ const response = await apiClient.post('/users', {
 #### 서비스 함수 사용 (권장)
 
 ```typescript
-import { authService, searchService } from '@/api'
+import { Service} from '@/api'
 
 // 로그인
 try {
-  const result = await authService.login({
+  const result = await Service.login({
     email: 'user@example.com',
     password: 'password123'
   })
@@ -64,7 +63,7 @@ try {
 
 // 검색
 try {
-  const results = await searchService.search({
+  const results = await Service.search({
     query: '계약금',
     page: 1,
     limit: 10

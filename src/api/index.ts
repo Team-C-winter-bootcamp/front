@@ -1,6 +1,4 @@
-/**
- * API 모듈 통합 export
- */
+/*API 모듈 통합 export*/
 
 // Client
 export { default as apiClient } from './client'
