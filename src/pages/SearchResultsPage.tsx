@@ -8,6 +8,8 @@ import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
 import { useSearchFilters } from '../hooks/useSearchFilters'
 import SearchPageAlertModal from '../components/AlertModal/SearchPageAlertModal'
+import { precedentService } from '../api'
+import type { PREVIEW, PREVIEWData } from '../api/types'
 
 export interface SearchResult {
   id: number
@@ -93,13 +95,66 @@ const SearchResultsPage = () => {
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
     (tabParam as 'expert' | 'all' | 'ai') || 'expert'
   )
 
-  const filters = useSearchFilters(MOCK_RESULTS, query, activeTab)
+  // API에서 검색 결과 로드
+  useEffect(() => {
+    const loadSearchResults = async () => {
+      if (!query.trim()) {
+        setSearchResults([])
+        setTotalCount(0)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const response: PREVIEW = await precedentService.preview({
+          q: query,
+          page: currentPage,
+          limit: 8
+        })
+
+        // PREVIEW 응답을 SearchResult 형태로 변환
+        // data가 배열일 수도 있고 단일 객체일 수도 있음
+        const dataArray = Array.isArray(response.data) ? response.data : (response.data ? [response.data] : [])
+        const results: SearchResult[] = dataArray.map((item: PREVIEWData) => ({
+          id: parseInt(item.precedents_id) || 0,
+          title: item.case_title || '',
+          content: item.case_preview || '',
+          court: '', // API 응답에 법원 정보가 없으면 빈 문자열
+          date: '', // API 응답에 날짜 정보가 없으면 빈 문자열
+          caseType: '', // API 응답에 사건 종류 정보가 없으면 빈 문자열
+          judgmentType: item.outcome_display || ''
+        }))
+
+        setSearchResults(results)
+        if (response.meta) {
+          setTotalCount(parseInt(response.meta.total_count as any) || 0)
+          const pageNum = parseInt(response.meta.page as any) || currentPage
+          setCurrentPage(pageNum)
+        }
+      } catch (error) {
+        console.error('검색 결과 로드 실패:', error)
+        // 에러 시 빈 결과 표시
+        setSearchResults([])
+        setTotalCount(0)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSearchResults()
+  }, [query, currentPage])
+
+  const filters = useSearchFilters(searchResults, query, activeTab)
 
   // 3. 브라우저 뒤로가기 등으로 URL이 변경될 때 탭 상태 동기화
   useEffect(() => {
@@ -123,8 +178,9 @@ const SearchResultsPage = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // 검색 시 현재 탭 정보도 유지
+    // 검색 시 현재 탭 정보도 유지하고 페이지를 1로 리셋
     setSearchParams({ q: searchInput, tab: activeTab })
+    setCurrentPage(1)
   }
 
   const handleAITabClick = () => {
@@ -304,7 +360,9 @@ const SearchResultsPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold">검색 결과</span>
-              <span className="text-blue-600 font-bold">{filters.filteredResults.length}건</span>
+              <span className="text-blue-600 font-bold">
+                {isLoading ? '검색 중...' : `${totalCount || filters.filteredResults.length}건`}
+              </span>
             </div>
             <select className="px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500">
               <option>정확도순</option>
@@ -314,7 +372,11 @@ const SearchResultsPage = () => {
 
           {/* Search Results List */}
           <div className="space-y-4">
-            {filters.paginatedResults.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-20 bg-gray-50 rounded-lg">
+                <p className="text-black text-xl font-bold">검색 중...</p>
+              </div>
+            ) : filters.paginatedResults.length > 0 ? (
               filters.paginatedResults.map((result) => (
                 <SearchResultItem
                   key={result.id}
@@ -330,11 +392,16 @@ const SearchResultsPage = () => {
             )}
           </div>
 
-          <Pagination
-            currentPage={filters.currentPage}
-            totalPages={filters.totalPages}
-            onPageChange={filters.setCurrentPage}
-          />
+          {!isLoading && filters.totalPages > 0 && (
+            <Pagination
+              currentPage={filters.currentPage}
+              totalPages={filters.totalPages}
+              onPageChange={(page) => {
+                filters.setCurrentPage(page)
+                setCurrentPage(page)
+              }}
+            />
+          )}
         </div>
 
         {/* Sidebar Filters */}

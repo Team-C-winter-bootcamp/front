@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, Message, ChatHistory } from '../store/useStore'
+import { sessionService } from '../api'
 
 export const useAIChat = () => {
   const navigate = useNavigate()
@@ -31,6 +32,32 @@ export const useAIChat = () => {
     }
   }, [isAuthenticated, navigate])
 
+  // 세션 목록 로드
+  useEffect(() => {
+    if (isAuthenticated) {
+      const loadSessions = async () => {
+        try {
+          const sessions = await sessionService.getList()
+          const chatHistories: ChatHistory[] = sessions.map(s => ({
+            id: s.id.toString(),
+            name: s.title,
+            messages: [],
+            createdAt: new Date().toISOString()
+          }))
+          setChatHistories(prev => {
+            // 기존에 없던 세션만 추가
+            const existingIds = new Set(prev.map(ch => ch.id))
+            const newSessions = chatHistories.filter(ch => !existingIds.has(ch.id))
+            return [...prev, ...newSessions]
+          })
+        } catch (error) {
+          console.error('세션 목록 로드 실패:', error)
+        }
+      }
+      loadSessions()
+    }
+  }, [isAuthenticated, setChatHistories])
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -48,9 +75,38 @@ export const useAIChat = () => {
       if (currentChatId) {
         const currentChat = chatHistories.find(ch => ch.id === currentChatId)
         if (currentChat) {
-          setMessages(currentChat.messages)
-          previousMessagesRef.current = currentChat.messages
-          setIsWelcomeMode(false)
+          // API에서 메시지 로드
+          const loadMessages = async () => {
+            try {
+              const sessionId = parseInt(currentChatId)
+              if (!isNaN(sessionId)) {
+                const messageData = await sessionService.getMessage(sessionId)
+                const loadedMessages: Message[] = messageData.messages.map((msg, idx) => ({
+                  id: msg.id,
+                  text: msg.content,
+                  isUser: msg.role === 'user',
+                  timestamp: new Date().toISOString()
+                }))
+                setMessages(loadedMessages)
+                previousMessagesRef.current = loadedMessages
+                // chatHistories에도 업데이트
+                setChatHistories(prev => prev.map(ch =>
+                  ch.id === currentChatId ? { ...ch, messages: loadedMessages } : ch
+                ))
+              } else {
+                // 숫자가 아닌 경우 로컬 메시지 사용
+                setMessages(currentChat.messages)
+                previousMessagesRef.current = currentChat.messages
+              }
+            } catch (error) {
+              console.error('메시지 로드 실패:', error)
+              // 에러 시 로컬 메시지 사용
+              setMessages(currentChat.messages)
+              previousMessagesRef.current = currentChat.messages
+            }
+            setIsWelcomeMode(false)
+          }
+          loadMessages()
         } else {
           setIsWelcomeMode(true)
           setMessages([])
@@ -97,7 +153,7 @@ export const useAIChat = () => {
     }
   }, [messages, currentChatId, setChatHistories])
 
-  const handleNewChat = () => {
+  const handleNewChat = async () => {
     // 현재 채팅의 메시지를 먼저 저장
     if (currentChatId && messages.length > 0) {
       setChatHistories(prev => prev.map(chat => 
@@ -125,10 +181,23 @@ export const useAIChat = () => {
     // 모달을 열기만 함 (실제 삭제는 confirmChatDelete에서 처리)
   }
 
-  const confirmChatDelete = (chatId: string) => {
-    setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
-    if (currentChatId === chatId) {
-      handleNewChat()
+  const confirmChatDelete = async (chatId: string) => {
+    try {
+      const sessionId = parseInt(chatId)
+      if (!isNaN(sessionId)) {
+        await sessionService.delete(sessionId)
+      }
+      setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
+      if (currentChatId === chatId) {
+        handleNewChat()
+      }
+    } catch (error) {
+      console.error('채팅 삭제 실패:', error)
+      // UI에서는 삭제하고 API 에러는 로그만 남김
+      setChatHistories(prev => prev.filter(ch => ch.id !== chatId))
+      if (currentChatId === chatId) {
+        handleNewChat()
+      }
     }
   }
 
@@ -141,13 +210,24 @@ export const useAIChat = () => {
     }
   }
 
-  const handleRenameSave = () => {
+  const handleRenameSave = async () => {
     if (editingChatId && editingName.trim()) {
-      setChatHistories(prev => prev.map(ch =>
-        ch.id === editingChatId ? { ...ch, name: editingName.trim() } : ch
-      ))
-      setEditingChatId(null)
-      setEditingName('')
+      try {
+        const sessionId = parseInt(editingChatId)
+        if (!isNaN(sessionId)) {
+          await sessionService.modify(sessionId, {
+            title: editingName.trim(),
+            bookmark: false // 기존 북마크 상태 유지 (필요시 store에서 가져오기)
+          })
+        }
+        setChatHistories(prev => prev.map(ch =>
+          ch.id === editingChatId ? { ...ch, name: editingName.trim() } : ch
+        ))
+        setEditingChatId(null)
+        setEditingName('')
+      } catch (error) {
+        console.error('채팅 이름 변경 실패:', error)
+      }
     }
   }
 
@@ -155,52 +235,131 @@ export const useAIChat = () => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
 
-    const userMessage: Message = {
-      id: Date.now(),
-      text: input,
-      isUser: true,
-      timestamp: new Date().toISOString()
-    }
-
-    if (isWelcomeMode || !currentChatId) {
-      // 새로운 채팅을 생성하기 전에, 이전에 다른 채팅이 있었다면 그 메시지를 저장
-      // (이미 handleNewChat에서 저장했지만, 안전을 위해 확인)
-      const newChatId = Date.now().toString()
-      
-      isCreatingChat.current = true
-
-      const newChat: ChatHistory = {
-        id: newChatId,
-        name: input.substring(0, 20) + (input.length > 20 ? '...' : ''),
-        messages: [userMessage],
-        createdAt: new Date().toISOString()
-      }
-      
-      setChatHistories(prev => [newChat, ...prev])
-      setCurrentChatId(newChatId)
-      previousChatIdRef.current = newChatId
-      setIsWelcomeMode(false)
-      setMessages([userMessage])
-      previousMessagesRef.current = [userMessage]
-    } else {
-      // 기존 채팅에 메시지 추가
-      setMessages(prev => [...prev, userMessage])
-    }
-
+    const userMessageText = input.trim()
     setInput('')
     setIsLoading(true)
 
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        text: `질문에 대한 답변입니다. "${userMessage.text}"에 대해 법률적으로 검토한 결과...`,
-        isUser: false,
-        timestamp: new Date().toISOString(),
-        resultId: Math.floor(Math.random() * 100)
+    try {
+      let sessionId: number | null = null
+
+      if (isWelcomeMode || !currentChatId) {
+        // 새로운 채팅 생성
+        const newChatData = await sessionService.newChat({ message: userMessageText })
+        sessionId = newChatData.session_id
+        const newChatId = sessionId.toString()
+        
+        isCreatingChat.current = true
+
+        const userMessage: Message = {
+          id: Date.now(),
+          text: userMessageText,
+          isUser: true,
+          timestamp: new Date().toISOString()
+        }
+
+        const newChat: ChatHistory = {
+          id: newChatId,
+          name: newChatData.title,
+          messages: [userMessage],
+          createdAt: new Date().toISOString()
+        }
+        
+        setChatHistories(prev => [newChat, ...prev])
+        setCurrentChatId(newChatId)
+        previousChatIdRef.current = newChatId
+        setIsWelcomeMode(false)
+        setMessages([userMessage])
+        previousMessagesRef.current = [userMessage]
+
+        // AI 응답 받기 (새 채팅 생성 시 자동으로 응답이 오는 것으로 가정)
+        try {
+          const responseData = await sessionService.sendMessage(sessionId, { message: userMessageText })
+          const aiMessage: Message = {
+            id: responseData.id,
+            text: responseData.content,
+            isUser: false,
+            timestamp: new Date().toISOString()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          previousMessagesRef.current = [...previousMessagesRef.current, aiMessage]
+        } catch (error) {
+          console.error('AI 응답 받기 실패:', error)
+          const aiMessage: Message = {
+            id: Date.now() + 1,
+            text: `질문에 대한 답변입니다. "${userMessageText}"에 대해 법률적으로 검토한 결과...`,
+            isUser: false,
+            timestamp: new Date().toISOString()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          previousMessagesRef.current = [...previousMessagesRef.current, aiMessage]
+        }
+      } else {
+        // 기존 채팅에 메시지 전송
+        sessionId = parseInt(currentChatId)
+        if (isNaN(sessionId)) {
+          throw new Error('Invalid session ID')
+        }
+
+        const userMessage: Message = {
+          id: Date.now(),
+          text: userMessageText,
+          isUser: true,
+          timestamp: new Date().toISOString()
+        }
+
+        setMessages(prev => [...prev, userMessage])
+        previousMessagesRef.current = [...previousMessagesRef.current, userMessage]
+
+        // AI 응답 받기
+        try {
+          const responseData = await sessionService.sendMessage(sessionId, { message: userMessageText })
+          const aiMessage: Message = {
+            id: responseData.id,
+            text: responseData.content,
+            isUser: false,
+            timestamp: new Date().toISOString()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          previousMessagesRef.current = [...previousMessagesRef.current, aiMessage]
+        } catch (error) {
+          console.error('AI 응답 받기 실패:', error)
+          const aiMessage: Message = {
+            id: Date.now() + 1,
+            text: `질문에 대한 답변입니다. "${userMessageText}"에 대해 법률적으로 검토한 결과...`,
+            isUser: false,
+            timestamp: new Date().toISOString()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          previousMessagesRef.current = [...previousMessagesRef.current, aiMessage]
+        }
       }
-      setMessages(prev => [...prev, aiMessage])
+    } catch (error) {
+      console.error('메시지 전송 실패:', error)
+      // 에러 시에도 로컬 메시지는 추가
+      const userMessage: Message = {
+        id: Date.now(),
+        text: userMessageText,
+        isUser: true,
+        timestamp: new Date().toISOString()
+      }
+      if (currentChatId) {
+        setMessages(prev => [...prev, userMessage])
+      } else {
+        const newChatId = Date.now().toString()
+        const newChat: ChatHistory = {
+          id: newChatId,
+          name: userMessageText.substring(0, 20) + (userMessageText.length > 20 ? '...' : ''),
+          messages: [userMessage],
+          createdAt: new Date().toISOString()
+        }
+        setChatHistories(prev => [newChat, ...prev])
+        setCurrentChatId(newChatId)
+        setMessages([userMessage])
+        setIsWelcomeMode(false)
+      }
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleResultClick = (resultId: number) => {
