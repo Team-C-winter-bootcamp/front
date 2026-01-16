@@ -110,15 +110,15 @@ export interface MODIFYMESSAGEData{
 //   default_search: DefaultSearch;
 // }
 //PREVIEW
-export interface PREVIEWMata{
+export interface PREVIEWMeta{
   total_count: number;
-  page: string;
-  limit: boolean;
-  total_page:string
+  page: number;
+  limit: number;
+  total_page:number
 }
 
 export interface PREVIEWData{
-  precedents_id: string;
+  precedents_id: number;
   case_title: string;
   case_preview: string;
   outcome_display: string;
@@ -128,7 +128,7 @@ export interface PREVIEW{
   code: string;
   status: number
   message: string;
-  meta:PREVIEWMata
+  meta:PREVIEWMeta
   data:PREVIEWData
 }
 //TOTALDATA
