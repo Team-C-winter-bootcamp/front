@@ -1,10 +1,12 @@
-import { useMemo, useState, useRef } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import { SearchBar } from '../components/search/SearchBar'
 import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+import { precedentService } from '../api'
+import type { TOTALDATAData } from '../api/types'
 
 // 이미지 assets
 import download from '../assets/download.png'
@@ -20,9 +22,30 @@ const JudgmentDetailPage = () => {
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai')
   // AI 요약 펼치기/접기 상태
   const [isAiExpanded, setIsAiExpanded] = useState(false)
+  const [judgmentDataFromAPI, setJudgmentDataFromAPI] = useState<TOTALDATAData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   
   const numericId = Number(id)
   const contentRef = useRef<HTMLDivElement>(null) // PDF 변환 영역 참조
+
+  // API에서 판례 상세 데이터 로드
+  useEffect(() => {
+    const loadJudgmentDetail = async () => {
+      if (!id) return
+      
+      setIsLoading(true)
+      try {
+        const data = await precedentService.getTotalData(id)
+        setJudgmentDataFromAPI(data)
+      } catch (error) {
+        console.error('판례 상세 정보 로드 실패:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadJudgmentDetail()
+  }, [id])
 
   const [isBookmarked, setIsBookmarked] = useState(() => {
     const raw = localStorage.getItem('bookmarked_judgments')
@@ -48,45 +71,62 @@ const JudgmentDetailPage = () => {
     return MOCK_RESULTS.find(r => r.id === numericId)
   }, [numericId])
 
-  const displayData = foundResult || {
+  // API 데이터가 있으면 우선 사용, 없으면 MOCK 데이터 사용
+  const displayData = judgmentDataFromAPI ? {
+    title: judgmentDataFromAPI.case_title || '판례 정보',
+    content: judgmentDataFromAPI.reason || judgmentDataFromAPI.main_sentence || '',
+    court: '', // API에 법원 정보가 별도로 없을 수 있음
+    date: '', // API에 날짜 정보가 별도로 없을 수 있음
+    caseType: '',
+    judgmentType: ''
+  } : (foundResult || {
     title: '데이터를 찾을 수 없습니다.',
     content: '',
     court: '',
     date: '',
     caseType: '',
     judgmentType: ''
-  }
+  })
 
   // 데이터 구조화
   const judgmentData = {
     id: id,
-    title: displayData.title,
-    summary: `${displayData.court} ${displayData.date} 선고`,
+    title: judgmentDataFromAPI?.case_title || displayData.title,
+    summary: judgmentDataFromAPI ? `${judgmentDataFromAPI.case_name}` : `${displayData.court} ${displayData.date} 선고`,
     aiSummary: {
       title: 'AI 판결 요약',
-      resultSummary: [
+      resultSummary: judgmentDataFromAPI?.main_sentence ? [
+        judgmentDataFromAPI.main_sentence
+      ] : [
         '내수면어업개발촉진법상 공유수면에는 하천법의 적용 또는 준용을 받는 하천도 포함됨을 판시함.',
         '하천법의 적용 또는 준용을 받는 하천부지의 무단점용은 공유수면관리법 위반죄가 아닌 하천법 위반죄에 해당함을 판시하며, 원심의 공유수면관리법 위반죄 적용을 파기 환송함.'
       ],
-      facts: [
+      facts: judgmentDataFromAPI ? [
+        `원고: ${judgmentDataFromAPI.petitioner || ''}`,
+        `피고: ${judgmentDataFromAPI.defendant || ''}`,
+        `소송대리인: ${judgmentDataFromAPI.pleader || ''}`,
+        judgmentDataFromAPI.original_judgment || ''
+      ] : [
         '피고인은 하천법의 적용 또는 준용을 받는 하천부지에서 송어양식어업을 영위하며 하천부지를 무단으로 점용함.',
         '원심은 피고인의 행위를 내수면어업개발촉진법 위반 및 공유수면관리법 위반죄로 판단함.',
         '피고인은 이에 불복하여 상고함.',
-        displayData.content // 실제 데이터 연결
+        displayData.content
       ]
     },
     judgment: {
-      court: displayData.court,
-      caseNo: '2014노1188',
-      caseName: '강간미수, 유사강간',
-      plaintiff: '검사',
-      defendant: '피고인',
-      judgmentDate: displayData.date,
-      order: [
+      court: displayData.court || '',
+      caseNo: '2014노1188', // API에 사건번호가 없으면 기본값
+      caseName: judgmentDataFromAPI?.case_name || displayData.court || '',
+      plaintiff: judgmentDataFromAPI?.petitioner || '검사',
+      defendant: judgmentDataFromAPI?.defendant || '피고인',
+      judgmentDate: displayData.date || '',
+      order: judgmentDataFromAPI?.original_judgment ? [
+        judgmentDataFromAPI.original_judgment
+      ] : [
         '1. 원심판결을 파기하고, 사건을 서울고등법원에 환송한다.',
         '2. 피고인의 나머지 상고를 기각한다.'
       ],
-      reasons: displayData.content.repeat(5) // 스크롤 테스트를 위해 내용 반복
+      reasons: judgmentDataFromAPI?.reason || displayData.content || ''
     },
     relatedCases: [
       { name: '대법원 2012도1234', desc: '유사한 사실관계 판례' },
@@ -193,9 +233,14 @@ const JudgmentDetailPage = () => {
 
       {/* Main Container */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
-        
-        {/* Header Info */}
-        <div className="mb-8">
+        {isLoading ? (
+          <div className="text-center py-20">
+            <p className="text-xl font-bold">판례 정보를 불러오는 중...</p>
+          </div>
+        ) : (
+          <>
+            {/* Header Info */}
+            <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-2.5 py-1 text-xs font-bold text-blue-700 bg-blue-100 rounded-md">
               {displayData.judgmentType || '판결'}
@@ -436,6 +481,8 @@ const JudgmentDetailPage = () => {
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   )
