@@ -214,13 +214,12 @@ const SearchResultsPage = () => {
             onSearch={handleSearch}
             onClear={() => {
               setSearchInput('')
-
               setSearchParams({ tab: activeTab })
             }} 
           /> 
 
         </div>
-      </div>
+      </div> 
 
       {/* Mobile Filter Toggle */}
       <div className="md:hidden px-4 py-3 border-b bg-gray-50 overflow-x-auto whitespace-nowrap">

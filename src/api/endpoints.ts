@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
   // 세션 (Session)
   session: {
     NEWCHAT: '/sessions', // 새로운 채팅방 생성(POST)
-    GETLIST: '/sessions', // 채팅방 목록 전체 조회(GET)  이부분 물어볼것
+    GETLIST: '/sessions', // 채팅방 목록 전체 조회(GET)
     MODIFY: '/sessions/{session_id}/settings', // 채팅방 수정(PATCH)
     DELETE: '/sessions/{session_id}/settings', // 채팅방 삭제(DELETE)
     GETMESSAGE: '/sessions/{session_id}', // 특정 채팅방 메시지 조회(GET)

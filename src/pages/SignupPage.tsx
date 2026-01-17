@@ -2,6 +2,7 @@ import { useState, useEffect , FormEvent} from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import SignupAlertModal from '../components/AlertModal/SignupAlertModal'
+import logotextb from '../assets/logotextb.png'
 const SignupPage = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -9,7 +10,7 @@ const SignupPage = () => {
   const [formData, setFormData] = useState({
     id: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: '', 
     phone: ''
   })
 
@@ -110,7 +111,6 @@ const SignupPage = () => {
       <Header />
 
       {/* Main Content */}
-
       <div className="flex flex-col items-center justify-center px-4 py-16 max-w-lg mx-auto">
         <button 
           onClick={() => navigate('/')} 
