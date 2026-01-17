@@ -129,7 +129,7 @@ export interface PREVIEW{
   status: number
   message: string; 
   meta:PREVIEWMeta
-  data:PREVIEWData
+  data:PREVIEWData | PREVIEWData[]
 }
 //TOTALDATA
 export interface TOTALDATAData{

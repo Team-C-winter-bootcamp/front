@@ -36,7 +36,8 @@ const DocumentPage = () => {
   const chat = useChat({
     currentSessionFiles: chatSessions.currentSession.files,
     updateCurrentSessionMessages: chatSessions.updateCurrentSessionMessages,
-    setIsProcessing
+    setIsProcessing,
+    currentSessionId: chatSessions.currentSessionId
   })
 
   // 세션 삭제 핸들러
@@ -52,7 +53,7 @@ const DocumentPage = () => {
   }
 
   return (
-    <div className="h-screen bg-[#F5F3EB] flex flex-col overflow-hidden text-minimal-charcoal font-serif">
+    <div className="h-screen bg-white flex flex-col overflow-hidden text-gray-900">
       <Header />
       
       {/* 모달 렌더링 */}
@@ -138,7 +139,7 @@ const DocumentPage = () => {
               e.preventDefault()
               resize.setIsResizingMemo(true)
             }}
-            className="w-1 bg-minimal-gray cursor-ew-resize flex-shrink-0"
+            className="w-1 bg-gray-200 cursor-ew-resize hover:bg-blue-400 transition-colors flex-shrink-0"
           />
         )}
 

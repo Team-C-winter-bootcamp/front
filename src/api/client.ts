@@ -14,7 +14,7 @@ interface ApiError {
  * API Base URL 설정
  * 환경 변수에서 가져오거나 기본값 사용
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
 /**
  * Axios 인스턴스 생성
@@ -65,7 +65,7 @@ apiClient.interceptors.request.use(
  * - 응답 로깅 (개발 환경)
  */
 apiClient.interceptors.response.use(
-  (response) => {
+  (response: any) => {
     // 개발 환경에서 응답 로깅
     if (import.meta.env.DEV) {
       console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {

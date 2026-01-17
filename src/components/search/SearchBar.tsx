@@ -22,13 +22,15 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
             />
           </div>
 
-          {/* Input 필드 */}
+          {/* Input 필드: 패딩과 글자 크기를 줄임 */}
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="키워드를 입력하세요"
-            className="w-full pl-12 pr-10 py-3 border border-[#CFB982] rounded-full focus:outline-none focus:ring-1 focus:ring-[#CFB982] focus:border-[#CFB982] bg-[#F5F3EB] text-base shadow-minimal transition-all placeholder-minimal-medium-gray text-minimal-charcoal font-light"
+            // pl-12: 아이콘 공간, py-2.5: 높이 축소, text-base: 글자 크기 축소
+            // border-2 -> border (테두리 두께 감소)
+            className="w-full pl-12 pr-10 py-2.5 border border-blue-500 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white text-base shadow-sm transition-all placeholder-gray-400 text-gray-800"
           />
 
           {/* 초기화 버튼 */}
@@ -36,7 +38,7 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
             <button
               type="button"
               onClick={onClear}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-minimal-medium-gray hover:text-minimal-charcoal transition-colors p-1"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
             >
               ✕ 
             </button>

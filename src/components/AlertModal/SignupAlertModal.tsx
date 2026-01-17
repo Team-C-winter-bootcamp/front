@@ -8,26 +8,34 @@ const SignupAlertModal = ({ isOpen, onClose, onConfirm }: SignupAlertModalProps)
   if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
 
   return (
+    // 배경 (배경 클릭 시 닫히도록 onClose 연결 - 선택사항)
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={onClose} 
     >
+
       <div  
         className="card-minimal w-80 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+
       >
-        <div className="p-4 border-b border-minimal-gray text-center">
-          <h2 className="text-lg font-light text-minimal-charcoal">알림</h2>
+        
+        {/* 상단 제목 */}
+        <div className="p-4 border-b text-center">
+          <h2 className="text-lg font-bold text-black">알림</h2>
         </div>
+
+        {/* 내용  */}
         <div className="p-8 text-center">
-          <p className="text-minimal-dark-gray font-light whitespace-pre-line">
+          <p className="text-gray-800 font-medium whitespace-pre-line">
             회원가입이 완료되었습니다.{'\n'}
             확인 버튼을 누르면{'\n'}로그인 페이지로 이동합니다.
           </p>
         </div>
+
+        {/* 확인 버튼 */}
         <button
           onClick={onConfirm}
-          className="w-full py-4 btn-minimal-primary font-light"
+          className="w-full py-4 bg-blue-200 hover:bg-blue-300 text-black font-bold transition-colors"
         >
           확인
         </button>

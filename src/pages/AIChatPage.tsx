@@ -46,7 +46,7 @@ const AIChatPage = () => {
   }
 
   return (
-    <div className="h-screen bg-[#F5F3EB] flex flex-col text-minimal-charcoal overflow-hidden font-serif">
+    <div className="h-screen bg-white flex flex-col text-gray-900 font-sans overflow-hidden">
       <Header />
       
       {/* 삭제 확인 모달 */}
@@ -73,7 +73,7 @@ const AIChatPage = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col bg-[#F5F3EB] relative overflow-hidden">
+        <div className="flex-1 flex flex-col bg-white relative overflow-hidden">
           
           {isWelcomeMode ? (
             <WelcomeScreen
@@ -83,7 +83,7 @@ const AIChatPage = () => {
             />
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scrollbar-hide">
                 {messages.map((message) => (
                   <ChatMessage
                     key={message.id}
@@ -94,20 +94,19 @@ const AIChatPage = () => {
                 
                 {isLoading && (
                   <div className="flex justify-start gap-3">
-                    <div className="w-8 h-8 bg-[#F5F3EB] border-minimal-gray rounded-full flex items-center justify-center text-minimal-dark-gray text-xs font-light">AI</div>
-                    <div className="bg-[#F5F3EB] card-minimal px-4 py-3 rounded-minimal-lg rounded-tl-none flex items-center gap-2">
-                      <span className="w-2 h-2 bg-minimal-medium-gray rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-minimal-medium-gray rounded-full animate-bounce delay-75"></span>
-                      <span className="w-2 h-2 bg-minimal-medium-gray rounded-full animate-bounce delay-150"></span>
-                      <span className="text-xs text-minimal-medium-gray ml-1 font-light">분석 중...</span>
+                    <div className="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-blue-600 text-sm">AI</div>
+                    <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                      <span className="text-xs text-gray-400 ml-1">분석 중...</span>
                     </div>
                   </div> 
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-4 bg-[#F5F3EB] border-t border-minimal-gray flex-shrink-0">
-                {/* form의 onSubmit도 유지하여 Enter키 동작 보장 */}
+              <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
                 <form onSubmit={handleSend} className="max-w-4xl mx-auto relative">
                   <textarea
                     value={input}
@@ -120,18 +119,16 @@ const AIChatPage = () => {
                     }}
                     placeholder="LAWDING에게 물어보기"
                     rows={1}
-                    className="w-full pl-4 pr-14 py-4 bg-[#F5F3EB] border border-minimal-gray rounded-lg focus:outline-none focus:ring-1 focus:ring-minimal-charcoal focus:border-minimal-charcoal focus:bg-[#F5F3EB] resize-none max-h-32 text-minimal-charcoal placeholder-minimal-medium-gray shadow-minimal font-light transition-all duration-200"
+                    className="w-full pl-4 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:bg-white resize-none max-h-32 text-gray-900 placeholder-gray-400 shadow-sm"
                     style={{ minHeight: '56px' }}
                   />
                   <button
-                    // type을 button으로 변경하고 onClick 이벤트를 직접 연결
-                    type="button" 
-                    onClick={handleSend}
+                    type="submit"
                     disabled={!input.trim() || isLoading}
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-minimal transition-all duration-200 ${
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg transition-colors ${
                       input.trim() && !isLoading
-                        ? 'bg-[#C8A45D] text-white hover:bg-[#b8934d]'
-                        : 'bg-minimal-gray text-minimal-medium-gray cursor-not-allowed'
+                        ? 'bg-black text-white hover:bg-gray-800'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +137,7 @@ const AIChatPage = () => {
                   </button>
                 </form>
                 <div className="text-center mt-2">
-                  <p className="text-xs text-minimal-medium-gray font-light">AI의 답변은 부정확할 수 있으므로 중요 사안은 반드시 전문가와 상담하세요.</p>
+                  <p className="text-xs text-gray-400">AI의 답변은 부정확할 수 있으므로 중요 사안은 반드시 전문가와 상담하세요.</p>
                 </div>
               </div>
             </>

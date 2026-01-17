@@ -2,7 +2,6 @@ import { useState, FormEvent, Dispatch, SetStateAction } from 'react' //Dispatch
 import { useNavigate, useLocation } from 'react-router-dom' //이동 시켜주는 놈 import
 import { useStore } from '../store/useStore' //Zustand에 박아놓은 함수들 import
 import Header from '../components/Header'//헤더 가져오기
-import logotextb from '../assets/logotextb.png'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -56,7 +55,7 @@ const LoginPage = () => {
   } 
  
   return (
-    <div className="min-h-screen bg-[#F5F3EB] font-serif">
+    <div className="min-h-screen bg-white">
       <Header />
 
       {/* 메인 로고  */}
@@ -72,16 +71,17 @@ const LoginPage = () => {
             // h-auto: 비율 유지
             className="w-72 md:w-78 h-auto object-contain" 
           />
+
         </button>
 
         {/* 유저 선택택 */}
-        <div className="flex w-full mb-8 border-b border-minimal-gray">
+        <div className="flex w-full mb-6 border-b">
           <button
             onClick={() => setActiveTab('lawding')}
-            className={`flex-1 py-4 text-center transition-colors ${
+            className={`flex-1 py-3 text-center ${
               activeTab === 'lawding'
-                ? 'border-b-2 border-minimal-charcoal font-medium text-minimal-charcoal'
-                : 'text-minimal-medium-gray font-light'
+                ? 'border-b-2 border-black font-semibold'
+                : 'text-gray-500'
             }`}
           >
             Law딩중 계정 로그인
@@ -89,10 +89,10 @@ const LoginPage = () => {
 
           <button
             onClick={() => setActiveTab('lawyers')}
-            className={`flex-1 py-4 text-center transition-colors ${
+            className={`flex-1 py-3 text-center ${
               activeTab === 'lawyers'
-                ? 'border-b-2 border-minimal-charcoal font-medium text-minimal-charcoal'
-                : 'text-minimal-medium-gray font-light'
+                ? 'border-b-2 border-black font-semibold'
+                : 'text-gray-500'
             }`}
           >
             로이어스원 계정 로그인
@@ -100,34 +100,36 @@ const LoginPage = () => {
         </div>
 
         {/* 로그인 폼 */}
-        <form onSubmit={handleLogin} className="w-full space-y-5">
+        <form onSubmit={handleLogin} className="w-full space-y-4">
           <div>
-            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               아이디 또는 전화번호
             </label>
             <input
               type="email"
               value={id}
+              // handleInputChange로 인해 입력할 때 에러 메시지도 같이 지워짐
               onChange={(e) => handleInputChange(setId, e.target.value)}
               placeholder={
                 activeTab === 'lawding'
                   ? '예) Lawding@gmail.com'
                   : '로이어스원 계정 이메일을 입력해 주세요.'
               }
-              className="input-minimal"
+              className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               비밀번호
             </label>
             <input
               type="password"
               value={password}
+              // handleInputChange로 인해 입력할 때 에러 메시지도 같이 지워짐
               onChange={(e) => handleInputChange(setPassword, e.target.value)}
               placeholder="비밀번호를 입력해주세요."
-              className="input-minimal"
+              className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -137,40 +139,51 @@ const LoginPage = () => {
               id="rememberId"
               checked={rememberId}
               onChange={(e) => setRememberId(e.target.checked)}
-              className="mr-2 w-4 h-4 text-minimal-charcoal border-minimal-gray rounded focus:ring-minimal-charcoal"
+              className="mr-2"
             />
-            <label htmlFor="rememberId" className="text-sm text-minimal-dark-gray font-light">
+            <label htmlFor="rememberId" className="text-sm text-black">
               아이디 기억하기
             </label>
           </div>
 
           {/* 에러 메시지 표시 영역 */}
+          {/* 아이디 기억하기 밑, 로그인 버튼 위에 위치 */}
           {errorMessage && (
-            <div className="text-red-600 text-sm font-light mt-2">
+            <div className="text-red-500 text-sm font-bold mt-2">
               {errorMessage}
             </div>
           )}
           
           <button
             type="submit"
-            className={`w-full py-3.5 rounded-minimal transition-all duration-200 ${
-              isFormFilled
-                ? 'btn-minimal-primary'
-                : 'bg-minimal-gray text-minimal-medium-gray cursor-not-allowed opacity-40'
-            }`}
-            disabled={!isFormFilled}
+            className={`w-full py-3 bg-black text-white rounded  
+              ${isFormFilled
+                ? 'opacity-100 hover:bg-gray-700 transition-colors'
+                : 'opacity-35'
+
+              }`}
           >
             로그인
           </button>
         </form>
 
+        {/* Social Login */}
+        <div className="w-full mt-6 space-y-3">
+          <button onClick={() => window.location.href = 'https://accounts.google.com/signin'} className="w-full py-3 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+            구글로 계속하기
+          </button>
+          <button onClick={() => window.location.href = 'https://nid.naver.com/nidlogin.login?mode=form&url=https://www.naver.com/'} className="w-full py-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+            네이버로 계속하기
+          </button>
+        </div>
+
         {/* Footer Links */}
-        <div className="flex gap-6 mt-10 text-sm">
-          <button className="text-minimal-medium-gray hover:text-minimal-charcoal font-light transition-colors">비밀번호 찾기</button>
-          <button className="text-minimal-medium-gray hover:text-minimal-charcoal font-light transition-colors">아이디 찾기</button>
+        <div className="flex gap-4 mt-8 text-sm">
+          <button className="text-gray-600 hover:text-black">비밀번호 찾기</button>
+          <button className="text-gray-600 hover:text-black">아이디 찾기</button>
           <button
             onClick={() => navigate('/signup')}
-            className="text-minimal-medium-gray hover:text-minimal-charcoal font-light transition-colors"
+            className="text-gray-600 hover:text-black"
           >
             회원가입
           </button>
