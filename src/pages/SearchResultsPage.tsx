@@ -126,7 +126,7 @@ const SearchResultsPage = () => {
         // data가 배열일 수도 있고 단일 객체일 수도 있음
         const dataArray = Array.isArray(response.data) ? response.data : (response.data ? [response.data] : [])
         const results: SearchResult[] = dataArray.map((item: PREVIEWData) => ({
-          id: parseInt(item.precedents_id) || 0,
+          id: item.precedents_id || 0,
           title: item.case_title || '',
           content: item.case_preview || '',
           court: '', // API 응답에 법원 정보가 없으면 빈 문자열
