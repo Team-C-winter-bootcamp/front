@@ -125,16 +125,7 @@ export interface PREVIEWData{
 }
 
 export interface PREVIEW{
-  code: string;
-  status: number
-  message: string;
-<<<<<<< HEAD
-  meta:PREVIEWMeta
-  data:PREVIEWData
-=======
-  meta:PREVIEWMata
-  data:PREVIEWData | PREVIEWData[]
->>>>>>> main
+
 }
 //TOTALDATA
 export interface TOTALDATAData{
