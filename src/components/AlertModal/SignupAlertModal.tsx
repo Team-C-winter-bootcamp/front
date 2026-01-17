@@ -13,11 +13,10 @@ const SignupAlertModal = ({ isOpen, onClose, onConfirm }: SignupAlertModalProps)
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={onClose} 
     >
-      
-      {/* 알림창 박스 (박스 클릭 시 닫히지 않게 이벤트 전파 방지) */}
-      <div 
-        className="bg-white rounded-lg shadow-lg w-80 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+
+      <div  
+        className="card-minimal w-80 overflow-hidden"
+
       >
         
         {/* 상단 제목 */}

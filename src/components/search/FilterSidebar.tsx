@@ -38,8 +38,8 @@ export const FilterSidebar = ({
                 onClick={() => onCaseTypeChange('')}
                 className="text-xs text-blue-500 hover:text-blue-700 font-medium underline underline-offset-2"
               >
-                초기화
-              </button>
+                초기화 
+              </button> 
             )}
           </h3>
           <div className="space-y-2.5">

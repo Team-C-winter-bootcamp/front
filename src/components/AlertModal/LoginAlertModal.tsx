@@ -7,16 +7,13 @@ interface LoginAlertModalProps {
   const LoginAlertModal = ({ isOpen, onConfirm }: LoginAlertModalProps) => {
     if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
   
-    return (
-      // 회색색 배경 (화면 전체 덮기)
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        
-        {/* 알림창 박스 */}
-        <div className="bg-white rounded-lg shadow-lg w-80 overflow-hidden">
-          
-          {/* 상단 제목 */}
-          <div className="p-4 border-b text-center">
-            <h2 className="text-lg font-bold text-black">알림</h2>
+
+    return ( 
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif">
+        <div className="card-minimal w-80 overflow-hidden">
+          <div className="p-4 border-b border-minimal-gray text-center">
+            <h2 className="text-lg font-light text-minimal-charcoal">알림</h2>
+
           </div>
   
           {/* 내용 */}

@@ -133,7 +133,16 @@ export const LeftSidebar = ({
                 />
               </div>
             </button>
-          </div>
+
+          </div> 
+          <button
+            onClick={onNewChat}
+            className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md w-full py-3 px-4"
+          >
+            <span className="font-medium text-sm">+</span>
+            <span className="font-medium text-sm">새 채팅</span>
+          </button>
+
         </div>
 
         {/* 중단: 채팅 세션 리스트 */}

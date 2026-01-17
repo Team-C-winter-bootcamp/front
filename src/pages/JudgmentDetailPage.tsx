@@ -162,7 +162,7 @@ const JudgmentDetailPage = () => {
         scale: 2, // 해상도 2배
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff' 
       })
 
       const imgData = canvas.toDataURL('image/png')

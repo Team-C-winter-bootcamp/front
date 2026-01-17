@@ -187,7 +187,7 @@ export const MemoPanel = ({
         <button onClick={onAddNewMemo} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="새 메모 추가">
           <span className="text-lg font-bold">+</span>
         </button>
-      </div>
+      </div> 
 
       {/* --- [수정됨] 메모 리스트 영역: 높이를 State로 제어 --- */}
       <div 

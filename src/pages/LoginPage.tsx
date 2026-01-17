@@ -59,9 +59,19 @@ const LoginPage = () => {
       <Header />
 
       {/* 메인 로고  */}
-      <div className="flex flex-col items-center justify-center px-4 py-12 max-w-lg mx-auto">
-        <button onClick={() => navigate('/')} className="text-4xl font-bold text-black mb-8">
-          Law딩중
+      <div className="flex flex-col items-center justify-center px-4 py-16 max-w-lg mx-auto">
+        <button 
+          onClick={() => navigate('/')} 
+          className="mb-7 hover:opacity-80 transition-opacity" // mb-12 -> 10으로 살짝 줄임, hover 효과 추가
+        >
+          <img 
+            src={logotextb}  
+            alt="Lawding Logo" 
+            // w-12(48px) -> w-40(160px) ~ w-48(192px) 정도로 키움
+            // h-auto: 비율 유지
+            className="w-72 md:w-78 h-auto object-contain" 
+          />
+
         </button>
 
         {/* 유저 선택택 */}

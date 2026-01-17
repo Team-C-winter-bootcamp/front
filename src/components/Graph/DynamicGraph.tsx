@@ -15,7 +15,7 @@ interface GraphNode {
 interface GraphLink {
   source: string;
   target: string;
-}
+} 
 
 const CENTER_NODE: GraphNode = {
   id: 'center',

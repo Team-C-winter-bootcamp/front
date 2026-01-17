@@ -214,9 +214,11 @@ const SearchResultsPage = () => {
             onSearch={handleSearch}
             onClear={() => {
               setSearchInput('')
-              setSearchParams({ tab: activeTab }) // 검색어 지울 때 탭은 유지
-            }}
-          />
+
+              setSearchParams({ tab: activeTab })
+            }} 
+          /> 
+
         </div>
       </div>
 
