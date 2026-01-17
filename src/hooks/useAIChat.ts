@@ -193,7 +193,7 @@ export const useAIChat = () => {
     setTimeout(() => {
       const aiMessage: Message = {
         id: Date.now() + 1,
-        text: `질문에 대한 답변입니다. "${userMessage.text}"에 대해 법률적으로 검토한 결과...`,
+        text: `질문에 대한 답변입니다. "${userMessage.text}"과 관련된 법례는 다음과 같습니다.`,
         isUser: false,
         timestamp: new Date().toISOString(),
         resultId: Math.floor(Math.random() * 100)

@@ -81,18 +81,18 @@ export const LeftSidebar = ({
   // 닫혔을 때: 얇은 사이드바 + 햄버거 버튼 표시 (MemoPanel과 동일한 방식 적용)
   if (!isLeftPanelOpen) {
     return (
-      <div className="bg-gray-50 border-r border-gray-200 flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 z-20">
+      <div className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 z-20 font-sans">
         <div className="p-2 flex flex-col items-center gap-4 mt-4">
           <button 
             onClick={onTogglePanel}
-            className="p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors"
+            className="p-2 hover:bg-[#1E293B] rounded-lg text-slate-400 hover:text-white transition-colors"
             title="사이드바 열기"
           >
             <div className="inline-block p-1 rounded-full">
               <img 
                 src={burger} 
                 alt="open" 
-                className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-70" 
               />
             </div>
           </button>
@@ -106,34 +106,34 @@ export const LeftSidebar = ({
     <>
       <div
         ref={leftSidebarRef}
-        className="border-r border-gray-200 bg-gray-50 flex flex-col flex-shrink-0 z-10 transition-all duration-300"
+        className="border-r border-[#1E293B] bg-[#111e31] flex flex-col flex-shrink-0 z-10 transition-all duration-300 font-sans text-slate-300"
         style={{ width: `${sourceWidth}px` }}
       >
         {/* 상단: 새 채팅 버튼 (햄버거 메뉴 포함) */}
-        <div className="p-4 pb-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onNewChat}
-              className="flex-1 px-4 py-2.5 font-bold bg-white border border-gray-300 text-black mt-1 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm"
-            >
-              <span>+</span>
-              <span>새 채팅</span>
-            </button>
-            {/* 패널 접기 버튼 */}
+        <div className="p-4 flex flex-col gap-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-lg text-white tracking-wider">LAWDING</span>
             <button 
               onClick={onTogglePanel}
-              className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-white hover:bg-[#1E293B] rounded-lg transition-colors"
               title="패널 접기"
             >
               <div className="inline-block p-1 rounded-full">
                 <img 
                   src={burger} 
                   alt="close" 
-                  className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                  className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-70" 
                 />
               </div>
             </button>
           </div>
+          <button
+            onClick={onNewChat}
+            className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md w-full py-3 px-4"
+          >
+            <span className="font-medium text-sm">+</span>
+            <span className="font-medium text-sm">새 채팅</span>
+          </button>
         </div>
 
         {/* 중단: 채팅 세션 리스트 */}
@@ -155,18 +155,17 @@ export const LeftSidebar = ({
         </div>
         
         {/* 드래그 가능한 구분선 */}
-        <div
-          ref={fileDividerResizeRef}
-          onMouseDown={(e) => {
-            e.preventDefault()
-            onFileDividerResizeStart()
-          }}
-          className="h-6 bg-gray-0 cursor-ns-resize flex-shrink-0 relative group mx-4 my-2 rounded-md flex items-center justify-center transition-colors hover:bg-gray-100"
-          title="드래그하여 높이 조절"
-        >
-          <div className="h-1 w-8 bg-gray-300 hover:bg-gray-400 rounded-full"></div>
-        </div>
-
+<div
+  ref={fileDividerResizeRef}
+  onMouseDown={(e) => {
+    e.preventDefault()
+    onFileDividerResizeStart()
+  }}
+  className="h-6 w-full cursor-ns-resize flex-shrink-0 relative group my-2 rounded-lg flex items-center justify-center transition-colors hover:bg-gray-100"
+  title="드래그하여 높이 조절"
+>
+  <div className="h-1 w-12 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+</div>
         {/* 하단: 소스 (파일 목록) */}
         <div className="flex-shrink-0 overflow-hidden" style={{ height: `${fileAreaHeight}px` }}>
           <FileList
@@ -196,7 +195,7 @@ export const LeftSidebar = ({
           e.preventDefault()
           onResizeStart()
         }}
-        className="w-1 bg-gray-200 cursor-ew-resize hover:bg-blue-400 transition-colors flex-shrink-0"
+        className="w-1 bg-[#1E293B] cursor-ew-resize hover:bg-blue-500/50 transition-colors flex-shrink-0"
       />
     </>
   )

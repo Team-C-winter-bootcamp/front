@@ -2,6 +2,7 @@ import { useState, useEffect , FormEvent} from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import SignupAlertModal from '../components/AlertModal/SignupAlertModal'
+import logotextb from '../assets/logotextb.png'
 const SignupPage = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -106,34 +107,43 @@ const SignupPage = () => {
   } 
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F5F3EB] font-serif">
       <Header />
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center px-4 py-12 max-w-md mx-auto">
-        <button onClick={() => navigate('/')} className="text-4xl font-bold text-black mb-8">
-          Law딩중
+      <div className="flex flex-col items-center justify-center px-4 py-16 max-w-lg mx-auto">
+        <button 
+          onClick={() => navigate('/')} 
+          className="mb-7 hover:opacity-80 transition-opacity" // mb-12 -> 10으로 살짝 줄임, hover 효과 추가
+        >
+          <img 
+            src={logotextb} 
+            alt="Lawding Logo" 
+            // w-12(48px) -> w-40(160px) ~ w-48(192px) 정도로 키움
+            // h-auto: 비율 유지
+            className="w-72 md:w-78 h-auto object-contain" 
+          />
         </button>
 
-        <form onSubmit={handleSubmit} className="w-full space-y-4">
+        <form onSubmit={handleSubmit} className="w-full space-y-5">
           
           {/* 1. 아이디 입력 */}
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
               아이디 (이메일)
             </label>
             <input
-              type="text" // 이메일 형식이므로 email 추천하지만 text도 무관
+              type="text"
               value={formData.id}
               onChange={(e) => setFormData({ ...formData, id: e.target.value })}
               placeholder="예) Lawding@gmail.com"
-              className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                emailMessage?.isError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              className={`input-minimal ${
+                emailMessage?.isError ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''
               }`}
             />
             {/* 아이디 유효성 메시지 */}
             {emailMessage && (
-              <p className={`text-xs mt-1 ${emailMessage.isError ? 'text-red-500' : 'text-green-500'}`}>
+              <p className={`text-xs mt-1 font-light ${emailMessage.isError ? 'text-red-600' : 'text-green-600'}`}>
                 {emailMessage.text}
               </p>
             )}
@@ -141,7 +151,7 @@ const SignupPage = () => {
 
           {/* 2. 비밀번호 입력 */}
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
               비밀번호
             </label>
             <input
@@ -149,35 +159,38 @@ const SignupPage = () => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="영문, 숫자, 특수문자 포함 8자 이상"
-              className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                passwordMessage ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              className={`input-minimal ${
+                passwordMessage ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''
               }`}
             />
             {/* 비밀번호 복잡도 에러 메시지 */}
             {passwordMessage && (
-              <p className="text-red-500 text-xs mt-1">{passwordMessage}</p>
+              <p className="text-red-600 text-xs mt-1 font-light">{passwordMessage}</p>
             )}
           </div>
 
           {/* 3. 비밀번호 확인 */}
           <div>
+            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
+              비밀번호 확인
+            </label>
             <input
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               placeholder="비밀번호를 다시 한 번 입력해주세요."
-              className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                matchMessage ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              className={`input-minimal ${
+                matchMessage ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''
               }`}
             />
             {/* 불일치 에러 메시지 */}
             {matchMessage && (
-              <p className="text-red-500 text-xs mt-1">{matchMessage}</p>
+              <p className="text-red-600 text-xs mt-1 font-light">{matchMessage}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black mb-2">
+            <label className="block text-sm font-light text-minimal-dark-gray mb-2">
               전화번호
             </label>
             <input
@@ -185,11 +198,11 @@ const SignupPage = () => {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="ex) 010-1234-5678"
-              className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-minimal"
             />
           </div>
 
-          {/* Agreements (기존 코드 유지) */}
+          {/* Agreements */}
           <div className="mt-6 space-y-3">
             <div className="flex items-center">
               <input
@@ -197,9 +210,9 @@ const SignupPage = () => {
                 id="agreeToAll"
                 checked={agreeToAll}
                 onChange={(e) => handleAgreeToAll(e.target.checked)}
-                className="mr-2"
+                className="mr-2 w-4 h-4 text-minimal-charcoal border-minimal-gray rounded focus:ring-minimal-charcoal"
               />
-              <label htmlFor="agreeToAll" className="text-sm font-semibold text-black">
+              <label htmlFor="agreeToAll" className="text-sm font-medium text-minimal-charcoal">
                 모두 동의합니다
               </label>
             </div>
@@ -213,9 +226,9 @@ const SignupPage = () => {
                   setAgreeTerms(e.target.checked)
                   setAgreeToAll(agreePrivacy && e.target.checked)
                 }}
-                className="mr-2"
+                className="mr-2 w-4 h-4 text-minimal-charcoal border-minimal-gray rounded focus:ring-minimal-charcoal"
               />
-              <label htmlFor="agreeTerms" className="text-sm text-black">
+              <label htmlFor="agreeTerms" className="text-sm text-minimal-dark-gray font-light">
                 (필수) 서비스 이용약관 동의
               </label>
             </div>
@@ -229,9 +242,9 @@ const SignupPage = () => {
                   setAgreePrivacy(e.target.checked)
                   setAgreeToAll(agreeTerms && e.target.checked)
                 }}
-                className="mr-2"
+                className="mr-2 w-4 h-4 text-minimal-charcoal border-minimal-gray rounded focus:ring-minimal-charcoal"
               />
-              <label htmlFor="agreePrivacy" className="text-sm text-black">
+              <label htmlFor="agreePrivacy" className="text-sm text-minimal-dark-gray font-light">
                 (필수) 개인정보 수집 및 이용동의
               </label>
             </div>
@@ -239,13 +252,12 @@ const SignupPage = () => {
 
           <button
             type="submit"
-            // 에러가 있거나 약관 동의 안 하면 버튼 비활성화 (선택사항, 원하면 disabled 제거)
             disabled={!!(emailMessage?.isError || passwordMessage || matchMessage || !agreeTerms || !agreePrivacy)}
-            className={`w-full py-4 rounded transition-colors mt-6 text-white font-bold
-              ${(emailMessage?.isError || passwordMessage || matchMessage || !agreeTerms || !agreePrivacy) 
-                ? 'bg-gray-400 cursor-not-allowed' // 조건 불만족 시 회색
-                : 'bg-gray-800 hover:bg-gray-700'  // 조건 만족 시 검은색
-              }`}
+            className={`w-full py-3.5 rounded-minimal transition-all duration-200 font-light ${
+              (emailMessage?.isError || passwordMessage || matchMessage || !agreeTerms || !agreePrivacy) 
+                ? 'bg-minimal-gray text-minimal-medium-gray cursor-not-allowed opacity-40'
+                : 'btn-minimal-primary'
+            }`}
           >
             회원가입 완료
           </button>
