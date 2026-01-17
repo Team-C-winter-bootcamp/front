@@ -2,6 +2,7 @@ import { useState, FormEvent, Dispatch, SetStateAction } from 'react' //Dispatch
 import { useNavigate, useLocation } from 'react-router-dom' //이동 시켜주는 놈 import
 import { useStore } from '../store/useStore' //Zustand에 박아놓은 함수들 import
 import Header from '../components/Header'//헤더 가져오기
+import logotextb from '../assets/logotextb.png'
 
 const LoginPage = () => {
   const navigate = useNavigate()

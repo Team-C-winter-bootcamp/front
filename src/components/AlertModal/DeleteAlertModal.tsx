@@ -8,8 +8,6 @@ const DeleteAlertModal = ({ isOpen, onClose, onConfirm }: DeleteAlertModalProps)
   if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
 
 
-  return ( 
-
   return (
 
     <div 
