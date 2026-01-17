@@ -138,6 +138,7 @@ export const ChatSidebar = ({
                       ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-[#334155]' 
                       : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
                   }`} 
+
                 >
                   <MessageSquare size={16} className={currentChatId === chat.id ? 'text-blue-400' : 'opacity-70'} />
                   

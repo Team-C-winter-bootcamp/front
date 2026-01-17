@@ -67,6 +67,7 @@ const LoginPage = () => {
         >
           <img 
             src={logotextb}  
+
             alt="Lawding Logo" 
             // w-12(48px) -> w-40(160px) ~ w-48(192px) 정도로 키움
             // h-auto: 비율 유지

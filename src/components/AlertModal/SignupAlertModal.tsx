@@ -13,6 +13,7 @@ const SignupAlertModal = ({ isOpen, onClose, onConfirm }: SignupAlertModalProps)
       onClick={onClose} 
     >
       <div  
+
         className="card-minimal w-80 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

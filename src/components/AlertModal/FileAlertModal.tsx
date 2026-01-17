@@ -37,6 +37,7 @@ const FileAlertModal = ({ isOpen, onClose, onConfirm }: FileAlertModalProps) => 
           >
             확인
           </button>
+
         </div>
       </div>
     </div>

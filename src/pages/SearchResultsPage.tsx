@@ -161,6 +161,7 @@ const SearchResultsPage = () => {
               setSearchParams({ tab: activeTab })
             }} 
           /> 
+
         </div>
       </div>
 

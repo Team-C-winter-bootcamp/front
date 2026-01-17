@@ -12,6 +12,7 @@ const LoginAlertModal = ({ isOpen, onConfirm }: LoginAlertModalProps) => {
       <div className="card-minimal w-80 overflow-hidden">
         <div className="p-4 border-b border-minimal-gray text-center">
           <h2 className="text-lg font-light text-minimal-charcoal">알림</h2>
+
         </div>
         <div className="p-8 text-center">
           <p className="text-minimal-dark-gray font-light whitespace-pre-line">

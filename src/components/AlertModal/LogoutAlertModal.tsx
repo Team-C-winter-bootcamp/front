@@ -37,6 +37,7 @@ const LogoutAlertModal = ({ isOpen, onClose, onConfirm }: LogoutAlertModalProps)
           >
             확인
           </button>
+
         </div>
       </div>
     </div>

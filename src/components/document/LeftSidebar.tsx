@@ -127,6 +127,7 @@ export const LeftSidebar = ({
               </div>
             </button>
           </div> 
+
           <button
             onClick={onNewChat}
             className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md w-full py-3 px-4"

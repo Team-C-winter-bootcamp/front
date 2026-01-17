@@ -68,6 +68,7 @@ const HomePage = () => {
             backgroundImage: `url(${background2})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center', 
+
             backgroundRepeat: 'no-repeat'
           }}
         >

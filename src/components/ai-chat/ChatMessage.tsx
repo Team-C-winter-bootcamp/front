@@ -18,7 +18,6 @@ export const ChatMessage = ({ message, onResultClick }: ChatMessageProps) => {
         }`}>
           {message.isUser ? '나' : 'AI'}
         </div>
- 
         {/* 메시지 버블 */}
         <div className={`px-5 py-3.5 shadow-sm text-base leading-relaxed font-light ${
           message.isUser 
