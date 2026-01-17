@@ -8,10 +8,11 @@ interface LogoutAlertModalProps {
     if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
   
     return (
-      // 회색 배경 (화면 전체 덮기)
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        onClick={onClose} // 배경 클릭 시 닫기 (선택 사항)
+
+      <div  
+        className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif"
+        onClick={onClose}
+
       >
         
         {/* 알림창 박스 */}

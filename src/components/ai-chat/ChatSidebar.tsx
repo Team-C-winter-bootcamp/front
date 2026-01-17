@@ -106,48 +106,68 @@ export const ChatSidebar = ({
         </button>
       </div>
 
-      {!isCollapsed && (
-        <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-hide">
-          <div className="text-xs font-bold text-black mb-3 px-2">최근 기록</div>
-          <div className="space-y-1">
-            {chatHistories?.map((chat) => (
-              <div
-                key={chat.id}
-                onClick={() => onChatClick(chat.id)}
-                className={`group relative p-3 rounded-lg cursor-pointer transition-colors text-sm flex items-center ${
-                  currentChatId === chat.id ? 'bg-gray-200 text-black font-medium' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {editingChatId === chat.id ? (
-                  <input
-                    type="text"
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onBlur={onRenameSave}
-                    onKeyDown={(e) => e.key === 'Enter' && onRenameSave()}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full bg-white border border-blue-500 rounded px-1 py-0.5 outline-none"
-                    autoFocus
-                  />
-                ) : (
-                  <>
-                    <span className="truncate flex-1">{chat.name}</span>
-                    <div className="hidden group-hover:flex gap-1 absolute right-2 bg-inherit pl-2">
-                      <button onClick={(e) => onChatRename(chat.id, e)} className="hover:text-blue-600">
-                        <div className="inline-block p-1 rounded-full">
-                          <img src={pencil} alt="pencil" className="w-5 h-5 object-contain opacity-60 pt-1" />
-                        </div>
-                      </button>
-                      <button onClick={(e) => onChatDelete(chat.id, e)} className="hover:text-red-500">
-                        <div className="inline-block p-1 rounded-full">
-                          <img src={bin} alt="bin" className="w-5 h-5 object-contain opacity-60 pt-1" />
-                        </div>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+
+      {/* 중단 영역: 채팅 히스토리 */}
+      <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
+        {!isCollapsed ? (
+          <>
+            {/* 메뉴 헤더 */}
+            <div className="flex items-center gap-3 px-3 py-2 text-slate-400 mb-2">
+              <History size={18} />
+              <span className="text-sm font-semibold">히스토리</span>
+            </div>
+
+            {/* 채팅 목록 */}
+            <div className="space-y-1 mb-6">
+              {chatHistories?.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => onChatClick(chat.id)}
+                  className={`group relative p-3 rounded-lg cursor-pointer transition-all text-sm flex items-center gap-3 ${
+                    currentChatId === chat.id 
+                      ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-[#334155]' 
+                      : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
+                  }`} 
+                >
+                  <MessageSquare size={16} className={currentChatId === chat.id ? 'text-blue-400' : 'opacity-70'} />
+                  
+                  {editingChatId === chat.id ? (
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={onRenameSave}
+                      onKeyDown={(e) => e.key === 'Enter' && onRenameSave()}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full bg-[#0F172A] border border-blue-500 rounded px-2 py-1 text-white text-sm outline-none"
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <span className="truncate flex-1">{chat.name}</span>
+                      <div className="hidden group-hover:flex gap-2 absolute right-2 bg-[#1E293B] pl-2 rounded shadow-sm">
+                        <button onClick={(e) => onChatRename(chat.id, e)} className="text-slate-400 hover:text-white">
+                          <Edit2 size={14} />
+                        </button>
+                        <button onClick={(e) => onChatDelete(chat.id, e)} className="text-slate-400 hover:text-red-400">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* 설정, 법률 도구 메뉴 섹션 삭제됨 */}
+          </>
+        ) : (
+          /* 접혔을 때 히스토리 아이콘만 표시 */
+          <div className="flex flex-col items-center gap-4 mt-2">
+             <button className="p-2 text-slate-400 hover:text-white hover:bg-[#1E293B] rounded-lg" title="히스토리">
+               <History size={20} />
+             </button>
+             {/* 설정 아이콘 삭제됨 */}
+
           </div>
         </div>
       )}

@@ -127,9 +127,11 @@ export interface PREVIEWData{
 export interface PREVIEW{
   code: string;
   status: number
+
   message: string;
   meta: PREVIEWMeta
   data: PREVIEWData | PREVIEWData[]
+
 }
 //TOTALDATA
 export interface TOTALDATAData{

@@ -7,8 +7,10 @@ interface FileAlertModalProps {
   const FileAlertModal = ({ isOpen, onClose, onConfirm }: FileAlertModalProps) => {
     if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
   
+    return ( 
+
     return (
-      // 회색 배경 (화면 전체 덮기)
+
       <div 
         className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         onClick={onClose} // 배경 클릭 시 닫기 (선택 사항)

@@ -13,7 +13,7 @@ import { ChatArea } from '../components/document/ChatArea'
 import { MemoPanel } from '../components/document/MemoPanel' 
 
 const DocumentPage = () => {
-  // 패널 접기/펼치기 State
+  // 패널 접기/펼치기 State 
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true)
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true)
   

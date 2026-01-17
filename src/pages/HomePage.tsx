@@ -57,24 +57,60 @@ const HomePage = () => {
       {/* 메인 검색 부분 */}
       <div className="flex flex-col items-center justify-center px-4 pt-4 pb-4">
         
-        {/* 메인 박스 */}
-        <div className="bg-black shadow-xl rounded-lg p-12 w-full h-[340px] max-w-7xl flex flex-col items-center justify-center gap-6">
-          
-          {/* 로고 영역 */}
-          <div className="flex flex-col items-center">
-            <button 
-              onClick={() => navigate('/')} 
-              className="mb-2 transition-opacity hover:opacity-80" 
-            >
-              <img 
-                src={logotext} 
-                alt="logotext" 
-                className="w-[400px] h-auto object-contain" 
-              />
-            </button>
-            <p className="text-base text-white text-center font-bold">
-              국내 최초 Ai 판례 검색 로딩중
-            </p>
+
+        {/* 상단 로고 & 검색 섹션 */}
+        <div 
+          className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 shadow-sm"
+          style={{
+            backgroundImage: `url(${background2})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center', 
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* 콘텐츠 래퍼 */}
+          <div className="w-full max-w-5xl flex flex-col items-center gap-10">
+            
+            {/* 로고 영역 */}
+            <div className="flex flex-col items-center">
+              <button 
+                onClick={() => navigate('/')} 
+                className="mb-2 transition-opacity hover:opacity-80 focus:outline-none" 
+              >
+                <img 
+                  src={logotext} 
+                  alt="LAWDING" 
+                  className="w-[320px] h-auto object-contain" 
+                />
+              </button>
+              
+              {/* 슬로건: 리디바탕이 적용되어 진중한 느낌 */}
+              <p className="text-sm text-[#F5F3EB] font-medium tracking-wide drop-shadow-md">
+                국내 최초 AI 판례 검색 로딩중
+              </p>
+            </div>
+
+            {/* 검색창 영역 */}
+            <form onSubmit={handleSearch} className="w-full flex justify-center">
+              <div className="relative w-full max-w-2xl">
+                {/* [변경 포인트] Input은 가독성을 위해 font-sans(고딕) 유지, 원하시면 font-serif로 변경 가능 */}
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="키워드를 입력하세요"
+                  className="w-full pl-6 pr-16 py-4 rounded-lg border border-gray-200 text-lg outline-none focus:border-[#CFB982] transition-colors placeholder:text-gray-400 shadow-lg font-sans"
+                />
+                {/* 검색 버튼 */}
+                <button 
+                  type="submit"
+                  className="absolute right-2 top-2 bottom-2 bg-[#C8A45D] hover:bg-[#b8934d] text-[#F5F3EB] rounded-md w-12 flex items-center justify-center transition-colors"
+                >
+                  <Search size={24} />
+                </button>
+              </div>
+            </form>
+
           </div>
 
           {/* 검색창 영역 */}

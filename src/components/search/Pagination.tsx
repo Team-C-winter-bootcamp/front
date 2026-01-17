@@ -15,7 +15,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         className="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50"
       >
         &lt;
-      </button>
+      </button> 
       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
         <button
           key={page}

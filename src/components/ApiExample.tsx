@@ -51,7 +51,7 @@ export const ApiExample = () => {
     queryKey: ['sessions', selectedSessionId, 'messages'],
     queryFn: () => sessionService.getMessage(selectedSessionId!),
     enabled: selectedSessionId !== null, // selectedSessionId가 있을 때만 실행
-  })
+  }) 
 
   /* 4. 판례 검색 (파라미터가 있는 쿼리) */
   const [searchParams, setSearchParams] = useState({
