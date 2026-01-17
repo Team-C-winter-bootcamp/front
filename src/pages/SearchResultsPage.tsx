@@ -8,6 +8,8 @@ import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
 import { useSearchFilters } from '../hooks/useSearchFilters'
 import SearchPageAlertModal from '../components/AlertModal/SearchPageAlertModal'
+import { precedentService } from '../api'
+import type { PREVIEW, PREVIEWData } from '../api/types'
 
 export interface SearchResult {
   id: number
@@ -93,13 +95,66 @@ const SearchResultsPage = () => {
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
     (tabParam as 'expert' | 'all' | 'ai') || 'expert'
   )
 
-  const filters = useSearchFilters(MOCK_RESULTS, query, activeTab)
+  // API에서 검색 결과 로드
+  useEffect(() => {
+    const loadSearchResults = async () => {
+      if (!query.trim()) {
+        setSearchResults([])
+        setTotalCount(0)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const response: PREVIEW = await precedentService.preview({
+          q: query,
+          page: currentPage,
+          limit: 8
+        })
+
+        // PREVIEW 응답을 SearchResult 형태로 변환
+        // data가 배열일 수도 있고 단일 객체일 수도 있음
+        const dataArray = Array.isArray(response.data) ? response.data : (response.data ? [response.data] : [])
+        const results: SearchResult[] = dataArray.map((item: PREVIEWData) => ({
+          id: item.precedents_id || 0,
+          title: item.case_title || '',
+          content: item.case_preview || '',
+          court: '', // API 응답에 법원 정보가 없으면 빈 문자열
+          date: '', // API 응답에 날짜 정보가 없으면 빈 문자열
+          caseType: '', // API 응답에 사건 종류 정보가 없으면 빈 문자열
+          judgmentType: item.outcome_display || ''
+        }))
+
+        setSearchResults(results)
+        if (response.meta) {
+          setTotalCount(parseInt(response.meta.total_count as any) || 0)
+          const pageNum = parseInt(response.meta.page as any) || currentPage
+          setCurrentPage(pageNum)
+        }
+      } catch (error) {
+        console.error('검색 결과 로드 실패:', error)
+        // 에러 시 빈 결과 표시
+        setSearchResults([])
+        setTotalCount(0)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSearchResults()
+  }, [query, currentPage])
+
+  const filters = useSearchFilters(searchResults, query, activeTab)
 
   // 3. 브라우저 뒤로가기 등으로 URL이 변경될 때 탭 상태 동기화
   useEffect(() => {
@@ -123,8 +178,9 @@ const SearchResultsPage = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // 검색 시 현재 탭 정보도 유지
+    // 검색 시 현재 탭 정보도 유지하고 페이지를 1로 리셋
     setSearchParams({ q: searchInput, tab: activeTab })
+    setCurrentPage(1)
   }
 
   const handleAITabClick = () => {
@@ -146,11 +202,11 @@ const SearchResultsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB] font-serif">
+    <div className="min-h-screen bg-white">
       <Header />
       
       {/* SearchBar 영역 */}
-      <div className="w-full flex justify-center lg:justify-start lg:pl-[5%] pt-4 pb-6 px-4 bg-[#F5F3EB] border-b border-minimal-gray">
+      <div className="w-full flex justify-center lg:justify-start lg:pl-[5%] pt-2 pb-4 px-4 bg-white border-b border-gray-100">
         <div className="w-full max-w-[1400px]">
           <SearchBar
             searchInput={searchInput}
@@ -158,23 +214,22 @@ const SearchResultsPage = () => {
             onSearch={handleSearch}
             onClear={() => {
               setSearchInput('')
-              setSearchParams({ tab: activeTab })
+              setSearchParams({ tab: activeTab }) // 검색어 지울 때 탭은 유지
             }}
           />
         </div>
       </div>
 
       {/* Mobile Filter Toggle */}
-      <div className="md:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
+      <div className="md:hidden px-4 py-3 border-b bg-gray-50 overflow-x-auto whitespace-nowrap">
+        {/* ... (필터 버튼 코드 기존 유지) ... */}
         <div className="flex gap-2">
           {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
             <button 
               key={filter}
               onClick={() => setMobileFilterOpen(mobileFilterOpen === filter ? null : filter)}
-              className={`px-3 py-1.5 text-sm border rounded-full font-light transition-all ${
-                mobileFilterOpen === filter 
-                  ? 'bg-[#F5F3EB] text-black border-[#CFB982] font-medium shadow-md' 
-                  : 'bg-[#F5F3EB] border-[#CFB982] text-minimal-dark-gray hover:bg-[#E8E0D0]'
+              className={`px-3 py-1.5 text-sm border rounded-full ${
+                mobileFilterOpen === filter ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300'
               }`}
             >
               {filter} ▼
@@ -182,17 +237,15 @@ const SearchResultsPage = () => {
           ))}
         </div>
         {mobileFilterOpen && (
-          <div className="mt-3 p-4 card-minimal animate-fade-in-down">
+          <div className="mt-3 p-4 bg-white border rounded shadow-lg animate-fade-in-down">
             {mobileFilterOpen === '사건종류' && (
               <div className="flex flex-wrap gap-2">
                 {CASE_TYPES.map(type => (
                   <button
                     key={type}
                     onClick={() => filters.handleCaseTypeChange(type)}
-                    className={`px-3 py-1 text-sm rounded-full transition-all ${
-                      filters.selectedCaseTypes.includes(type) 
-                        ? 'bg-[#F5F3EB] text-black font-medium shadow-md scale-105' 
-                        : 'bg-[#F5F3EB] text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                    className={`px-3 py-1 text-sm rounded-full ${
+                      filters.selectedCaseTypes.includes(type) ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'
                     }`}
                   >
                     {type}
@@ -201,14 +254,14 @@ const SearchResultsPage = () => {
                 {filters.selectedCaseTypes.length > 0 && (
                   <button
                     onClick={() => filters.handleCaseTypeChange('')}
-                    // 초기화 버튼: 붉은 계열(Rose)로 구분
-                    className="px-3 py-1 text-sm rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium transition-colors"
+                    className="px-3 py-1 text-sm rounded-full bg-red-100 text-red-700"
                   >
                     초기화
                   </button>
                 )}
               </div>
             )}
+            {/* ... (나머지 모바일 필터 내용 기존 유지) ... */}
              {mobileFilterOpen === '법원' && (
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2">
@@ -216,10 +269,8 @@ const SearchResultsPage = () => {
                     <button
                       key={court}
                       onClick={() => filters.handleCourtChange(court)}
-                      className={`px-3 py-1 text-sm rounded-full transition-all ${
-                        filters.selectedCourts.includes(court) 
-                          ? 'bg-[#F5F3EB] text-black font-medium shadow-md scale-105' 
-                          : 'bg-[#F5F3EB] text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                      className={`px-3 py-1 text-sm rounded-full ${
+                        filters.selectedCourts.includes(court) ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'
                       }`}
                     >
                       {court}
@@ -228,8 +279,7 @@ const SearchResultsPage = () => {
                   {filters.selectedCourts.length > 0 && (
                     <button
                       onClick={() => filters.handleCourtChange('')}
-                      // 초기화 버튼: 붉은 계열(Rose)로 구분
-                      className="px-3 py-1 text-sm rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium transition-colors"
+                      className="px-3 py-1 text-sm rounded-full bg-red-100 text-red-700"
                     >
                       초기화
                     </button>
@@ -237,7 +287,6 @@ const SearchResultsPage = () => {
                 </div>
               </div>
             )}
-            {/* ... 재판유형, 기간 필터는 기존 유지 ... */}
             {mobileFilterOpen === '재판유형' && (
               <div className="flex flex-col gap-2">
                 {JUDGMENT_TYPES.map(type => (
@@ -247,9 +296,9 @@ const SearchResultsPage = () => {
                       name="mobileJudgmentType"
                       checked={filters.selectedJudgmentType === type}
                       onChange={() => filters.setSelectedJudgmentType(type)}
-                      className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray"
+                      className="text-blue-600 focus:ring-blue-500 w-4 h-4"
                     />
-                    <span className="text-sm text-minimal-dark-gray font-light">{type}</span>
+                    <span className="text-sm text-gray-700">{type}</span>
                   </label>
                 ))}
               </div>
@@ -263,9 +312,9 @@ const SearchResultsPage = () => {
                       name="mobilePeriod"
                       checked={filters.selectedPeriod === period}
                       onChange={() => filters.setSelectedPeriod(period)}
-                      className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray"
+                      className="text-blue-600 focus:ring-blue-500 w-4 h-4"
                     />
-                    <span className="text-sm text-minimal-dark-gray font-light">{period}</span>
+                    <span className="text-sm text-gray-700">{period}</span>
                   </label>
                 ))}
               </div>
@@ -279,51 +328,43 @@ const SearchResultsPage = () => {
         
         {/* Main Content */}
         <div className="flex-1 order-2 lg:order-1 lg:min-w-[1100px]">
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-3 mb-6 items-center">
+          {/* Tabs: onClick 핸들러를 handleTabChange로 교체 */}
+          <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => handleTabChange('expert')}
-              className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
-                activeTab === 'expert' 
-                  ? 'bg-[#F5F3EB] text-black font-bold shadow-md scale-105' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'expert' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               전문판례
             </button>
-            
-            <div className="h-4 w-px bg-minimal-gray/50 hidden sm:block"></div>
-            
             <button
               onClick={() => handleTabChange('all')}
-              className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
-                activeTab === 'all' 
-                  ? 'bg-[#F5F3EB] text-black font-bold shadow-md scale-105' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               전체
             </button>
-
             <button
               onClick={handleAITabClick}
-              className={`ml-auto sm:ml-2 px-5 py-2.5 rounded-full text-sm text-black transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'ai' 
-                  ? 'bg-black text-white font-medium shadow-md ring-2 ring-black ring-offset-1' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-gray-100 font-light'
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'ai' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
               }`}
             >
-              나의 유사 판례 찾기
+               나의 유사 판례 찾기
             </button>
           </div>
 
-          {/* Results Header - w-full 및 justify-between으로 양 끝 정렬 보장 */}
-          <div className="flex flex-row w-full justify-between items-center mb-4 pb-4 border-b border-minimal-gray gap-2">
+          {/* Results Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-light text-minimal-charcoal">검색 결과</span>
-              <span className="text-minimal-dark-gray font-light">{filters.filteredResults.length}건</span>
+              <span className="text-xl font-bold">검색 결과</span>
+              <span className="text-blue-600 font-bold">
+                {isLoading ? '검색 중...' : `${totalCount || filters.filteredResults.length}건`}
+              </span>
             </div>
-            <select className="input-minimal px-3 py-1.5 text-sm w-auto">
+            <select className="px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500">
               <option>정확도순</option>
               <option>최신순</option>
             </select>
@@ -331,7 +372,11 @@ const SearchResultsPage = () => {
 
           {/* Search Results List */}
           <div className="space-y-4">
-            {filters.paginatedResults.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-20 bg-gray-50 rounded-lg">
+                <p className="text-black text-xl font-bold">검색 중...</p>
+              </div>
+            ) : filters.paginatedResults.length > 0 ? (
               filters.paginatedResults.map((result) => (
                 <SearchResultItem
                   key={result.id}
@@ -340,18 +385,23 @@ const SearchResultsPage = () => {
                 />
               ))
             ) : (
-              <div className="text-center py-20 card-minimal">
-                <p className="text-minimal-charcoal text-2xl font-light">검색 결과가 없습니다.</p>
-                <p className="text-minimal-medium-gray text-sm mt-2 font-light">단어의 철자가 정확한지 확인해 보세요.</p>
+              <div className="text-center py-20 bg-gray-50 rounded-lg">
+                <p className="text-black text-3xl font-bold">검색 결과가 없습니다.</p>
+                <p className="text-gray-400 text-sm mt-2">단어의 철자가 정확한지 확인해 보세요.</p>
               </div>
             )}
           </div>
 
-          <Pagination
-            currentPage={filters.currentPage}
-            totalPages={filters.totalPages}
-            onPageChange={filters.setCurrentPage}
-          />
+          {!isLoading && filters.totalPages > 0 && (
+            <Pagination
+              currentPage={filters.currentPage}
+              totalPages={filters.totalPages}
+              onPageChange={(page) => {
+                filters.setCurrentPage(page)
+                setCurrentPage(page)
+              }}
+            />
+          )}
         </div>
 
         {/* Sidebar Filters */}

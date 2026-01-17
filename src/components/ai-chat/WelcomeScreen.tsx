@@ -1,6 +1,5 @@
 import logoImage from '../../assets/logo.png'
-import { Send, Mic } from 'lucide-react'
-
+import enter from '../../assets/enter.png'
 interface WelcomeScreenProps {
   input: string
   setInput: (value: string) => void
@@ -8,62 +7,58 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) => {
-  const prompts = [
-    { text: '판례 검색', style: 'bg-[#254775] text-white hover:bg-[#5a7ca1]' },
-    { text: '계약서 검토', style: 'bg-[#C8A45D] text-white hover:bg-[#b8934d]' },
-    { text: '법률 상담', style: 'bg-[#254775] text-white hover:bg-[#5a7ca1]' },
-    { text: '최신 법률 정보', style: 'bg-[#C8A45D] text-white hover:bg-[#b8934d]' }
-  ]
+  const prompts = ['계약서 검토', '임금 체불 상담', '부동산 분쟁', '교통사고 과실']
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto bg-[#F5F3EB] font-serif">
+    <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto">
       <div className="text-center max-w-2xl w-full">
         <div className="mb-8">
-          <div className="inline-block p-4 rounded-full mb-4">
+        <div className="inline-block p-4 rounded-full mb-4">
             <img 
               src={logoImage} 
-              alt="법례를 찾아드립니다" 
-              className="w-24 h-24 object-contain" 
+              alt="Law딩중 로고" 
+              className="w-20 h-20 object-contain" 
             />
           </div>
-          <h1 className="text-3xl font-bold text-minimal-charcoal mb-2 tracking-tight">
-            법례를 찾아드립니다
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            무엇을 도와드릴까요?
           </h1>
-          <p className="text-minimal-medium-gray font-medium">
-            판례 검색, 법률 자문, 문서 작성을 AI가 도와드립니다.
+          <p className="text-gray-500">
+            Law딩중 AI가 판례 검색과 법률 조언을 도와드립니다.
           </p>
         </div>
         
-        <form onSubmit={onSend} className="relative w-full shadow-lg rounded-xl">
+        <form onSubmit={onSend} className="relative w-full shadow-lg rounded-2xl">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="예) 최근 5년간 전세 사기 관련 대법원 판례를 찾아줘..."
-            className="w-full p-5 pr-24 text-lg border border-[#CFB982] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8A45D] focus:border-transparent transition-all placeholder-gray-400 bg-[#F5F3EB] text-minimal-charcoal font-sans"
+            placeholder="예) 전세 보증금을 돌려받지 못하고 있어요..."
+            className="w-full p-5 pr-16 text-lg border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all placeholder-gray-400"
           />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-            <button type="button" className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <Mic size={24} />
-            </button>
-            <button 
-              type="submit"
-              disabled={!input.trim()}
-              className="p-2 bg-[#C8A45D] text-white rounded-lg disabled:opacity-50 hover:bg-[#b8934d] transition-all duration-200 flex items-center justify-center"
-            >
-              <Send size={20} />
-            </button>
+          <button 
+            type="submit"
+            disabled={!input.trim()}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 bg-gray-400 rounded-lg disabled:opacity-30 hover:bg-gray-300 transition-colors"
+          >
+            <div className="inline-block p-1 rounded-full ">
+            <img 
+              src={enter} 
+              alt="enter" 
+              className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+            />
           </div>
+          </button>
         </form>
 
-        <div className="mt-8 flex flex-wrap gap-3 justify-center font-sans">
-          {prompts.map((prompt, index) => (
+        <div className="mt-8 flex flex-wrap gap-2 justify-center">
+          {prompts.map((prompt) => (
             <button
-              key={index}
-              onClick={() => setInput(prompt.text)}
-              className={`px-6 py-3 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md ${prompt.style}`}
+              key={prompt}
+              onClick={() => setInput(prompt)}
+              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors"
             >
-              {prompt.text}
+              {prompt}
             </button>
           ))}
         </div>

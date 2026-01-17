@@ -1,5 +1,6 @@
 import { ChatSession } from '../../hooks/useChatSessions'
-import { MessageSquare, Edit2, Trash2 } from 'lucide-react'
+import pencil from '../../assets/pencil.png'
+import bin from '../../assets/bin.png'
 
 interface ChatSessionListProps {
   sessions: ChatSession[]
@@ -34,20 +35,19 @@ export const ChatSessionList = ({
 
   return (
     <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
-      <div className="flex items-center gap-3 px-3 py-2 text-slate-400 mb-2">
-        <span className="text-sm font-semibold">히스토리</span>
-      </div>
-      <div className="space-y-1 mb-6">
+      <div className="text-xs font-bold text-black mb-2 px-1">채팅 목록</div>
+      <div className="space-y-1">
         {sessions.map((session) => (
           <div
             key={session.id}
             onClick={() => onSessionClick(session.id)}
-            className={`group relative p-3 rounded-lg cursor-pointer transition-all text-sm flex items-center gap-3 ${
+            className={`group relative p-2.5 rounded-lg cursor-pointer transition-colors text-sm flex items-center ${
               currentSessionId === session.id 
-                ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-[#334155]' 
-                : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
+                ?  'text-gray-600 hover:bg-gray-200' 
+                : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
+            
             {editingSessionId === session.id ? (
               <input
                 type="text"
@@ -56,19 +56,30 @@ export const ChatSessionList = ({
                 onBlur={onSessionRenameSave}
                 onKeyDown={(e) => e.key === 'Enter' && onSessionRenameSave()}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full bg-[#0F172A] border border-blue-500 rounded px-2 py-1 text-white text-sm outline-none"
+                className="w-full bg-white border border-blue-500 rounded px-1 py-0.5 outline-none text-xs"
                 autoFocus
               />
             ) : (
               <>
-                <MessageSquare size={16} className={currentSessionId === session.id ? 'text-blue-400' : 'opacity-70'} />
                 <span className="truncate flex-1">{session.name}</span>
-                <div className="hidden group-hover:flex gap-2 absolute right-2 bg-[#1E293B] pl-2 rounded shadow-sm">
-                  <button onClick={(e) => onSessionRename(session.id, e)} className="text-slate-400 hover:text-white">
-                    <Edit2 size={14} />
+                <div className="hidden group-hover:flex absolute right-2 bg-inherit pl-1">
+                  <button onClick={(e) => onSessionRename(session.id, e)} className="hover:text-blue-600 p-1">
+                  <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={pencil} 
+                        alt="pencil" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
                   </button>
-                  <button onClick={(e) => onSessionDeleteClick(session.id, e)} className="text-slate-400 hover:text-red-400">
-                    <Trash2 size={14} />
+                  <button onClick={(e) => onSessionDeleteClick(session.id, e)} className="hover:text-red-500 p-1">
+                  <div className="inline-block p-1 rounded-full ">
+                        <img 
+                        src={bin} 
+                        alt="bin" 
+                        className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-60" 
+                            />
+                         </div>
                   </button>
                 </div>
               </>
