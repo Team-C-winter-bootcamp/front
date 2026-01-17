@@ -12,7 +12,7 @@ const SignupAlertModal = ({ isOpen, onClose, onConfirm }: SignupAlertModalProps)
       className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif"
       onClick={onClose} 
     >
-      <div 
+      <div  
         className="card-minimal w-80 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

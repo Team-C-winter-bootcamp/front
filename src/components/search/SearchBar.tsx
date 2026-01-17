@@ -38,7 +38,7 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
               onClick={onClear}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 text-minimal-medium-gray hover:text-minimal-charcoal transition-colors p-1"
             >
-              ✕
+              ✕ 
             </button>
           )}
         </div>

@@ -115,7 +115,7 @@ const SignupPage = () => {
         <button 
           onClick={() => navigate('/')} 
           className="mb-7 hover:opacity-80 transition-opacity" // mb-12 -> 10으로 살짝 줄임, hover 효과 추가
-        >
+        > 
           <img 
             src={logotextb} 
             alt="Lawding Logo" 

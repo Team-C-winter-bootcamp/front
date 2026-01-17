@@ -7,7 +7,7 @@ interface LoginAlertModalProps {
   const LoginAlertModal = ({ isOpen, onConfirm }: LoginAlertModalProps) => {
     if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
   
-    return (
+    return ( 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif">
         <div className="card-minimal w-80 overflow-hidden">
           <div className="p-4 border-b border-minimal-gray text-center">

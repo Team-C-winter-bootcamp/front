@@ -159,8 +159,8 @@ const SearchResultsPage = () => {
             onClear={() => {
               setSearchInput('')
               setSearchParams({ tab: activeTab })
-            }}
-          />
+            }} 
+          /> 
         </div>
       </div>
 

@@ -101,7 +101,7 @@ const AIChatPage = () => {
                       <span className="w-2 h-2 bg-minimal-medium-gray rounded-full animate-bounce delay-150"></span>
                       <span className="text-xs text-minimal-medium-gray ml-1 font-light">분석 중...</span>
                     </div>
-                  </div>
+                  </div> 
                 )}
                 <div ref={messagesEndRef} />
               </div>

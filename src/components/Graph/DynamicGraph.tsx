@@ -16,7 +16,7 @@ interface GraphNode {
 interface GraphLink {
   source: string;
   target: string;
-}
+} 
 
 // === 디자인 시스템에 맞춘 컬러 팔레트 수정 및 하이라이트 색상 추가 ===
 const COLORS = {

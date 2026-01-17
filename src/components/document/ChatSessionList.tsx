@@ -40,7 +40,7 @@ export const ChatSessionList = ({
       <div className="space-y-1 mb-6">
         {sessions.map((session) => (
           <div
-            key={session.id}
+            key={session.id} 
             onClick={() => onSessionClick(session.id)}
             className={`group relative p-3 rounded-lg cursor-pointer transition-all text-sm flex items-center gap-3 ${
               currentSessionId === session.id 

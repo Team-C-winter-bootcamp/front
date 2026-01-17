@@ -15,7 +15,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         className="btn-minimal disabled:opacity-30 disabled:cursor-not-allowed"
       >
         &lt;
-      </button>
+      </button> 
       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
         <button
           key={page}

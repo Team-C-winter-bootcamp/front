@@ -32,7 +32,7 @@ const Header = () => {
                 alt="logo" 
             className="w-10 h-10 object-contain justify-center items-center opacity-50" />
                 </div>
-        </button>
+        </button> 
         
         <div className="flex gap-4 items-center">
           {isAuthenticated && user ? (

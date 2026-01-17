@@ -97,7 +97,7 @@ export const useStore = create<StoreState>()(
         isAuthenticated: state.isAuthenticated,
         memos: state.memos,
         // 채팅 관련 데이터도 저장되도록 추가
-        chatHistories: state.chatHistories,
+        chatHistories: state.chatHistories, 
         currentChatId: state.currentChatId, 
       }),
     }

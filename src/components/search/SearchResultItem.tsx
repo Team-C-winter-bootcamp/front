@@ -15,7 +15,7 @@ export const SearchResultItem = ({ result, onClick }: SearchResultItemProps) => 
         <span className="text-minimal-dark-gray font-light">{result.court}</span>
         <span className="text-minimal-medium-gray">|</span>
         <span className="text-minimal-dark-gray font-light">{result.date}</span>
-        <span className="text-minimal-medium-gray">|</span>
+        <span className="text-minimal-medium-gray">|</span> 
         <span className="bg-[#F5F3EB] border border-[#CFB982] text-minimal-dark-gray px-2 py-0.5 rounded-minimal text-xs flex items-center font-light">{result.caseType}</span>
         <span className="bg-[#F5F3EB] border border-[#CFB982] text-minimal-dark-gray px-2 py-0.5 rounded-minimal text-xs flex items-center font-light">{result.judgmentType}</span>
       </div>

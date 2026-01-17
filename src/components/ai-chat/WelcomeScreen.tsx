@@ -15,7 +15,7 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
     { text: '최신 법률 정보', style: 'bg-[#C8A45D] text-white hover:bg-[#b8934d]' }
   ]
 
-  return (
+  return ( 
     <div className="flex-1 flex flex-col items-center justify-center p-4 pb-20 overflow-y-auto bg-[#F5F3EB] font-serif">
       <div className="text-center max-w-2xl w-full">
         <div className="mb-8">

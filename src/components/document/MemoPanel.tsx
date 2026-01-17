@@ -187,7 +187,7 @@ export const MemoPanel = ({
         <button onClick={onAddNewMemo} className="p-1 text-minimal-dark-gray hover:bg-[#E8E0D0] rounded-minimal transition-colors" title="새 메모 추가">
           <span className="text-lg font-light">+</span>
         </button>
-      </div>
+      </div> 
 
       {/* 메모 리스트 영역 */}
       <div 

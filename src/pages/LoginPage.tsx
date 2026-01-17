@@ -66,7 +66,7 @@ const LoginPage = () => {
           className="mb-7 hover:opacity-80 transition-opacity" // mb-12 -> 10으로 살짝 줄임, hover 효과 추가
         >
           <img 
-            src={logotextb} 
+            src={logotextb}  
             alt="Lawding Logo" 
             // w-12(48px) -> w-40(160px) ~ w-48(192px) 정도로 키움
             // h-auto: 비율 유지

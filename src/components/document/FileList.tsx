@@ -53,7 +53,7 @@ export const FileList = ({
         </button>
         <input
           ref={fileInputRef}
-          type="file"
+          type="file" 
           multiple
           onChange={onFileChange}
           className="hidden"

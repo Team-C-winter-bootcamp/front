@@ -62,7 +62,7 @@ export const ChatArea = ({
                 </div>
               )}
 
-              <div
+              <div 
                 className={`relative p-4 shadow-sm text-base leading-relaxed font-light ${
                   msg.isSummary 
                     ? 'bg-[#F5F3EB] border border-minimal-gray w-full ml-0 rounded-lg' 

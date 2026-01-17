@@ -7,7 +7,7 @@ interface DeleteAlertModalProps {
 const DeleteAlertModal = ({ isOpen, onClose, onConfirm }: DeleteAlertModalProps) => {
   if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
 
-  return (
+  return ( 
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif"
       onClick={onClose}

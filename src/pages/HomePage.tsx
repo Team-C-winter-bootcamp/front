@@ -67,7 +67,7 @@ const HomePage = () => {
           style={{
             backgroundImage: `url(${background2})`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center', 
             backgroundRepeat: 'no-repeat'
           }}
         >
