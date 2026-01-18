@@ -37,9 +37,19 @@ export const useMemoManagement = () => {
     if (selectedMemoId) {
       const selectedMemo = memos.find(m => m.id === selectedMemoId)
       if (selectedMemo) {
-        updateMemo(selectedMemoId, {
-          content: selectedMemo.content ? selectedMemo.content + '\n\n' + content : content
-        })
+        // 기존 메모 내용이 있는 경우
+        if (selectedMemo.content && selectedMemo.content.trim()) {
+          // 기존 내용 끝의 줄바꿈을 제거하고, \n\n으로 구분하여 추가
+          const trimmedContent = selectedMemo.content.replace(/\n+$/, '')
+          updateMemo(selectedMemoId, {
+            content: trimmedContent + '\n\n' + content
+          })
+        } else {
+          // 기존 내용이 비어있거나 공백만 있는 경우 줄바꿈 없이 추가
+          updateMemo(selectedMemoId, {
+            content: content
+          })
+        }
       }
     } else {
       if (memos.length >= 10) {

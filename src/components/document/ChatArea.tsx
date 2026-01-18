@@ -85,7 +85,7 @@ export const ChatArea = ({
                 {!msg.isUser && (
                   <div className="flex justify-end mt-3 pt-2">
                     <button
-                      onClick={() => onAddToMemo(msg.text, msg.fileName)}
+                      onClick={() => onAddToMemo(msg.text.trim(), msg.fileName)}
                       className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1 transition-all duration-200 font-light shadow-md bg-[#CFB982] text-white hover:bg-[#C8A45D]"
                     >
                       메모에 추가

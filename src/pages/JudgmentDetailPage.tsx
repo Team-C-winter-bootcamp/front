@@ -8,10 +8,7 @@ import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
-// 이미지 assets
-import download from '../assets/download.png'
-import link from '../assets/link.png'
-import bookmark from '../assets/bookmark.png'
+import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react'
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
@@ -396,22 +393,14 @@ const JudgmentDetailPage = () => {
                     className="btn-minimal p-2.5 flex-1 flex justify-center"
                     title="PDF 다운로드"
                   >
-                    <img
-                      src={download}
-                      alt="download"
-                      className="w-4 h-4 object-contain opacity-50"
-                    />
+                    <Download size={18} className="text-minimal-dark-gray opacity-60" />
                   </button>
                   <button 
                     onClick={handleCopyLink} 
                     className="btn-minimal p-2.5 flex-1 flex justify-center"
                     title="링크 복사"
                   >
-                    <img
-                      src={link}
-                      alt="link"
-                      className="w-4 h-4 object-contain opacity-50"
-                    />
+                    <Link2 size={18} className="text-minimal-dark-gray opacity-60" />
                   </button>
                   <button
                     onClick={handleToggleBookmark}
@@ -422,11 +411,11 @@ const JudgmentDetailPage = () => {
                     }`}
                     title="북마크"
                   >
-                    <img
-                      src={bookmark}
-                      alt="bookmark"
-                      className={`w-4 h-4 object-contain ${isBookmarked ? 'opacity-80' : 'opacity-50'}`}
-                    />
+                    {isBookmarked ? (
+                      <BookmarkCheck size={18} className="text-minimal-charcoal opacity-80 fill-current" />
+                    ) : (
+                      <Bookmark size={18} className="text-minimal-dark-gray opacity-60" />
+                    )}
                   </button>
                 </div>
               </div>
