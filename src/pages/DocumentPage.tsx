@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Header from '../components/Header'
 import DeleteAlertModal from '../components/AlertModal/DeleteAlertModal'
 import MomoAlertModal from '../components/AlertModal/MomoAlertModal'
 import FileAlertModal from '../components/AlertModal/FileAlertModal'
@@ -53,7 +52,6 @@ const DocumentPage = () => {
 
   return (
     <div className="h-screen bg-[#F5F3EB] flex flex-col overflow-hidden text-minimal-charcoal font-serif">
-      <Header />
       
       {/* 모달 렌더링 */}
       <DeleteAlertModal 

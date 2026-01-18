@@ -26,14 +26,14 @@ const COLORS = {
   centerHighlight: '#EAD8B1',
 
   // root: 이미지의 1차 노드 색상 (짙은 네이비)
-  root: '#23355c',
+  root: '#1A233B',
   // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  rootHighlight: '#4C6494',
+  rootHighlight: '#2A3454',
 
   // leaf: 이미지의 2차 노드 색상 (채도 낮은 파란색/하늘색)
-  leaf: '#7591c9',
+  leaf: '#1A233B',
   // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  leafHighlight: '#AEC4E6',
+  leafHighlight: '#3A4A6B',
 
   // line: 선 색상은 기존 유지 (은은한 회색)
   line: '#E2E8F0',

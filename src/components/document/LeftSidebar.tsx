@@ -1,7 +1,8 @@
 import { ChatSessionList } from './ChatSessionList'
 import { FileList } from './FileList'
-import burger from '../../assets/burger.png'
 import { ChatSession, FileItem } from '../../hooks/useChatSessions'
+import { useNavigate } from 'react-router-dom'
+import { Plus, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 
 interface LeftSidebarProps {
   isLeftPanelOpen: boolean
@@ -78,6 +79,8 @@ export const LeftSidebar = ({
   onDragLeave,
   onDrop
 }: LeftSidebarProps) => {
+  const navigate = useNavigate()
+  
   // 닫혔을 때: 얇은 사이드바 + 햄버거 버튼 표시 (MemoPanel과 동일한 방식 적용)
   if (!isLeftPanelOpen) {
     return (
@@ -85,16 +88,10 @@ export const LeftSidebar = ({
         <div className="p-2 flex flex-col items-center gap-4 mt-4">
           <button 
             onClick={onTogglePanel}
-            className="p-2 hover:bg-[#1E293B] rounded-lg text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors"
             title="사이드바 열기"
           >
-            <div className="inline-block p-1 rounded-full">
-              <img 
-                src={burger} 
-                alt="open" 
-                className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-70" 
-              />
-            </div>
+            <PanelLeftOpen size={24} />
           </button>
         </div>
       </div>
@@ -112,19 +109,18 @@ export const LeftSidebar = ({
         {/* 상단: 새 채팅 버튼 (햄버거 메뉴 포함) */}
         <div className="p-4 flex flex-col gap-4 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-lg text-white tracking-wider">LAWDING</span>
+            <button 
+              onClick={() => navigate('/')}
+              className="font-bold text-lg text-white tracking-wider hover:opacity-70 transition-opacity cursor-pointer"
+            >
+              LAWDING
+            </button>
             <button 
               onClick={onTogglePanel}
-              className="p-2 text-slate-400 hover:text-white hover:bg-[#1E293B] rounded-lg transition-colors"
+              className="text-slate-400 hover:text-white transition-colors"
               title="패널 접기"
             >
-              <div className="inline-block p-1 rounded-full">
-                <img 
-                  src={burger} 
-                  alt="close" 
-                  className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-70" 
-                />
-              </div>
+              <PanelLeftClose size={24} />
             </button>
           </div> 
 
@@ -132,7 +128,7 @@ export const LeftSidebar = ({
             onClick={onNewChat}
             className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md w-full py-3 px-4"
           >
-            <span className="font-medium text-sm">+</span>
+            <Plus size={20} />
             <span className="font-medium text-sm">새 채팅</span>
           </button>
         </div>

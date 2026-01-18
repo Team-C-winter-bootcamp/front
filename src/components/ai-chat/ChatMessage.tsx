@@ -8,7 +8,7 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message, onResultClick }: ChatMessageProps) => {
   return (
-    <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${message.isUser ? 'justify-end pr-[21%]' : 'justify-start'}`}>
       <div className={`max-w-3xl flex gap-3 ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* 프로필 아이콘 */}
         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs border font-light ${

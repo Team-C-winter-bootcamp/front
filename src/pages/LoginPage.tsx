@@ -1,7 +1,6 @@
 import { useState, FormEvent, Dispatch, SetStateAction } from 'react' //Dispatch :  ,SetStateAction
 import { useNavigate, useLocation } from 'react-router-dom' //이동 시켜주는 놈 import
 import { useStore } from '../store/useStore' //Zustand에 박아놓은 함수들 import
-import Header from '../components/Header'//헤더 가져오기
 import logotextb from '../assets/logotextb.png'
 
 const LoginPage = () => {
@@ -57,7 +56,6 @@ const LoginPage = () => {
  
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <Header />
 
       {/* 메인 로고  */}
       <div className="flex flex-col items-center justify-center px-4 py-16 max-w-lg mx-auto">

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChatHistory } from '../../store/useStore'
 // 사용하지 않는 아이콘(Settings, Wrench, LogOut, Menu) import 제거
 import { 
@@ -40,6 +41,8 @@ export const ChatSidebar = ({
   onRenameSave,
   onChatDelete
 }: ChatSidebarProps) => {
+  const navigate = useNavigate()
+  
   // --- 리사이징 관련 로직 (유지) ---
   const [sidebarWidth, setSidebarWidth] = useState(260); 
   const [isResizing, setIsResizing] = useState(false);
@@ -94,7 +97,12 @@ export const ChatSidebar = ({
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
            {/* 로고 영역 */}
            {!isCollapsed && (
-             <span className="font-bold text-lg text-white tracking-wider">LAWDING</span>
+             <button 
+               onClick={() => navigate('/')}
+               className="font-bold text-lg text-white tracking-wider hover:opacity-70 transition-opacity cursor-pointer"
+             >
+               LAWDING
+             </button>
            )}
            {/* 토글 버튼 */}
            <button

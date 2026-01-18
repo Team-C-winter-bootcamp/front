@@ -1,6 +1,5 @@
 import { useState, useEffect , FormEvent} from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../components/Header'
 import SignupAlertModal from '../components/AlertModal/SignupAlertModal'
 import logotextb from '../assets/logotextb.png'
 const SignupPage = () => {
@@ -108,7 +107,6 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <Header />
 
       {/* Main Content */}
       <div className="flex flex-col items-center justify-center px-4 py-16 max-w-lg mx-auto">
