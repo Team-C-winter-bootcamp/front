@@ -138,7 +138,7 @@ const DocumentPage = () => {
               e.preventDefault()
               resize.setIsResizingMemo(true)
             }}
-            className="w-1 bg-minimal-gray cursor-ew-resize flex-shrink-0"
+            className="w-1 bg-[#CFB982] cursor-ew-resize flex-shrink-0"
           />
         )}
 

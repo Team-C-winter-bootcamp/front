@@ -21,7 +21,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="flex justify-between items-center px-8 py-2 border-b border-minimal-gray bg-[#F5F3EB] font-serif">
+      <header className="flex justify-between items-center px-8 py-2 border-b border-minimal-gray bg-[#1A233B] font-serif">
         <button
           onClick={() => navigate('/')}
           className="text-xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"

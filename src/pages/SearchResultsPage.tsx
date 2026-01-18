@@ -166,7 +166,7 @@ const SearchResultsPage = () => {
       </div>
 
       {/* Mobile Filter Toggle */}
-      <div className="md:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
+      <div className="xl:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
         <div className="flex gap-2">
           {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
             <button 
@@ -311,7 +311,7 @@ const SearchResultsPage = () => {
               className={`ml-auto sm:ml-2 px-5 py-2.5 rounded-full text-sm text-black transition-all duration-200 flex items-center gap-2 ${
                 activeTab === 'ai' 
                   ? 'bg-black text-white font-medium shadow-md ring-2 ring-black ring-offset-1' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-gray-100 font-light'
+                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
               }`}
             >
               나의 유사 판례 찾기
