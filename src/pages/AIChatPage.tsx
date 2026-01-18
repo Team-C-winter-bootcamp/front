@@ -4,10 +4,14 @@ import { ChatSidebar } from '../components/ai-chat/ChatSidebar'
 import { ChatMessage } from '../components/ai-chat/ChatMessage'
 import { WelcomeScreen } from '../components/ai-chat/WelcomeScreen'
 import { useAIChat } from '../hooks/useAIChat'
+import { useStore } from '../store/useStore' // [추가] Store import
 
 const AIChatPage = () => {
   const [deleteChatTargetId, setDeleteChatTargetId] = useState<string | null>(null)
   
+  // [추가] Store에서 toggleChatPin 함수 가져오기
+  const { toggleChatPin } = useStore()
+
   const {
     isSidebarCollapsed,
     setIsSidebarCollapsed,
@@ -31,6 +35,12 @@ const AIChatPage = () => {
     handleResultClick,
     confirmChatDelete
   } = useAIChat()
+
+  // [추가] 고정 기능 핸들러 구현
+  const handleTogglePin = (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 이벤트 버블링 방지
+    toggleChatPin(chatId); // 스토어의 상태 변경 함수 호출
+  };
 
   const handleDeleteClick = (chatId: string, e: React.MouseEvent) => {
     handleChatDelete(chatId, e)
@@ -68,6 +78,7 @@ const AIChatPage = () => {
           onChatRename={handleChatRename}
           onRenameSave={handleRenameSave}
           onChatDelete={handleDeleteClick}
+          onTogglePin={handleTogglePin} // [추가] ChatSidebar에 핸들러 전달
         />
 
         {/* Main Content Area */}

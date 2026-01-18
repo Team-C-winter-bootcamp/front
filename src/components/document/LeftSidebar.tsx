@@ -24,6 +24,7 @@ interface LeftSidebarProps {
   onSessionRename: (id: string, e: React.MouseEvent) => void
   onSessionRenameSave: () => void
   onSessionDeleteClick: (id: string, e: React.MouseEvent) => void
+  onSessionTogglePin: (id: string, e: React.MouseEvent) => void
   onNewChat: () => void
   // FileList props
   files: FileItem[]
@@ -62,6 +63,7 @@ export const LeftSidebar = ({
   onSessionRename,
   onSessionRenameSave,
   onSessionDeleteClick,
+  onSessionTogglePin,
   onNewChat,
   files,
   editingFileId,
@@ -81,7 +83,7 @@ export const LeftSidebar = ({
 }: LeftSidebarProps) => {
   const navigate = useNavigate()
   
-  // 닫혔을 때: 얇은 사이드바 + 햄버거 버튼 표시 (MemoPanel과 동일한 방식 적용)
+  // 닫혔을 때: 얇은 사이드바 + 햄버거 버튼 표시
   if (!isLeftPanelOpen) {
     return (
       <div className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 z-20 font-sans">
@@ -98,7 +100,7 @@ export const LeftSidebar = ({
     )
   }
 
-  // 열렸을 때: 기존 전체 패널 표시 (transition-all duration-300 추가)
+  // 열렸을 때: 기존 전체 패널 표시
   return (
     <>
       <div
@@ -106,7 +108,7 @@ export const LeftSidebar = ({
         className="border-r border-[#1E293B] bg-[#111e31] flex flex-col flex-shrink-0 z-10 transition-all duration-300 font-sans text-slate-300"
         style={{ width: `${sourceWidth}px` }}
       >
-        {/* 상단: 새 채팅 버튼 (햄버거 메뉴 포함) */}
+        {/* 상단: 새 채팅 버튼 (LAWDING 버튼 포함) */}
         <div className="p-4 flex flex-col gap-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <button 
@@ -145,6 +147,7 @@ export const LeftSidebar = ({
             onSessionRename={onSessionRename}
             onSessionRenameSave={onSessionRenameSave}
             onSessionDeleteClick={onSessionDeleteClick}
+            onTogglePin={onSessionTogglePin}
             onNewChat={onNewChat}
             onTogglePanel={onTogglePanel}
             isLeftPanelOpen={isLeftPanelOpen}
@@ -152,17 +155,18 @@ export const LeftSidebar = ({
         </div>
         
         {/* 드래그 가능한 구분선 */}
-<div
-  ref={fileDividerResizeRef}
-  onMouseDown={(e) => {
-    e.preventDefault()
-    onFileDividerResizeStart()
-  }}
-  className="h-6 w-full cursor-ns-resize flex-shrink-0 relative group my-2 rounded-lg flex items-center justify-center transition-colors hover:bg-gray-100"
-  title="드래그하여 높이 조절"
->
-  <div className="h-1 w-12 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
-</div>
+        <div
+          ref={fileDividerResizeRef}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            onFileDividerResizeStart()
+          }}
+          className="h-6 w-full cursor-ns-resize flex-shrink-0 relative group my-2 rounded-lg flex items-center justify-center transition-colors hover:bg-gray-100"
+          title="드래그하여 높이 조절"
+        >
+          <div className="h-1 w-12 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+        </div>
+
         {/* 하단: 소스 (파일 목록) */}
         <div className="flex-shrink-0 overflow-hidden" style={{ height: `${fileAreaHeight}px` }}>
           <FileList

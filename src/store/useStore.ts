@@ -1,19 +1,19 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-//메모 타입
+// 메모 타입
 interface Memo {
   id: string
   title: string
   content: string
 }
 
-//채팅 관련 타입 (export 필수임 AIChatPage에서 사용)
+// 채팅 관련 타입 (export 필수임 AIChatPage에서 사용)
 export interface Message {
   id: number
   text: string
   isUser: boolean
-  timestamp: string // 시간(Date)은은 저장 시 꼬일 수 있어 string(ISO) 권장
+  timestamp: string // 시간(Date)은 저장 시 꼬일 수 있어 string(ISO) 권장
   resultId?: number
 }
 
@@ -22,6 +22,7 @@ export interface ChatHistory {
   name: string
   messages: Message[]
   createdAt: string
+  isPinned?: boolean // [추가] 고정 여부 속성
 }
 
 interface StoreState {
@@ -45,6 +46,9 @@ interface StoreState {
   setChatHistories: (updater: (prev: ChatHistory[]) => ChatHistory[]) => void
   setCurrentChatId: (id: string | null) => void
   clearChatSession: () => void
+  
+  // [추가] 채팅방 고정 토글 함수
+  toggleChatPin: (chatId: string) => void 
 }
 
 export const useStore = create<StoreState>()(
@@ -87,6 +91,13 @@ export const useStore = create<StoreState>()(
       
       // 채팅 세션 초기화 (필요시 사용)
       clearChatSession: () => set({ chatHistories: [], currentChatId: null }),
+
+      // [추가] 고정 상태 토글 함수 구현
+      toggleChatPin: (chatId) => set((state) => ({
+        chatHistories: state.chatHistories.map((chat) =>
+          chat.id === chatId ? { ...chat, isPinned: !chat.isPinned } : chat
+        ),
+      })),
     }),
     {
       name: 'lawding-storage', // 저장소 이름 (하나로 통일)
