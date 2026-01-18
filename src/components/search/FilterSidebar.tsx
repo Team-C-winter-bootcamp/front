@@ -25,18 +25,17 @@ export const FilterSidebar = ({
   onPeriodChange
 }: FilterSidebarProps) => {
   return (
-    // w-72로 폭을 살짝 넓히고 왼쪽 마진(ml-6)을 주어 전체적으로 오른쪽으로 밀었습니다.
     <div className="hidden xl:block w-72 flex-shrink-0 order-1 md:order-2 ml-2">
-      <div className="sticky top-24 space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-50">
+      <div className="card-minimal sticky top-24 space-y-6 p-6">
         
         {/* 1. 사건종류 필터 */}
-        <div className="pl-2"> {/* 텍스트를 좀 더 오른쪽으로 밀기 위한 내부 패딩 */}
-          <h3 className="font-bold text-gray-800 mb-4 flex justify-between items-center">
+        <div className="pl-2">
+          <h3 className="font-light text-minimal-charcoal mb-4 flex justify-between items-center">
             사건종류
             {selectedCaseTypes.length > 0 && (
               <button 
                 onClick={() => onCaseTypeChange('')}
-                className="text-xs text-blue-500 hover:text-blue-700 font-medium underline underline-offset-2"
+                className="text-xs text-minimal-dark-gray hover:text-minimal-charcoal font-light underline underline-offset-2 transition-colors"
               >
                 초기화 
               </button> 
@@ -49,24 +48,24 @@ export const FilterSidebar = ({
                   type="checkbox"
                   checked={selectedCaseTypes.includes(type)}
                   onChange={() => onCaseTypeChange(type)}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 border-gray-300 transition-all"
+                  className="rounded text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray transition-all"
                 />
-                <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">{type}</span>
+                <span className="text-sm text-minimal-dark-gray group-hover:text-minimal-charcoal font-light transition-colors">{type}</span>
               </label>
             ))}
           </div>
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-minimal-gray" />
 
         {/* 2. 법원 필터 */}
         <div className="pl-2">
-          <h3 className="font-bold text-gray-800 mb-4 flex justify-between items-center">
+          <h3 className="font-light text-minimal-charcoal mb-4 flex justify-between items-center">
             법원
             {selectedCourts.length > 0 && (
               <button 
                 onClick={() => onCourtChange('')}
-                className="text-xs text-blue-500 hover:text-blue-700 font-medium underline underline-offset-2"
+                className="text-xs text-minimal-dark-gray hover:text-minimal-charcoal font-light underline underline-offset-2 transition-colors"
               >
                 초기화
               </button>
@@ -79,19 +78,19 @@ export const FilterSidebar = ({
                   type="checkbox"
                   checked={selectedCourts.includes(court)}
                   onChange={() => onCourtChange(court)}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 border-gray-300 transition-all"
+                  className="rounded text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray transition-all"
                 />
-                <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">{court}</span>
+                <span className="text-sm text-minimal-dark-gray group-hover:text-minimal-charcoal font-light transition-colors">{court}</span>
               </label>
             ))}
           </div>
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-minimal-gray" />
 
         {/* 3. 재판유형 필터 */}
         <div className="pl-2">
-          <h3 className="font-bold text-gray-800 mb-4">재판유형</h3>
+          <h3 className="font-light text-minimal-charcoal mb-4">재판유형</h3>
           <div className="space-y-2.5">
             {JUDGMENT_TYPES.map((type) => (
               <label key={type} className="flex items-center gap-3 cursor-pointer group">
@@ -100,19 +99,19 @@ export const FilterSidebar = ({
                   name="judgmentType"
                   checked={selectedJudgmentType === type}
                   onChange={() => onJudgmentTypeChange(type)}
-                  className="text-blue-600 focus:ring-blue-500 w-4 h-4 border-gray-300 transition-all"
+                  className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray transition-all"
                 />
-                <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">{type}</span>
+                <span className="text-sm text-minimal-dark-gray group-hover:text-minimal-charcoal font-light transition-colors">{type}</span>
               </label>
             ))}
           </div>
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-minimal-gray" />
 
         {/* 4. 기간 필터 */}
         <div className="pl-2">
-          <h3 className="font-bold text-gray-800 mb-4">기간</h3>
+          <h3 className="font-light text-minimal-charcoal mb-4">기간</h3>
           <div className="space-y-2.5">
             {PERIOD_TYPES.map((period) => (
               <label key={period} className="flex items-center gap-3 cursor-pointer group">
@@ -121,9 +120,9 @@ export const FilterSidebar = ({
                   name="period"
                   checked={selectedPeriod === period}
                   onChange={() => onPeriodChange(period)}
-                  className="text-blue-600 focus:ring-blue-500 w-4 h-4 border-gray-300 transition-all"
+                  className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray transition-all"
                 />
-                <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">{period}</span>
+                <span className="text-sm text-minimal-dark-gray group-hover:text-minimal-charcoal font-light transition-colors">{period}</span>
               </label>
             ))}
           </div>
