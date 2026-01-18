@@ -4,6 +4,9 @@ import { useStore } from '../store/useStore'
 import Header from '../components/Header'
 import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
 import logotext from '../assets/logotext.png'
+import background2 from '../assets/background2.png'
+// 아이콘 사용을 위해 lucide-react 추가
+import { Search, Gavel, FileText } from 'lucide-react'
 
 // 1. DynamicGraph 컴포넌트 import
 import DynamicGraph from '../components/Graph/DynamicGraph' 
@@ -40,7 +43,7 @@ const HomePage = () => {
     navigate('/ai-chat')
   }
   
-  // 빨간 버튼 (문서 작성)
+  // 빨간 버튼 (문서 작성) -> 디자인 변경으로 파란 버튼 계열로 통일
   const handleDocumentClick = () => {
     if (!isAuthenticated) {
       setTargetPath('/document')
@@ -51,13 +54,13 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    // [변경 포인트] font-serif 적용: 전체 폰트를 '리디바탕'으로 설정하여 법전 느낌 강조
+    <div className="min-h-screen bg-[#F5F3EB] font-serif">
       <Header />
 
-      {/* 메인 검색 부분 */}
-      <div className="flex flex-col items-center justify-center px-4 pt-4 pb-4">
+      {/* 메인 컨텐츠 영역 */}
+      <div className="flex flex-col items-center justify-start w-full">
         
-
         {/* 상단 로고 & 검색 섹션 */}
         <div 
           className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 shadow-sm"
@@ -110,69 +113,66 @@ const HomePage = () => {
                 </button>
               </div>
             </form>
-
           </div>
-
-          {/* 검색창 영역 */}
-          <form onSubmit={handleSearch} className="w-full flex justify-center">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="키워드를 입력하세요"
-              className="w-full max-w-2xl px-6 py-4 text-lg rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-            />
-          </form>
         </div>
 
-        <div className="w-full max-w-7xl mt-8 mb-9 mb-2 px-1">
-          <h2 className="text-2xl font-bold text-gray-800">로딩중 활용하기</h2>
-        </div>
-
-        {/* 버튼 영역 */}
-        <div className="flex gap-10 w-full max-w-5xl">
+        {/* 액션 버튼 영역 */}
+        <div className="flex gap-6 w-full max-w-5xl px-6 mb-16">
+          {/* 버튼 1: 유사한 판례 찾기 */}
           <button
             onClick={handleAIChatClick}
-            className={`flex-1 px-1 py-6 rounded-lg transition-colors ${
-              isAuthenticated
-                ? 'bg-yellow-100 font-bold text-xl text-black hover:bg-yellow-200 shadow-lg'
-                : 'bg-yellow-100 font-bold text-xl text-black hover:bg-yellow-200 shadow-lg'
-            }`}
+            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1E2B45] to-[#2B4066] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
           >
-            {/* 1. 왼쪽 텍스트 영역 */}
-            <div className="flex flex-col items-start text-left pl-7">
-              <span className="text-2xg font-bold font-semibold text-black mb-1">
-                나와 유사한 판례 찾기
-              </span>
-              <span className="text-sm text-gray-600">
-                Ai 챗봇으로 필요한 판례를 찾아보세요!
-              </span>
+            <div className="relative z-10 flex justify-between items-center">
+              <div>
+                {/* 제목: 리디바탕체 적용 */}
+                <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
+                  나와 유사한 판례 찾기
+                </h3>
+                {/* 설명글: 리디바탕체 적용 (상속됨) */}
+                <p className="text-sm text-gray-300 font-light opacity-90">
+                  AI 챗봇으로 필요한 판례를 찾아보세요!
+                </p>
+              </div>
+              {/* 아이콘 */}
+              <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                 <Gavel className="text-[#CFB982]" size={50} />
+              </div>
             </div>
-
           </button>
+
+          {/* 버튼 2: 문서 작성하러 가기 */}
           <button
             onClick={handleDocumentClick}
-            className={`flex-1 px-1 py-6 rounded-lg transition-colors ${
-              isAuthenticated
-                ? 'bg-purple-100 font-bold text-xl text-black hover:bg-purple-200 shadow-lg'
-                : 'bg-purple-100 font-bold text-xl text-black hover:bg-purple-200 shadow-lg'
-            }`}
+            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1E2B45] to-[#2B4066] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
           >
-              <div className="flex flex-col items-start text-left pl-7">
-              <span className="text-2xg font-bold font-semibold text-black mb-1">
-                문서 작성하러 가기
-              </span>
-              <span className="text-sm text-gray-600">
-                문서 정리를 Ai로 간단하게!
-              </span>
+            <div className="relative z-10 flex justify-between items-center">
+              <div>
+                {/* 제목: 리디바탕체 적용 */}
+                <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
+                  문서 작성하러 가기
+                </h3>
+                <p className="text-sm text-gray-300 font-light opacity-90">
+                  문서 정리를 AI로 간단하게!
+                </p>
+              </div>
+              {/* 아이콘 */}
+              <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                <FileText className="text-[#CFB982]" size={50} />
+              </div>
             </div>
           </button>
         </div>
-      </div>
 
-      {/* 그래프 섹션 */}
-      <div className="px-6 py-8 w-full max-w-7xl mx-auto">
-        <DynamicGraph />
+        {/* 그래프 섹션 */}
+        <div className="w-full max-w-5xl px-6 mb-12">
+            <div className="bg-[#F5F3EB] shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                <div className="w-full h-[650px] bg-[#F3F4F6] relative">
+                    <DynamicGraph />
+                </div>
+            </div>
+        </div>
+
       </div>
 
       <LoginAlertModal 
