@@ -50,6 +50,7 @@ const DocumentPage = () => {
     setDeleteSessionTargetId(null)
   }
 
+
   return (
     <div className="h-screen bg-[#F5F3EB] flex flex-col overflow-hidden text-minimal-charcoal font-serif">
       
@@ -94,6 +95,7 @@ const DocumentPage = () => {
           onSessionRename={chatSessions.handleSessionRename}
           onSessionRenameSave={chatSessions.handleSessionRenameSave}
           onSessionDeleteClick={handleSessionDeleteClick}
+          onSessionTogglePin={chatSessions.handleSessionTogglePin}
           onNewChat={chatSessions.handleNewChat}
           files={chatSessions.currentSession?.files || []}
           editingFileId={fileManagement.editingFileId}

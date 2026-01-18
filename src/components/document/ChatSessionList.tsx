@@ -1,8 +1,14 @@
+import { useState, useEffect, useRef } from 'react'
 import { ChatSession } from '../../hooks/useChatSessions'
-import { MessageSquare, Edit2, Trash2 } from 'lucide-react'
+import { MessageSquare, Edit2, Trash2, MoreVertical, Pin, PinOff } from 'lucide-react'
+
+// ExtendedChatSession 정의 (isPinned 필드 추가)
+interface ExtendedChatSession extends ChatSession {
+  isPinned?: boolean;
+}
 
 interface ChatSessionListProps {
-  sessions: ChatSession[]
+  sessions: ExtendedChatSession[]
   currentSessionId: string
   editingSessionId: string | null
   editingSessionName: string
@@ -11,6 +17,7 @@ interface ChatSessionListProps {
   onSessionRename: (id: string, e: React.MouseEvent) => void
   onSessionRenameSave: () => void
   onSessionDeleteClick: (id: string, e: React.MouseEvent) => void
+  onTogglePin: (sessionId: string, e: React.MouseEvent) => void
   onNewChat: () => void
   onTogglePanel: () => void
   isLeftPanelOpen: boolean
@@ -26,19 +33,53 @@ export const ChatSessionList = ({
   onSessionRename,
   onSessionRenameSave,
   onSessionDeleteClick,
+  onTogglePin,
   onNewChat: _onNewChat,
   onTogglePanel: _onTogglePanel,
   isLeftPanelOpen
 }: ChatSessionListProps) => {
   if (!isLeftPanelOpen) return null
 
+  // --- 미트볼 메뉴 로직 ---
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleMenuToggle = (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenMenuId(prev => prev === sessionId ? null : sessionId);
+  };
+
+  // --- 정렬 로직 ---
+  // 고정된 세션(Pinned)을 상단으로, 나머지는 기존 순서 유지
+  const sortedSessions = (() => {
+    if (!sessions) return [];
+    
+    const pinnedSessions = sessions.filter(session => session.isPinned);
+    const unpinnedSessions = sessions.filter(session => !session.isPinned);
+    
+    return [...pinnedSessions, ...unpinnedSessions];
+  })();
+
   return (
     <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
       <div className="flex items-center gap-3 px-3 py-2 text-slate-400 mb-2">
         <span className="text-sm font-semibold">히스토리</span>
       </div>
-      <div className="space-y-1 mb-6">
-        {sessions.map((session) => (
+      <div className="space-y-1 mb-6 pb-20">
+        {sortedSessions.map((session) => (
           <div
             key={session.id} 
             onClick={() => onSessionClick(session.id)}
@@ -48,6 +89,9 @@ export const ChatSessionList = ({
                 : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
             }`}
           >
+            {/* 왼쪽 말풍선 아이콘 */}
+            <MessageSquare size={16} className={currentSessionId === session.id ? 'text-blue-400' : 'opacity-70'} />
+            
             {editingSessionId === session.id ? (
               <input
                 type="text"
@@ -61,15 +105,67 @@ export const ChatSessionList = ({
               />
             ) : (
               <>
-                <MessageSquare size={16} className={currentSessionId === session.id ? 'text-blue-400' : 'opacity-70'} />
+                {/* 채팅방 이름 (남은 공간 차지하여 오른쪽 요소 밀어냄) */}
                 <span className="truncate flex-1">{session.name}</span>
-                <div className="hidden group-hover:flex gap-2 absolute right-2 bg-[#1E293B] pl-2 rounded shadow-sm">
-                  <button onClick={(e) => onSessionRename(session.id, e)} className="text-slate-400 hover:text-white">
-                    <Edit2 size={14} />
+                
+                {/* 고정 핀 아이콘 (이름 오른쪽, 메뉴 왼쪽) */}
+                {session.isPinned && (
+                  <Pin size={14} className="text-blue-400 fill-blue-400/20 rotate-45 flex-shrink-0" />
+                )}
+
+                {/* 미트볼 메뉴 버튼 */}
+                <div className="relative">
+                  <button 
+                    onClick={(e) => handleMenuToggle(session.id, e)} 
+                    className={`p-1 rounded hover:bg-slate-700 transition-colors ${openMenuId === session.id ? 'opacity-100 bg-slate-700' : 'opacity-0 group-hover:opacity-100'}`}
+                  >
+                    <MoreVertical size={16} className="text-slate-400" />
                   </button>
-                  <button onClick={(e) => onSessionDeleteClick(session.id, e)} className="text-slate-400 hover:text-red-400">
-                    <Trash2 size={14} />
-                  </button>
+
+                  {/* 드롭다운 메뉴 */}
+                  {openMenuId === session.id && (
+                    <div 
+                      ref={menuRef}
+                      className="absolute right-0 top-8 z-50 w-32 bg-[#2D3748] border border-slate-600 rounded-md shadow-xl overflow-hidden py-1 flex flex-col"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* 1. 고정 하기/해제 */}
+                      <button
+                        onClick={(e) => {
+                          onTogglePin(session.id, e);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                      >
+                        {session.isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+                        <span>{session.isPinned ? '고정 해제' : '고정'}</span>
+                      </button>
+
+                      {/* 2. 이름 변경 */}
+                      <button
+                        onClick={(e) => {
+                          onSessionRename(session.id, e);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                      >
+                        <Edit2 size={14} />
+                        <span>이름 변경</span>
+                      </button>
+
+                      {/* 3. 삭제 */}
+                      <button
+                        onClick={(e) => {
+                          onSessionDeleteClick(session.id, e);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-slate-600 w-full text-left transition-colors"
+                      >
+                        <Trash2 size={14} />
+                        <span>삭제</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChatHistory } from '../../store/useStore'
-// 사용하지 않는 아이콘(Settings, Wrench, LogOut, Menu) import 제거
 import { 
   Plus, 
   History, 
@@ -9,14 +8,22 @@ import {
   Edit2, 
   Trash2,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  MoreVertical,
+  Pin,
+  PinOff
 } from 'lucide-react'
+
+// ExtendedChatHistory 정의
+interface ExtendedChatHistory extends ChatHistory {
+  isPinned?: boolean;
+}
 
 interface ChatSidebarProps {
   isCollapsed: boolean
   onToggleCollapse: () => void
   onNewChat: () => void
-  chatHistories: ChatHistory[]
+  chatHistories: ExtendedChatHistory[]
   currentChatId: string | null
   editingChatId: string | null
   editingName: string
@@ -25,6 +32,7 @@ interface ChatSidebarProps {
   onChatRename: (chatId: string, e: React.MouseEvent) => void
   onRenameSave: () => void
   onChatDelete: (chatId: string, e: React.MouseEvent) => void
+  onTogglePin: (chatId: string, e: React.MouseEvent) => void
 }
 
 export const ChatSidebar = ({
@@ -39,11 +47,12 @@ export const ChatSidebar = ({
   onChatClick,
   onChatRename,
   onRenameSave,
-  onChatDelete
+  onChatDelete,
+  onTogglePin
 }: ChatSidebarProps) => {
   const navigate = useNavigate()
   
-  // --- 리사이징 관련 로직 (유지) ---
+  // --- 리사이징 관련 로직 ---
   const [sidebarWidth, setSidebarWidth] = useState(260); 
   const [isResizing, setIsResizing] = useState(false);
   const resizingRef = useRef(false);
@@ -87,15 +96,47 @@ export const ChatSidebar = ({
   }, [isResizing, resize, stopResizing]);
   // -----------------------------
 
+  // --- 미트볼 메뉴 로직 ---
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleMenuToggle = (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenMenuId(prev => prev === chatId ? null : chatId);
+  };
+
+  // --- 정렬 로직 ---
+  // 고정된 채팅(Pinned)을 상단으로, 나머지는 기존 순서 유지
+  const sortedHistories = (() => {
+    if (!chatHistories) return [];
+    
+    const pinnedChats = chatHistories.filter(chat => chat.isPinned);
+    const unpinnedChats = chatHistories.filter(chat => !chat.isPinned);
+    
+    return [...pinnedChats, ...unpinnedChats];
+  })();
+
   return (
     <aside
       className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full relative font-sans text-slate-300 transition-all duration-300"
       style={{ width: isCollapsed ? '70px' : `${sidebarWidth}px` }}
     >
-      {/* 상단 영역: 로고/토글 및 새 채팅 버튼 */}
+      {/* 상단 영역 */}
       <div className="p-4 flex flex-col gap-4 flex-shrink-0">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-           {/* 로고 영역 */}
            {!isCollapsed && (
              <button 
                onClick={() => navigate('/')}
@@ -104,7 +145,6 @@ export const ChatSidebar = ({
                LAWDING
              </button>
            )}
-           {/* 토글 버튼 */}
            <button
             onClick={onToggleCollapse}
             className="text-slate-400 hover:text-white transition-colors"
@@ -113,7 +153,6 @@ export const ChatSidebar = ({
           </button>
         </div>
 
-        {/* 새 채팅 버튼 */}
         <button
           onClick={onNewChat}
           className={`flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md ${
@@ -129,15 +168,13 @@ export const ChatSidebar = ({
       <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
         {!isCollapsed ? (
           <>
-            {/* 메뉴 헤더 */}
             <div className="flex items-center gap-3 px-3 py-2 text-slate-400 mb-2">
               <History size={18} />
               <span className="text-sm font-semibold">히스토리</span>
             </div>
 
-            {/* 채팅 목록 */}
-            <div className="space-y-1 mb-6">
-              {chatHistories?.map((chat) => (
+            <div className="space-y-1 mb-6 pb-20">
+              {sortedHistories.map((chat) => (
                 <div
                   key={chat.id}
                   onClick={() => onChatClick(chat.id)}
@@ -146,8 +183,8 @@ export const ChatSidebar = ({
                       ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-[#334155]' 
                       : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
                   }`} 
-
                 >
+                  {/* 왼쪽 말풍선 아이콘 */}
                   <MessageSquare size={16} className={currentChatId === chat.id ? 'text-blue-400' : 'opacity-70'} />
                   
                   {editingChatId === chat.id ? (
@@ -163,36 +200,104 @@ export const ChatSidebar = ({
                     />
                   ) : (
                     <>
+                      {/* 채팅방 이름 (남은 공간 차지하여 오른쪽 요소 밀어냄) */}
                       <span className="truncate flex-1">{chat.name}</span>
-                      <div className="hidden group-hover:flex gap-2 absolute right-2 bg-[#1E293B] pl-2 rounded shadow-sm">
-                        <button onClick={(e) => onChatRename(chat.id, e)} className="text-slate-400 hover:text-white">
-                          <Edit2 size={14} />
+                      
+                      {/* 고정 핀 아이콘 (이름 오른쪽, 메뉴 왼쪽) */}
+                      {chat.isPinned && (
+                        // Lucide 아이콘 사용 시
+                        <Pin size={14} className="text-blue-400 fill-blue-400/20 rotate-45 flex-shrink-0" />
+                        
+                        /* 이미지(fin.png) 사용 시 위 Pin 컴포넌트를 지우고 아래 주석 해제
+                        <img 
+                            src="assets/fin.png" 
+                            alt="pinned" 
+                            className="w-3.5 h-3.5 opacity-80 flex-shrink-0"
+                        />
+                        */
+                      )}
+
+                      {/* 미트볼 메뉴 버튼 */}
+                      <div className="relative">
+                        <button 
+                          onClick={(e) => handleMenuToggle(chat.id, e)} 
+                          className={`p-1 rounded hover:bg-slate-700 transition-colors ${openMenuId === chat.id ? 'opacity-100 bg-slate-700' : 'opacity-0 group-hover:opacity-100'}`}
+                        >
+                          {/* Lucide 아이콘 사용 시 */}
+                          <MoreVertical size={16} className="text-slate-400" />
+
+                          {/* 이미지(vertical_dot.png) 사용 시 위 MoreVertical 컴포넌트를 지우고 아래 주석 해제
+                          <img 
+                            src="assets/vertical_dot.png" 
+                            alt="menu" 
+                            className="w-4 h-4 object-contain filter invert opacity-70"
+                            style={{ filter: 'brightness(0) invert(0.8)' }} 
+                          />
+                          */ }
                         </button>
-                        <button onClick={(e) => onChatDelete(chat.id, e)} className="text-slate-400 hover:text-red-400">
-                          <Trash2 size={14} />
-                        </button>
+
+                        {/* 드롭다운 메뉴 */}
+                        {openMenuId === chat.id && (
+                          <div 
+                            ref={menuRef}
+                            className="absolute right-0 top-8 z-50 w-32 bg-[#2D3748] border border-slate-600 rounded-md shadow-xl overflow-hidden py-1 flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {/* 1. 고정 하기/해제 */}
+                            <button
+                              onClick={(e) => {
+                                onTogglePin(chat.id, e);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                            >
+                              {chat.isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+                              <span>{chat.isPinned ? '고정 해제' : '고정'}</span>
+                            </button>
+
+                            {/* 2. 이름 변경 */}
+                            <button
+                              onClick={(e) => {
+                                onChatRename(chat.id, e);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                            >
+                              <Edit2 size={14} />
+                              <span>이름 변경</span>
+                            </button>
+
+                            {/* 3. 삭제 */}
+                            <button
+                              onClick={(e) => {
+                                onChatDelete(chat.id, e);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-slate-600 w-full text-left transition-colors"
+                            >
+                              <Trash2 size={14} />
+                              <span>삭제</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
                 </div>
               ))}
             </div>
-            {/* 설정, 법률 도구 메뉴 섹션 삭제됨 */}
           </>
         ) : (
-          /* 접혔을 때 히스토리 아이콘만 표시 */
+          /* 접혔을 때 */
           <div className="flex flex-col items-center gap-4 mt-2">
              <button className="p-2 text-slate-400 hover:text-white hover:bg-[#1E293B] rounded-lg" title="히스토리">
                <History size={20} />
              </button>
-             {/* 설정 아이콘 삭제됨 */}
           </div>
         )}
       </div>
 
-      {/* 하단 로그아웃 영역 삭제됨 */}
-
-      {/* 리사이즈 드래그 핸들 */}
+      {/* 리사이즈 핸들 */}
       {!isCollapsed && (
         <div
           onMouseDown={startResizing}

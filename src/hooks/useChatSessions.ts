@@ -15,6 +15,7 @@ export interface ChatSession {
   messages: ChatMessage[]
   files: FileItem[]
   createdAt: Date
+  isPinned?: boolean
 }
 
 export interface FileItem {
@@ -41,7 +42,8 @@ export const useChatSessions = () => {
             files: (s.files || []).map((f: any) => ({
               ...f,
               file: new File([""], f.name || "unknown") 
-            }))
+            })),
+            isPinned: s.isPinned || false
           }))
         }
       } catch (e) {
@@ -83,7 +85,8 @@ export const useChatSessions = () => {
         name: f.name,
         isSelected: f.isSelected
         // file 객체는 제외
-      }))
+      })),
+      isPinned: s.isPinned
     }))
     localStorage.setItem('doc_sessions', JSON.stringify(sessionsToSave))
   }, [sessions])
@@ -168,6 +171,13 @@ export const useChatSessions = () => {
     ))
   }
 
+  const handleSessionTogglePin = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSessions(prev => prev.map(s => 
+      s.id === id ? { ...s, isPinned: !s.isPinned } : s
+    ))
+  }
+
   return {
     sessions,
     currentSession,
@@ -180,6 +190,7 @@ export const useChatSessions = () => {
     handleSessionRename,
     handleSessionRenameSave,
     handleSessionDeleteClick,
+    handleSessionTogglePin,
     confirmSessionDelete,
     updateCurrentSessionFiles,
     updateCurrentSessionMessages
