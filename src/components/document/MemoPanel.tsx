@@ -216,14 +216,14 @@ export const MemoPanel = ({
      {/* 드래그 핸들바 */}
      <div 
         onMouseDown={startResizing}
-        className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-gray-100 transition-colors my-1 select-none"
+        className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-[#F5F3EB] transition-colors my-1 select-none"
       >
-        <div className="w-14 h-1 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+        <div className="w-14 h-1 bg-[#F5F3EB] rounded-full group-hover:bg-gray-400 transition-colors"></div>
       </div>
 
       {selectedMemo ? (
-        <div className="flex flex-col flex-1 min-h-0 bg-[#F5F3EB] border border-minimal-gray rounded-lg shadow-minimal overflow-hidden">
-          <div className="p-3 border-b border-minimal-gray flex items-center justify-between bg-[#F5F3EB]">
+        <div className="flex flex-col flex-1 min-h-0 bg-[#F5F3EB] border border-[#F5F3EB] rounded-lg shadow-minimal overflow-hidden">
+          <div className="p-3 border-b border-[F5F3EB] flex items-center justify-between bg-[#F5F3EB]">
             {editingMemoName ? (
               <input
                 type="text"

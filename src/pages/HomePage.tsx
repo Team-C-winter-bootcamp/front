@@ -1,10 +1,11 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import Header from '../components/Header'
 import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
+import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 import logotext from '../assets/logotext.png'
 import background2 from '../assets/background2.png'
+import logo from '../assets/logo.png'
 // 아이콘 사용을 위해 lucide-react 추가
 import { Search, Gavel, FileText } from 'lucide-react'
 
@@ -13,8 +14,9 @@ import DynamicGraph from '../components/Graph/DynamicGraph'
 
 const HomePage = () => {
   const navigate = useNavigate()
-  const { isAuthenticated } = useStore()
+  const { isAuthenticated, user, logout } = useStore()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   // 검색 핸들러
   const handleSearch = (event: FormEvent) => {
@@ -53,10 +55,61 @@ const HomePage = () => {
     navigate('/document')
   }
 
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true)
+  }
+
+  const handleLogoutConfirm = () => {
+    logout()
+    setIsLogoutModalOpen(false)
+    navigate('/')
+  }
+
   return (
     // [변경 포인트] font-serif 적용: 전체 폰트를 '리디바탕'으로 설정하여 법전 느낌 강조
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <Header />
+      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#1A233B] font-serif">
+        <button
+          onClick={() => navigate('/')}
+          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+        >
+          <div className="inline-block p-1 rounded-full">
+            <img 
+                src={logo} 
+                alt="logo" 
+            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+                </div>
+        </button> 
+        
+        <div className="pr-[3%] flex gap-4 items-center">
+          {isAuthenticated && user ? (
+            <>
+              <span className="text-sm text-white font-light">환영합니다 {user.id}님!</span>
+              <button
+                onClick={handleLogoutClick}
+                className="btn-minimal-primary text-sm"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-minimal"
+              >
+                로그인
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="btn-minimal-primary"
+              >
+                회원가입
+              </button>
+            </>
+          )}
+        </div>
+      </header>
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex flex-col items-center justify-start w-full">
@@ -122,7 +175,7 @@ const HomePage = () => {
           {/* 버튼 1: 유사한 판례 찾기 */}
           <button
             onClick={handleAIChatClick}
-            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1E2B45] to-[#2B4066] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
+            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
           >
             <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -145,7 +198,7 @@ const HomePage = () => {
           {/* 버튼 2: 문서 작성하러 가기 */}
           <button
             onClick={handleDocumentClick}
-            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1E2B45] to-[#2B4066] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
+            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
           >
             <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -180,6 +233,12 @@ const HomePage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleModalConfirm}
+      />
+
+      <LogoutAlertModal 
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
       />
     </div>
   )

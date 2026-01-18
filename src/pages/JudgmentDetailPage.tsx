@@ -1,7 +1,9 @@
 import { useMemo, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Header from '../components/Header'
+import { useStore } from '../store/useStore'
 import { SearchBar } from '../components/search/SearchBar'
+import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
+import logo from '../assets/logo.png'
 import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
@@ -14,12 +16,14 @@ import bookmark from '../assets/bookmark.png'
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { isAuthenticated, user, logout } = useStore()
   
   const [searchInput, setSearchInput] = useState('')
   // 현재 보고 있는 섹션 상태 (스크롤 스파이 용도)
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai')
   // AI 요약 펼치기/접기 상태
   const [isAiExpanded, setIsAiExpanded] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
   
   const numericId = Number(id)
   const contentRef = useRef<HTMLDivElement>(null) // PDF 변환 영역 참조
@@ -175,13 +179,33 @@ const JudgmentDetailPage = () => {
     setIsBookmarked(!isBookmarked)
   }
 
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true)
+  }
+
+  const handleLogoutConfirm = () => {
+    logout()
+    setIsLogoutModalOpen(false)
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <Header />
-      
-      {/* SearchBar */}
-      <div className="w-full flex justify-center lg:justify-start lg:pl-[5%] pt-4 pb-6 px-4 bg-[#F5F3EB] border-b border-minimal-gray ">
-        <div className="w-full max-w-[1400px]">
+      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#F5F3EB] font-serif">
+        <button
+          onClick={() => navigate('/')}
+          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+        >
+          <div className="inline-block p-1 rounded-full">
+            <img 
+                src={logo} 
+                alt="logo" 
+            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+                </div>
+        </button> 
+        
+        {/* 중앙 SearchBar */}
+        <div className="flex-1 max-w-2xl mx-4">
           <SearchBar
             searchInput={searchInput}
             setSearchInput={setSearchInput}
@@ -189,7 +213,36 @@ const JudgmentDetailPage = () => {
             onClear={() => setSearchInput('')}
           />
         </div>
+        
+        <div className="pr-[3%] flex gap-4 items-center">
+          {isAuthenticated && user ? (
+            <>
+              <span className="text-sm text-minimal-dark-gray font-light">환영합니다 {user.id}님!</span>
+              <button
+                onClick={handleLogoutClick}
+                className="btn-minimal-primary text-sm"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-minimal"
+              >
+                로그인
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="btn-minimal-primary"
+              >
+                회원가입
+              </button>
+            </>
+          )}
       </div>
+      </header>
 
       {/* Main Container */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
@@ -249,7 +302,7 @@ const JudgmentDetailPage = () => {
                   
                   {/* 헤더 영역: 아이콘과 제목을 묶고 구분선 추가 */}
                   <div className="flex items-center gap-3 mb-5 border-b border-minimal-gray pb-4">
-                    <div className="w-15 h-auto rounded-full bg-[#F5F3EB] border border-[#CFB982] flex items-center justify-center text-minimal-dark-gray font-bold text-xl flex-shrink-0">
+                    <div className="w-[90px] h-auto rounded-full bg-[#F5F3EB] border border-[#CFB982] flex items-center justify-center text-minimal-dark-gray font-bold text-lg flex-shrink-0">
                       AI 요약 
                     </div>
                   </div>
@@ -431,6 +484,12 @@ const JudgmentDetailPage = () => {
           </div>
         </div>
       </div>
+
+      <LogoutAlertModal 
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   )
 }

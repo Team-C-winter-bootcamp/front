@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import Header from '../components/Header'
 import { SearchBar } from '../components/search/SearchBar'
+import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
+import logo from '../assets/logo.png'
 import { FilterSidebar } from '../components/search/FilterSidebar'
 import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
@@ -89,10 +90,11 @@ const SearchResultsPage = () => {
   const query = searchParams.get('q') || ''
   const tabParam = searchParams.get('tab')
 
-  const { isAuthenticated } = useStore()
+  const { isAuthenticated, user, logout } = useStore()
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
@@ -145,13 +147,33 @@ const SearchResultsPage = () => {
     navigate(`/judgment/${id}`, { state: { from: 'search' } })
   }
 
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true)
+  }
+
+  const handleLogoutConfirm = () => {
+    logout()
+    setIsLogoutModalOpen(false)
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <Header />
-      
-      {/* SearchBar 영역 */}
-      <div className="w-full flex justify-center lg:justify-start lg:pl-[5%] pt-4 pb-6 px-4 bg-[#F5F3EB] border-b border-minimal-gray">
-        <div className="w-full max-w-[1400px]">
+      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#F5F3EB] font-serif">
+        <button
+          onClick={() => navigate('/')}
+          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+        >
+          <div className="inline-block p-1 rounded-full">
+            <img 
+                src={logo} 
+                alt="logo" 
+            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+                </div>
+        </button> 
+        
+        {/* 중앙 SearchBar */}
+        <div className="flex-1 max-w-2xl mx-4">
           <SearchBar
             searchInput={searchInput}
             setSearchInput={setSearchInput}
@@ -160,13 +182,41 @@ const SearchResultsPage = () => {
               setSearchInput('')
               setSearchParams({ tab: activeTab })
             }} 
-          /> 
-
+          />
         </div>
-      </div>
+        
+        <div className="pr-[3%] flex gap-4 items-center">
+          {isAuthenticated && user ? (
+            <>
+              <span className="text-sm text-minimal-dark-gray font-light">환영합니다 {user.id}님!</span>
+              <button
+                onClick={handleLogoutClick}
+                className="btn-minimal-primary text-sm"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-minimal"
+              >
+                로그인
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="btn-minimal-primary"
+              >
+                회원가입
+              </button>
+            </>
+          )}
+        </div>
+      </header>
 
       {/* Mobile Filter Toggle */}
-      <div className="md:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
+      <div className="xl:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
         <div className="flex gap-2">
           {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
             <button 
@@ -311,7 +361,7 @@ const SearchResultsPage = () => {
               className={`ml-auto sm:ml-2 px-5 py-2.5 rounded-full text-sm text-black transition-all duration-200 flex items-center gap-2 ${
                 activeTab === 'ai' 
                   ? 'bg-black text-white font-medium shadow-md ring-2 ring-black ring-offset-1' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-gray-100 font-light'
+                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
               }`}
             >
               나의 유사 판례 찾기
@@ -374,6 +424,12 @@ const SearchResultsPage = () => {
         isOpen={isAlertModalOpen}
         onClose={() => setIsAlertModalOpen(false)}
         onConfirm={handleAlertModalConfirm}
+      />
+
+      <LogoutAlertModal 
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
       />
     </div>
   )

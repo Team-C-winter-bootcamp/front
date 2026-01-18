@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Header from '../components/Header'
 import DeleteAlertModal from '../components/AlertModal/DeleteAlertModal'
 import MomoAlertModal from '../components/AlertModal/MomoAlertModal'
 import FileAlertModal from '../components/AlertModal/FileAlertModal'
@@ -53,7 +52,6 @@ const DocumentPage = () => {
 
   return (
     <div className="h-screen bg-[#F5F3EB] flex flex-col overflow-hidden text-minimal-charcoal font-serif">
-      <Header />
       
       {/* 모달 렌더링 */}
       <DeleteAlertModal 
@@ -138,7 +136,7 @@ const DocumentPage = () => {
               e.preventDefault()
               resize.setIsResizingMemo(true)
             }}
-            className="w-1 bg-minimal-gray cursor-ew-resize flex-shrink-0"
+            className="w-1 bg-[#CFB982] cursor-ew-resize flex-shrink-0"
           />
         )}
 

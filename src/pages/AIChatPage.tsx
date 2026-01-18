@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Header from '../components/Header'
 import DeleteAlertModal from '../components/AlertModal/DeleteAlertModal'
 import { ChatSidebar } from '../components/ai-chat/ChatSidebar'
 import { ChatMessage } from '../components/ai-chat/ChatMessage'
@@ -47,7 +46,6 @@ const AIChatPage = () => {
 
   return (
     <div className="h-screen bg-[#F5F3EB] flex flex-col text-minimal-charcoal overflow-hidden font-serif">
-      <Header />
       
       {/* 삭제 확인 모달 */}
       <DeleteAlertModal 
