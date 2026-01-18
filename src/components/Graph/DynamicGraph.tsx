@@ -56,44 +56,6 @@ const create3DGradient = (mainColor: string, highlightColor: string) => {
   };
 };
 
-// === 디자인 시스템에 맞춘 컬러 팔레트 수정 및 하이라이트 색상 추가 ===
-const COLORS = {
-  // center: 이미지의 중앙 '핫이슈 키워드' 노드 색상 (금색/황토색)
-  center: '#CFB982',
-  // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  centerHighlight: '#EAD8B1',
-
-  // root: 이미지의 1차 노드 색상 (짙은 네이비)
-  root: '#23355c',
-  // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  rootHighlight: '#4C6494',
-
-  // leaf: 이미지의 2차 노드 색상 (채도 낮은 파란색/하늘색)
-  leaf: '#7591c9',
-  // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  leafHighlight: '#AEC4E6',
-
-  // line: 선 색상은 기존 유지 (은은한 회색)
-  line: '#E2E8F0',
-  text: '#FFFFFF',
-};
-
-// [NEW] 3D 볼륨감을 위한 방사형 그라데이션 생성 함수
-const create3DGradient = (mainColor: string, highlightColor: string) => {
-  return {
-    type: 'radial' as const,
-    x: 0.3, // 빛의 중심점 x좌표 (0~1, 왼쪽이 0) - 왼쪽 상단에서 빛이 들어오는 느낌
-    y: 0.3, // 빛의 중심점 y좌표 (0~1, 위쪽이 0)
-    r: 0.7, // 그라데이션 반경
-    colorStops: [
-      { offset: 0, color: highlightColor }, // 중심부 (가장 밝은 빛)
-      // { offset: 0.5, color: mainColor },    // 중간톤
-      { offset: 1, color: mainColor }       // 외곽부 (기본 색상, 약간 어둡게 처리됨)
-    ],
-    global: false // 상대 좌표 사용
-  };
-};
-
 const CENTER_NODE: GraphNode = {
   id: 'center',
   name: '핫이슈\n키워드',
