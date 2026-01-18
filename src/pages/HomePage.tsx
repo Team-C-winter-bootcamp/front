@@ -5,7 +5,7 @@ import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
 import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 import logotext from '../assets/logotext.png'
 import background2 from '../assets/background2.png'
-import logo from '../assets/logo.png'
+import logow from '../assets/logow.png'
 // 아이콘 사용을 위해 lucide-react 추가
 import { Search, Gavel, FileText } from 'lucide-react'
 
@@ -75,9 +75,9 @@ const HomePage = () => {
         >
           <div className="inline-block p-1 rounded-full">
             <img 
-                src={logo} 
+                src={logow} 
                 alt="logo" 
-            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+            className="w-10 h-10 object-contain justify-center items-center " />
                 </div>
         </button> 
         
@@ -112,7 +112,7 @@ const HomePage = () => {
       </header>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex flex-col items-center justify-start w-full">
+      <div className="flex flex-col items-center justify-start w-full border-t-[3px] border-[#CFB982]">
         
         {/* 상단 로고 & 검색 섹션 */}
         <div 

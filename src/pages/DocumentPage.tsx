@@ -130,18 +130,6 @@ const DocumentPage = () => {
           onRightPanelToggle={() => setIsRightPanelOpen(!isRightPanelOpen)}
         />
 
-        {/* 채팅-메모 사이 드래그 핸들 (Right Resize Handle) */}
-        {isRightPanelOpen && (
-          <div
-            ref={resize.memoResizeRef}
-            onMouseDown={(e) => {
-              e.preventDefault()
-              resize.setIsResizingMemo(true)
-            }}
-            className="w-1 bg-[#CFB982] cursor-ew-resize flex-shrink-0"
-          />
-        )}
-
         {/* ================= 오른쪽 메모 패널 영역 ================= */}
         {/* 중요: 여기서 {isRightPanelOpen && ...} 조건문을 꼭 제거해야 합니다! */}
         {/* MemoPanel 내부에서 닫힘 상태를 처리하므로 항상 렌더링해야 합니다. */}

@@ -7,7 +7,7 @@ import { Plus, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 interface LeftSidebarProps {
   isLeftPanelOpen: boolean
   onTogglePanel: () => void
-  sourceWidth: number
+  sourceWidth: number // 이제 고정 너비를 사용하므로 실제로는 사용되지 않지만 인터페이스 유지를 위해 남김
   sourceResizeRef: React.RefObject<HTMLDivElement>
   onResizeStart: () => void
   fileAreaHeight: number
@@ -47,9 +47,6 @@ interface LeftSidebarProps {
 export const LeftSidebar = ({
   isLeftPanelOpen,
   onTogglePanel,
-  sourceWidth,
-  sourceResizeRef,
-  onResizeStart,
   fileAreaHeight,
   fileDividerResizeRef,
   onFileDividerResizeStart,
@@ -106,7 +103,8 @@ export const LeftSidebar = ({
       <div
         ref={leftSidebarRef}
         className="border-r border-[#1E293B] bg-[#111e31] flex flex-col flex-shrink-0 z-10 transition-all duration-300 font-sans text-slate-300"
-        style={{ width: `${sourceWidth}px` }}
+        // 너비 조절 기능을 제거했으므로 sourceWidth 대신 고정값 사용 (예: 260px)
+        style={{ width: '260px' }}
       >
         {/* 상단: 새 채팅 버튼 (LAWDING 버튼 포함) */}
         <div className="p-4 flex flex-col gap-4 flex-shrink-0">
@@ -154,7 +152,7 @@ export const LeftSidebar = ({
           />
         </div>
         
-        {/* 드래그 가능한 구분선 */}
+        {/* 드래그 가능한 구분선 (수평 - 유지됨) */}
         <div
           ref={fileDividerResizeRef}
           onMouseDown={(e) => {
@@ -189,15 +187,7 @@ export const LeftSidebar = ({
         </div>
       </div>
 
-      {/* Resizer Handle */}
-      <div
-        ref={sourceResizeRef}
-        onMouseDown={(e) => {
-          e.preventDefault()
-          onResizeStart()
-        }}
-        className="w-1 bg-[#1E293B] cursor-ew-resize hover:bg-blue-500/50 transition-colors flex-shrink-0"
-      />
+
     </>
   )
 }
