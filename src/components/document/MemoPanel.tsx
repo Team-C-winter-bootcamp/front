@@ -1,11 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useStore } from '../../store/useStore'
-import undo from '../../assets/undo.png'
-import redo from '../../assets/redo.png'
-import copy from '../../assets/copy.png'
-import burger from '../../assets/burger.png'
-import b from '../../assets/b.png'
-import I from '../../assets/I.png'
+import { Undo2, Redo2, Copy, Menu, Bold, Italic } from 'lucide-react'
 
 interface MemoPanelProps {
   selectedMemoId: string | null
@@ -161,9 +156,7 @@ export const MemoPanel = ({
       <div className="bg-[#F5F3EB] border-l border-minimal-gray flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 font-serif">
         <div className="p-2 flex flex-col items-center gap-4 mt-4">
           <button onClick={onOpenPanel} className="p-2 hover:bg-[#E8E0D0] rounded-minimal text-minimal-medium-gray transition-colors" title="메모장 열기">
-            <div className="inline-block p-1 rounded-full">
-              <img src={burger} alt="burger" className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-50" />
-            </div>
+            <Menu size={20} className="text-minimal-medium-gray opacity-60" />
           </button>
         </div>
       </div>
@@ -178,9 +171,7 @@ export const MemoPanel = ({
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-2">
           <button onClick={onTogglePanel} className="p-2 hover:bg-[#E8E0D0] rounded-minimal text-minimal-medium-gray transition-colors" title="메모장 접기">
-            <div className="inline-block p-1 rounded-full">
-              <img src={burger} alt="burger" className="w-5 h-5 object-contain justify-center items-center pt-1 opacity-50" />
-            </div>
+            <Menu size={20} className="text-minimal-medium-gray opacity-60" />
           </button>
           <h3 className="font-light text-minimal-charcoal">메모장 <span className="text-xs font-light text-minimal-medium-gray">({memos.length}/10)</span></h3>
         </div>
@@ -244,22 +235,22 @@ export const MemoPanel = ({
           
           <div className="flex items-center gap-1 p-2 border-b border-minimal-gray bg-[#F5F3EB] flex-wrap">
             <button onClick={onUndo} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="실행 취소">
-               <div className="inline-block p-1 rounded-full"><img src={undo} alt="undo" className="w-3 h-3 object-contain opacity-50" /></div>
+              <Undo2 size={16} className="text-minimal-dark-gray opacity-60" />
             </button>
             <button onClick={onRedo} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="다시 실행">
-               <div className="inline-block p-1 rounded-full"><img src={redo} alt="redo" className="w-3 h-3 object-contain opacity-50" /></div>
+              <Redo2 size={16} className="text-minimal-dark-gray opacity-60" />
             </button>
             <button onClick={handleToolbarPaste} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="붙여넣기">
-               <div className="inline-block p-1 rounded-full"><img src={copy} alt="copy" className="w-3 h-3 object-contain opacity-50" /></div>
+              <Copy size={16} className="text-minimal-dark-gray opacity-60" />
             </button>
             
             <div className="w-px h-4 bg-minimal-gray mx-1"></div>
             
             <button onMouseDown={(e) => applyStyle(e, 'bold')} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal font-medium text-minimal-dark-gray transition-colors" title="굵게">
-            <div className="inline-block p-1 rounded-full"><img src={b} alt="bold" className="w-3 h-3 object-contain opacity-50" /></div>
+              <Bold size={16} className="text-minimal-dark-gray opacity-60" />
             </button>
             <button onMouseDown={(e) => applyStyle(e, 'italic')} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal italic text-minimal-dark-gray transition-colors" title="기울임">
-            <div className="inline-block p-1 rounded-full"><img src={I} alt="i" className="w-3 h-3 object-contain opacity-50" /></div>
+              <Italic size={16} className="text-minimal-dark-gray opacity-60" />
             </button>
           </div>
 

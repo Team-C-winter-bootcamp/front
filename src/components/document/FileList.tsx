@@ -1,6 +1,5 @@
 import { FileItem } from '../../hooks/useChatSessions'
-import pencil from '../../assets/pencil.png'
-import x from '../../assets/x.png'
+import { Pencil, X } from 'lucide-react'
 
 interface FileListProps {
   files: FileItem[]
@@ -106,16 +105,10 @@ export const FileList = ({
                   <div className="flex items-center gap-2 overflow-hidden">
                     <button 
                       onClick={() => onFileRenameClick(file.id, file.name)}
-                      className="text-slate-400 hover:text-white p-1 flex-shrink-0 transition-colors"
+                      className="text-slate-400 hover:text-slate-200 p-1 flex-shrink-0 transition-colors"
                       title="이름 변경"
                     >
-                      <div className="inline-block p-1 rounded-full">
-                        <img 
-                          src={pencil} 
-                          alt="pencil" 
-                          className="w-4 h-4 object-contain justify-center items-center pt-1 opacity-50" 
-                        />
-                      </div>
+                      <Pencil size={14} className="opacity-60" />
                     </button>
                     <span className="text-xs truncate text-slate-300 font-light">{file.name}</span>
                   </div>
@@ -132,7 +125,7 @@ export const FileList = ({
                   onClick={() => onFileDeleteClick(file.id)}
                   className="text-slate-400 hover:text-red-400 transition-colors"
                 >
-                  <img src={x} alt="x" className="w-3 h-3 object-contain justify-center items-center opacity-50" />
+                  <X size={14} className="opacity-60" />
                 </button>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import logoImage from '../../assets/logo.png'
-import { Send, Mic } from 'lucide-react'
+import { Send } from 'lucide-react'
 
 interface WelcomeScreenProps {
   input: string
@@ -43,9 +43,6 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
             className="w-full p-5 pr-24 text-lg border border-[#CFB982] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8A45D] focus:border-transparent transition-all placeholder-gray-400 bg-[#F5F3EB] text-minimal-charcoal font-sans"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-            <button type="button" className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <Mic size={24} />
-            </button>
             <button 
               type="submit"
               disabled={!input.trim()}
