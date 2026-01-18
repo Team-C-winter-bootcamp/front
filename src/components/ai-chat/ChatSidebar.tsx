@@ -1,9 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { ChatHistory } from '../../store/useStore'
-import pencil from '../../assets/pencil.png'
-import bin from '../../assets/bin.png'
-import plus from '../../assets/plus.png'
-import burger from '../../assets/burger.png'
+// 사용하지 않는 아이콘(Settings, Wrench, LogOut, Menu) import 제거
+import { 
+  Plus, 
+  History, 
+  MessageSquare, 
+  Edit2, 
+  Trash2,
+  PanelLeftClose,
+  PanelLeftOpen
+} from 'lucide-react'
 
 interface ChatSidebarProps {
   isCollapsed: boolean
@@ -34,8 +40,8 @@ export const ChatSidebar = ({
   onRenameSave,
   onChatDelete
 }: ChatSidebarProps) => {
-  // --- [추가] 리사이징 관련 로직 ---
-  const [sidebarWidth, setSidebarWidth] = useState(256); // 기본 w-64 = 256px
+  // --- 리사이징 관련 로직 (유지) ---
+  const [sidebarWidth, setSidebarWidth] = useState(260); 
   const [isResizing, setIsResizing] = useState(false);
   const resizingRef = useRef(false);
 
@@ -57,7 +63,6 @@ export const ChatSidebar = ({
   const resize = useCallback((e: MouseEvent) => {
     if (resizingRef.current) {
       const newWidth = e.clientX;
-      // 최소 160px, 최대 480px 제한
       if (newWidth >= 160 && newWidth <= 480) {
         setSidebarWidth(newWidth);
       }
@@ -81,31 +86,36 @@ export const ChatSidebar = ({
 
   return (
     <aside
-      className="bg-gray-50 border-r border-gray-200 transition-all duration-300 flex-shrink-0 flex flex-col h-full relative"
-      style={{ width: isCollapsed ? '64px' : `${sidebarWidth}px` }} // 동적 너비 적용
+      className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full relative font-sans text-slate-300 transition-all duration-300"
+      style={{ width: isCollapsed ? '70px' : `${sidebarWidth}px` }}
     >
-      <div className="p-4 flex items-center justify-between flex-shrink-0">
-        {!isCollapsed && (
-          <button
-            onClick={onNewChat}
-            className="w-full px-4 py-2.5 bg-white border border-gray-300 text-black rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm text-sm font-bold"
+      {/* 상단 영역: 로고/토글 및 새 채팅 버튼 */}
+      <div className="p-4 flex flex-col gap-4 flex-shrink-0">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+           {/* 로고 영역 */}
+           {!isCollapsed && (
+             <span className="font-bold text-lg text-white tracking-wider">LAWDING</span>
+           )}
+           {/* 토글 버튼 */}
+           <button
+            onClick={onToggleCollapse}
+            className="text-slate-400 hover:text-white transition-colors"
           >
-            <span>+</span>
-            <span>새 채팅</span>
+            {isCollapsed ? <PanelLeftOpen size={24} /> : <PanelLeftClose size={24} />}
           </button>
-        )}
+        </div>
+
+        {/* 새 채팅 버튼 */}
         <button
-          onClick={onToggleCollapse}
-          className={`p-2 hover:bg-gray-200 rounded-lg text-gray-500 transition-colors ${isCollapsed ? 'mx-auto' : 'ml-2'}`}
+          onClick={onNewChat}
+          className={`flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md ${
+            isCollapsed ? 'w-10 h-10 p-0 mx-auto' : 'w-full py-3 px-4'
+          }`}
         >
-          {isCollapsed ? '➜' : (
-            <div className="inline-block p-1 rounded-full">
-              <img src={burger} alt="burger" className="w-5 h-5 object-contain opacity-60 pt-1" />
-            </div>
-          )}
+          <Plus size={20} />
+          {!isCollapsed && <span className="font-medium text-sm">새 채팅</span>}
         </button>
       </div>
-
 
       {/* 중단 영역: 채팅 히스토리 */}
       <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
@@ -167,29 +177,18 @@ export const ChatSidebar = ({
                <History size={20} />
              </button>
              {/* 설정 아이콘 삭제됨 */}
-
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {isCollapsed && (
-        <div className="p-2 flex flex-col items-center gap-4">
-          <button onClick={onNewChat} className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 shadow-sm">
-            <div className="inline-block p-1 rounded-full">
-              <img src={plus} alt="plus" className="w-5 h-5 object-contain opacity-60 pt-1" />
-            </div>
-          </button>
-        </div>
-      )}
+      {/* 하단 로그아웃 영역 삭제됨 */}
 
-      {/* --- [추가] 리사이즈 드래그 핸들 --- */}
+      {/* 리사이즈 드래그 핸들 */}
       {!isCollapsed && (
         <div
           onMouseDown={startResizing}
-          className="absolute top-0 right-0 w-1 h-full cursor-col-resize group flex items-center justify-center z-30"
+          className="absolute top-0 right-0 w-1 h-full cursor-col-resize group flex items-center justify-center z-30 hover:bg-blue-500/50 transition-colors"
         >
-          {/* 평소에는 투명하다가 hover 시 파란색으로 변하는 바 */}
-          <div className="w-[5px] h-full bg-transparent group-hover:bg-gray-400 transition-colors"></div>
         </div>
       )}
     </aside>
