@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChatHistory } from '../../store/useStore'
 import { 
@@ -52,48 +52,8 @@ export const ChatSidebar = ({
 }: ChatSidebarProps) => {
   const navigate = useNavigate()
   
-  // --- 리사이징 관련 로직 ---
-  const [sidebarWidth, setSidebarWidth] = useState(260); 
-  const [isResizing, setIsResizing] = useState(false);
-  const resizingRef = useRef(false);
-
-  const startResizing = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    resizingRef.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  }, []);
-
-  const stopResizing = useCallback(() => {
-    setIsResizing(false);
-    resizingRef.current = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
-
-  const resize = useCallback((e: MouseEvent) => {
-    if (resizingRef.current) {
-      const newWidth = e.clientX;
-      if (newWidth >= 160 && newWidth <= 480) {
-        setSidebarWidth(newWidth);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isResizing) {
-      window.addEventListener('mousemove', resize);
-      window.addEventListener('mouseup', stopResizing);
-    } else {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    }
-    return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    };
-  }, [isResizing, resize, stopResizing]);
+  // --- 리사이징 관련 로직 제거됨 ---
+  // useState(sidebarWidth), useCallback, useEffect(resize event) 등 삭제
   // -----------------------------
 
   // --- 미트볼 메뉴 로직 ---
@@ -119,7 +79,6 @@ export const ChatSidebar = ({
   };
 
   // --- 정렬 로직 ---
-  // 고정된 채팅(Pinned)을 상단으로, 나머지는 기존 순서 유지
   const sortedHistories = (() => {
     if (!chatHistories) return [];
     
@@ -132,7 +91,8 @@ export const ChatSidebar = ({
   return (
     <aside
       className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full relative font-sans text-slate-300 transition-all duration-300"
-      style={{ width: isCollapsed ? '70px' : `${sidebarWidth}px` }}
+      // style에서 sidebarWidth 상태 대신 고정값(260px) 사용
+      style={{ width: isCollapsed ? '70px' : '260px' }}
     >
       {/* 상단 영역 */}
       <div className="p-4 flex flex-col gap-4 flex-shrink-0">
@@ -200,21 +160,12 @@ export const ChatSidebar = ({
                     />
                   ) : (
                     <>
-                      {/* 채팅방 이름 (남은 공간 차지하여 오른쪽 요소 밀어냄) */}
+                      {/* 채팅방 이름 */}
                       <span className="truncate flex-1">{chat.name}</span>
                       
-                      {/* 고정 핀 아이콘 (이름 오른쪽, 메뉴 왼쪽) */}
+                      {/* 고정 핀 아이콘 */}
                       {chat.isPinned && (
-                        // Lucide 아이콘 사용 시
                         <Pin size={14} className="text-blue-400 fill-blue-400/20 rotate-45 flex-shrink-0" />
-                        
-                        /* 이미지(fin.png) 사용 시 위 Pin 컴포넌트를 지우고 아래 주석 해제
-                        <img 
-                            src="assets/fin.png" 
-                            alt="pinned" 
-                            className="w-3.5 h-3.5 opacity-80 flex-shrink-0"
-                        />
-                        */
                       )}
 
                       {/* 미트볼 메뉴 버튼 */}
@@ -223,17 +174,7 @@ export const ChatSidebar = ({
                           onClick={(e) => handleMenuToggle(chat.id, e)} 
                           className={`p-1 rounded hover:bg-slate-700 transition-colors ${openMenuId === chat.id ? 'opacity-100 bg-slate-700' : 'opacity-0 group-hover:opacity-100'}`}
                         >
-                          {/* Lucide 아이콘 사용 시 */}
                           <MoreVertical size={16} className="text-slate-400" />
-
-                          {/* 이미지(vertical_dot.png) 사용 시 위 MoreVertical 컴포넌트를 지우고 아래 주석 해제
-                          <img 
-                            src="assets/vertical_dot.png" 
-                            alt="menu" 
-                            className="w-4 h-4 object-contain filter invert opacity-70"
-                            style={{ filter: 'brightness(0) invert(0.8)' }} 
-                          />
-                          */ }
                         </button>
 
                         {/* 드롭다운 메뉴 */}
@@ -297,14 +238,7 @@ export const ChatSidebar = ({
         )}
       </div>
 
-      {/* 리사이즈 핸들 */}
-      {!isCollapsed && (
-        <div
-          onMouseDown={startResizing}
-          className="absolute top-0 right-0 w-1 h-full cursor-col-resize group flex items-center justify-center z-30 hover:bg-blue-500/50 transition-colors"
-        >
-        </div>
-      )}
+      {/* 리사이즈 핸들 div가 완전히 삭제되었습니다. */}
     </aside>
   )
 }

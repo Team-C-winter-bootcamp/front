@@ -218,7 +218,7 @@ export const MemoPanel = ({
         onMouseDown={startResizing}
         className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-[#F5F3EB] transition-colors my-1 select-none"
       >
-        <div className="w-14 h-1 bg-[#F5F3EB] rounded-full group-hover:bg-gray-400 transition-colors"></div>
+        <div className="w-14 h-1 bg-[#C8A45D] rounded-full group-hover:bg-[#CFB982] transition-colors"></div>
       </div>
 
       {selectedMemo ? (

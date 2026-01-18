@@ -31,9 +31,9 @@ const COLORS = {
   rootHighlight: '#2A3454',
 
   // leaf: 이미지의 2차 노드 색상 (채도 낮은 파란색/하늘색)
-  leaf: '#1A233B',
+  leaf: '#42A5F5',
   // [NEW] 입체감을 위한 밝은 하이라이트 색상
-  leafHighlight: '#3A4A6B',
+  leafHighlight: '#90CAF9',
 
   // line: 선 색상은 기존 유지 (은은한 회색)
   line: '#E2E8F0',
