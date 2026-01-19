@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useUser } from '@clerk/clerk-react'
 import { useStore, Message, ChatHistory } from '../store/useStore'
 
 export const useAIChat = () => {
   const navigate = useNavigate()
+  const { isSignedIn } = useUser()
   const { 
-    isAuthenticated, 
     chatHistories, 
     setChatHistories, 
     currentChatId, 
@@ -26,10 +27,10 @@ export const useAIChat = () => {
   const previousChatIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isSignedIn) {
       navigate('/') 
     }
-  }, [isAuthenticated, navigate])
+  }, [isSignedIn, navigate])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

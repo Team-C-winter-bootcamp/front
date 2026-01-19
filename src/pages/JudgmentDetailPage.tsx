@@ -1,8 +1,13 @@
 import { useMemo, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useStore } from '../store/useStore'
+// [변경 1] Clerk 관련 Hook과 컴포넌트 import
+import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+
+// [삭제] 기존 useStore 및 LogoutModal 제거
+// import { useStore } from '../store/useStore'
+// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
+
 import { SearchBar } from '../components/search/SearchBar'
-import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 import logo from '../assets/logo.png'
 import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
@@ -13,17 +18,19 @@ import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react'
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { isAuthenticated, user, logout } = useStore()
+  
+  // [변경 2] Clerk useUser 훅 사용
+  const { user } = useUser()
   
   const [searchInput, setSearchInput] = useState('')
-  // 현재 보고 있는 섹션 상태 (스크롤 스파이 용도)
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai')
-  // AI 요약 펼치기/접기 상태
   const [isAiExpanded, setIsAiExpanded] = useState(false)
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  
+  // [삭제] LogoutModal 관련 state 삭제
+  // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
   
   const numericId = Number(id)
-  const contentRef = useRef<HTMLDivElement>(null) // PDF 변환 영역 참조
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const [isBookmarked, setIsBookmarked] = useState(() => {
     const raw = localStorage.getItem('bookmarked_judgments')
@@ -58,7 +65,6 @@ const JudgmentDetailPage = () => {
     judgmentType: ''
   }
 
-  // 데이터 구조화
   const judgmentData = {
     id: id,
     title: displayData.title,
@@ -73,7 +79,7 @@ const JudgmentDetailPage = () => {
         '피고인은 하천법의 적용 또는 준용을 받는 하천부지에서 송어양식어업을 영위하며 하천부지를 무단으로 점용함.',
         '원심은 피고인의 행위를 내수면어업개발촉진법 위반 및 공유수면관리법 위반죄로 판단함.',
         '피고인은 이에 불복하여 상고함.',
-        displayData.content // 실제 데이터 연결
+        displayData.content
       ]
     },
     judgment: {
@@ -87,7 +93,7 @@ const JudgmentDetailPage = () => {
         '1. 원심판결을 파기하고, 사건을 서울고등법원에 환송한다.',
         '2. 피고인의 나머지 상고를 기각한다.'
       ],
-      reasons: displayData.content.repeat(5) // 스크롤 테스트를 위해 내용 반복
+      reasons: displayData.content.repeat(5)
     },
     relatedCases: [
       { name: '대법원 2012도1234', desc: '유사한 사실관계 판례' },
@@ -95,12 +101,10 @@ const JudgmentDetailPage = () => {
     ]
   }
 
-  // 스크롤 이동 함수
   const scrollToSection = (sectionId: 'ai' | 'original') => {
     setActiveTab(sectionId)
     const element = document.getElementById(sectionId)
     if (element) {
-      // 헤더 높이(약 150px)를 고려하여 스크롤 위치 조정
       const headerOffset = 180
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset
@@ -112,15 +116,13 @@ const JudgmentDetailPage = () => {
     }
   }
 
-  // 실제 PDF 다운로드 기능
   const handleDownloadPDF = async () => {
     if (!contentRef.current) return
 
     try {
-      // PDF 생성 중임을 알리는 로딩 상태가 필요하다면 추가 가능
       const canvas = await html2canvas(contentRef.current, {
-        // @ts-ignore - scale 옵션은 html2canvas에서 지원하지만 타입 정의에 없을 수 있음
-        scale: 2, // 해상도 2배
+        // @ts-ignore
+        scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff' 
@@ -128,8 +130,8 @@ const JudgmentDetailPage = () => {
 
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
-      const imgWidth = 210 // A4 너비
-      const pageHeight = 297 // A4 높이
+      const imgWidth = 210
+      const pageHeight = 297
       const imgHeight = (canvas.height * imgWidth) / canvas.width
       let heightLeft = imgHeight
       let position = 0
@@ -137,7 +139,6 @@ const JudgmentDetailPage = () => {
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
       heightLeft -= pageHeight
 
-      // 내용이 길어서 페이지가 넘어가는 경우 처리
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight
         pdf.addPage()
@@ -176,15 +177,7 @@ const JudgmentDetailPage = () => {
     setIsBookmarked(!isBookmarked)
   }
 
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true)
-  }
-
-  const handleLogoutConfirm = () => {
-    logout()
-    setIsLogoutModalOpen(false)
-    navigate('/')
-  }
+  // [삭제] Logout 관련 핸들러 삭제
 
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
@@ -197,7 +190,7 @@ const JudgmentDetailPage = () => {
             <img 
                 src={logo} 
                 alt="logo" 
-            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+                className="w-10 h-10 object-contain justify-center items-center opacity-50" />
                 </div>
         </button> 
         
@@ -211,34 +204,31 @@ const JudgmentDetailPage = () => {
           />
         </div>
         
+        {/* [변경 3] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
         <div className="pr-[3%] flex gap-4 items-center">
-          {isAuthenticated && user ? (
-            <>
-              <span className="text-sm text-minimal-dark-gray font-light">환영합니다 {user.id}님!</span>
-              <button
-                onClick={handleLogoutClick}
-                className="btn-minimal-primary text-sm"
-              >
-                로그아웃
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => navigate('/login')}
-                className="btn-minimal"
-              >
-                로그인
-              </button>
-              <button
-                onClick={() => navigate('/signup')}
-                className="btn-minimal-primary"
-              >
-                회원가입
-              </button>
-            </>
-          )}
-      </div>
+          <SignedIn>
+            <span className="text-sm text-minimal-dark-gray font-light">
+              환영합니다 {user?.firstName || user?.username}님!
+            </span>
+            {/* Clerk 제공 유저 버튼 (로그아웃 포함) */}
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+          
+          <SignedOut>
+            <button
+              onClick={() => navigate('/login')}
+              className="btn-minimal"
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => navigate('/signup')}
+              className="btn-minimal-primary"
+            >
+              회원가입
+            </button>
+          </SignedOut>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -297,7 +287,7 @@ const JudgmentDetailPage = () => {
               <div id="ai" className="scroll-mt-32">
                 <div className="card-minimal p-6 md:p-8 relative">
                   
-                  {/* 헤더 영역: 아이콘과 제목을 묶고 구분선 추가 */}
+                  {/* 헤더 영역 */}
                   <div className="flex items-center gap-3 mb-5 border-b border-minimal-gray pb-4">
                     <div className="w-[90px] h-auto rounded-full bg-[#F5F3EB] border border-[#CFB982] flex items-center justify-center text-minimal-dark-gray font-bold text-lg flex-shrink-0">
                       AI 요약 
@@ -382,7 +372,6 @@ const JudgmentDetailPage = () => {
 
           {/* Right Column: Sidebar */}
           <div className="w-full lg:w-80 flex-shrink-0">
-            {/* sticky와 top-8 클래스를 사용하여 스크롤 시 따라오도록 설정 */}
             <div className="sticky top-8 space-y-4">
               
               {/* Action Buttons */}
@@ -473,12 +462,8 @@ const JudgmentDetailPage = () => {
           </div>
         </div>
       </div>
-
-      <LogoutAlertModal 
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogoutConfirm}
-      />
+      
+      {/* LogoutAlertModal 삭제됨 */}
     </div>
   )
 }

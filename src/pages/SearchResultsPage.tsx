@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useStore } from '../store/useStore'
+// [변경 1] Clerk 관련 Hook과 컴포넌트 import
+import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+
+// [삭제] 기존 useStore 및 LogoutModal 제거
+// import { useStore } from '../store/useStore'
+// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
+
 import { SearchBar } from '../components/search/SearchBar'
-import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 import logo from '../assets/logo.png'
 import { FilterSidebar } from '../components/search/FilterSidebar'
 import { SearchResultItem } from '../components/search/SearchResultItem'
@@ -90,11 +95,15 @@ const SearchResultsPage = () => {
   const query = searchParams.get('q') || ''
   const tabParam = searchParams.get('tab')
 
-  const { isAuthenticated, user, logout } = useStore()
+  // [변경 2] Clerk useUser 훅 사용 (기존 useStore 대체)
+  const { isSignedIn, user, isLoaded } = useUser()
+  
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  
+  // [삭제] LogoutModal 관련 state 삭제 (UserButton이 대신함)
+  // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
@@ -119,18 +128,19 @@ const SearchResultsPage = () => {
   // 4. 탭 변경 핸들러: 상태 변경 + URL 업데이트
   const handleTabChange = (newTab: 'expert' | 'all') => {
     setActiveTab(newTab)
-    // 기존 검색어(q)는 유지하고 탭(tab) 정보를 URL에 추가
     setSearchParams({ q: query, tab: newTab })
   }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // 검색 시 현재 탭 정보도 유지
     setSearchParams({ q: searchInput, tab: activeTab })
   }
 
+  // [변경 3] AI 탭 클릭 시 Clerk 인증 상태 확인
   const handleAITabClick = () => {
-    if (!isAuthenticated) {
+    if (!isLoaded) return // 로딩 중이면 클릭 무시
+
+    if (!isSignedIn) {
       setIsAlertModalOpen(true)
       return
     }
@@ -147,15 +157,7 @@ const SearchResultsPage = () => {
     navigate(`/judgment/${id}`, { state: { from: 'search' } })
   }
 
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true)
-  }
-
-  const handleLogoutConfirm = () => {
-    logout()
-    setIsLogoutModalOpen(false)
-    navigate('/')
-  }
+  // [삭제] Logout 관련 핸들러 삭제
 
   return (
     <div className="min-h-screen bg-[#F5F3EB] font-serif">
@@ -168,7 +170,7 @@ const SearchResultsPage = () => {
             <img 
                 src={logo} 
                 alt="logo" 
-            className="w-10 h-10 object-contain justify-center items-center opacity-50" />
+                className="w-10 h-10 object-contain justify-center items-center opacity-50" />
                 </div>
         </button> 
         
@@ -185,33 +187,30 @@ const SearchResultsPage = () => {
           />
         </div>
         
+        {/* [변경 4] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
         <div className="pr-[3%] flex gap-4 items-center">
-          {isAuthenticated && user ? (
-            <>
-              <span className="text-sm text-minimal-dark-gray font-light">환영합니다 {user.id}님!</span>
-              <button
-                onClick={handleLogoutClick}
-                className="btn-minimal-primary text-sm"
-              >
-                로그아웃
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => navigate('/login')}
-                className="btn-minimal"
-              >
-                로그인
-              </button>
-              <button
-                onClick={() => navigate('/signup')}
-                className="btn-minimal-primary"
-              >
-                회원가입
-              </button>
-            </>
-          )}
+          <SignedIn>
+            <span className="text-sm text-minimal-dark-gray font-light">
+              환영합니다 {user?.firstName || user?.username}님!
+            </span>
+            {/* Clerk 제공 유저 버튼 (로그아웃 포함) */}
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+
+          <SignedOut>
+            <button
+              onClick={() => navigate('/login')}
+              className="btn-minimal"
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => navigate('/signup')}
+              className="btn-minimal-primary"
+            >
+              회원가입
+            </button>
+          </SignedOut>
         </div>
       </header>
 
@@ -426,11 +425,7 @@ const SearchResultsPage = () => {
         onConfirm={handleAlertModalConfirm}
       />
 
-      <LogoutAlertModal 
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogoutConfirm}
-      />
+      {/* [변경 5] LogoutAlertModal 제거 (UserButton 사용으로 불필요) */}
     </div>
   )
 }
