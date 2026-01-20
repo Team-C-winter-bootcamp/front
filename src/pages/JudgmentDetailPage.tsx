@@ -8,7 +8,6 @@ import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 // import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
 
 import { SearchBar } from '../components/search/SearchBar'
-import logo from '../assets/logo.png'
 import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'

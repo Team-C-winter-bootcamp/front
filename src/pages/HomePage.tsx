@@ -4,9 +4,7 @@ import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 
 import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
 
-import logotext from '../assets/logotext.png'
-import logow from '../assets/logow.png'
-import { Search, FileText } from 'lucide-react'
+import { Search } from 'lucide-react'
 import ReactECharts from 'echarts-for-react'
 
 interface GraphNode {
@@ -345,7 +343,7 @@ const HomePage = () => {
       <div className="min-w-[1024px] flex flex-col">
         <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
           <button
-            onClick={() => navigate('/home')}
+            onClick={() => navigate('/')}
             className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
           >
             LAWDING
@@ -429,10 +427,9 @@ const HomePage = () => {
       {/* Floating Document Button */}
       <button
         onClick={handleDocumentClick}
-        className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl shadow-xl shadow-indigo-200 transition-all duration-200 flex items-center gap-2 z-50 hover:scale-105 active:scale-95"
+        className="fixed bottom-[30px] right-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl shadow-xl shadow-indigo-200 transition-all duration-200 flex items-center gap-2 z-50 hover:scale-105 active:scale-95"
       >
-        <FileText size={20} />
-        <span className="font-medium text-sm">문서 작성</span>
+        <span className="font-medium text-xl">Ai로 나와 유사한 판례 찾기</span>
       </button>
 
       <LoginAlertModal
