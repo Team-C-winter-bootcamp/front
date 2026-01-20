@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useStore } from '../store/useStore'
 import { ApiResponse } from './types'
+import { getSessionId, removeSessionId } from '../utils/sessionStorage'
 
 // 에러 객체 타입 (인터셉터에서 반환)
 interface ApiError {
@@ -34,21 +35,25 @@ const apiClient: AxiosInstance = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Zustand store에서 토큰 가져오기
-    // 토큰이 localStorage나 store에 저장되어 있다고 가정
-    const token = localStorage.getItem('authToken')
+    // session_id를 헤더에 포함
+    // 서버에서 session_id → user_id로 매핑하여 처리
+    const sessionId = getSessionId()
     
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (sessionId && config.headers) {
+      // session_id를 헤더에 포함 (서버에서 기대하는 형식에 맞게 조정)
+      config.headers['X-Session-Id'] = sessionId
+      // 또는 쿠키로 관리하는 경우: document.cookie = `session_id=${sessionId}`
     }
 
-    // 개발 환경에서 요청 로깅
-    if (import.meta.env.DEV) {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-        data: config.data,
-        params: config.params,
-      })
-    }
+    // 요청 로깅 (항상 활성화)
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+      baseURL: config.baseURL,
+      url: config.url,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      data: config.data,
+      params: config.params,
+    })
 
     return config
   },
@@ -66,35 +71,38 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response: any) => {
-    // 개발 환경에서 응답 로깅
-    if (import.meta.env.DEV) {
-      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-        status: response.status,
-        data: response.data,
-      })
-    }
+    // 응답 로깅 (항상 활성화)
+    console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      data: response.data,
+    })
 
     return response
   },
   async (error: AxiosError<ApiResponse<null> | { message?: string }>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    // 개발 환경에서 에러 로깅
-    if (import.meta.env.DEV) {
-      console.error('[API Response Error]', {
-        url: error.config?.url,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      })
-    }
+    // 에러 로깅 (항상 활성화)
+    console.error('[API Response Error]', {
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      fullURL: error.config ? `${error.config.baseURL}${error.config.url}` : 'unknown',
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      stack: error.stack,
+    })
 
     // 401 Unauthorized - 토큰 만료 또는 인증 실패
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
-      // 토큰 제거 및 로그아웃 처리
-      localStorage.removeItem('authToken')
+      // session_id 제거 및 로그아웃 처리
+      removeSessionId()
       const { logout } = useStore.getState()
       logout()
 

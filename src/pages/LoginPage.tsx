@@ -25,6 +25,7 @@ const LoginPage = () => {
   // as : 강제로 타입 지정, { from?: string } from 이 있을 수도 없을 수도 있음 
   // ( ... )?.from [옵셔널 체이닝] : 앞이 null or undefined라면? 바로 undefined 내뱉음 있다면 .from 꺼냄냄
   
+  
   //로그인 시
   const handleLogin = (e: FormEvent) => {
     e.preventDefault()

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { setSessionId, removeSessionId } from '../utils/sessionStorage'
 
 // 메모 타입
 interface Memo {
@@ -29,7 +30,7 @@ interface StoreState {
   // --- 인증 관련 ---
   user: { id: string; email: string } | null
   isAuthenticated: boolean
-  login: (id: string, email: string) => void
+  login: (id: string, email: string, sessionId?: string) => void
   logout: () => void
 
   // --- 메모 관련 ---
@@ -58,12 +59,19 @@ export const useStore = create<StoreState>()(
       //  인증
       user: null,
       isAuthenticated: false,
-      login: (id: string, email: string) => 
-        set({ user: { id, email }, isAuthenticated: true }),
+      login: (id: string, email: string, sessionId?: string) => {
+        // session_id가 제공되면 저장
+        if (sessionId) {
+          setSessionId(sessionId)
+        }
+        set({ user: { id, email }, isAuthenticated: true })
+      },
       
-      // 로그아웃 시 인증 정보뿐만 아니라 현재 보고 있던 채팅방 ID도 초기화 (선택사항)
-      logout: () => 
-        set({ user: null, isAuthenticated: false, currentChatId: null }),
+      // 로그아웃 시 인증 정보뿐만 아니라 session_id도 제거
+      logout: () => {
+        removeSessionId()
+        set({ user: null, isAuthenticated: false, currentChatId: null })
+      },
 
       //  메모
       memos: [],

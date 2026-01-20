@@ -6,6 +6,22 @@ export interface ApiResponse<T> {
   data: T | null;
 }
 
+// 로그인 요청(POST)
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+// 로그인 응답(POST)
+export interface LoginResponse {
+  session_id: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
+
 // 유저 프로필 데이터(GET)
 export interface UserProfile {
   email_address: string;

@@ -1,6 +1,8 @@
 import apiClient from '../client'
 import {
   ApiResponse,
+  LoginRequest,
+  LoginResponse,
   UserProfile,
   NEWCHATRequest,
   NEWCHATRequestData,
@@ -20,6 +22,20 @@ import { API_ENDPOINTS, replaceParams } from '../endpoints'
 
 /*사용자 관련 API 서비스*/
 export const userService = {
+  /*로그인(POST)*/
+  login: async (data: LoginRequest): Promise<LoginResponse> => {
+    const response = await apiClient.post<ApiResponse<LoginResponse>>(
+      API_ENDPOINTS.users.LOGIN,
+      data
+    )
+
+    if (response.data.data) {
+      return response.data.data
+    }
+
+    throw new Error(response.data.message || '로그인에 실패했습니다.')
+  },
+
   /*현재 사용자 정보 조회(GET)*/
   getMe: async (): Promise<UserProfile> => {
     const response = await apiClient.get<ApiResponse<UserProfile>>(

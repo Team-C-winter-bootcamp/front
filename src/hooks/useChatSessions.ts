@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { sessionService } from '../api'
 
 export interface ChatMessage {
   id: number
@@ -135,12 +136,28 @@ export const useChatSessions = () => {
     }
   }
 
-  const handleSessionRenameSave = () => {
+  const handleSessionRenameSave = async () => {
     if (editingSessionId && editingSessionName.trim()) {
-      setSessions(prev => prev.map(s => 
-        s.id === editingSessionId ? { ...s, name: editingSessionName.trim() } : s
-      ))
-      setEditingSessionId(null)
+      try {
+        const sessionId = parseInt(editingSessionId)
+        if (!isNaN(sessionId)) {
+          await sessionService.modify(sessionId, {
+            title: editingSessionName.trim(),
+            bookmark: false // 기존 북마크 상태 유지 (필요시 저장된 값 사용)
+          })
+        }
+        setSessions(prev => prev.map(s => 
+          s.id === editingSessionId ? { ...s, name: editingSessionName.trim() } : s
+        ))
+        setEditingSessionId(null)
+      } catch (error) {
+        console.error('세션 이름 변경 실패:', error)
+        // 에러 시에도 UI는 업데이트
+        setSessions(prev => prev.map(s => 
+          s.id === editingSessionId ? { ...s, name: editingSessionName.trim() } : s
+        ))
+        setEditingSessionId(null)
+      }
     }
   }
 

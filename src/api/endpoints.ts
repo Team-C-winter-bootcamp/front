@@ -2,6 +2,7 @@
 export const API_ENDPOINTS = {
    // 사용자 (Users)
   users: {
+    LOGIN: '/users/login', // 로그인(POST)
     ME: '/users/me', // 사용자 정보 조회(GET)
   },
 
