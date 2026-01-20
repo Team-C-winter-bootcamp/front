@@ -135,7 +135,7 @@ const CATEGORIES = [
   },
 ]
 
-const DynamicGraph = ({ width = '100%', height = '830px' }: DynamicGraphProps) => {
+const DynamicGraph = ({ width = '100%', height = '700px' }: DynamicGraphProps) => {
   const [expandedNodeIds, setExpandedNodeIds] = useState<string[]>([])
   const isInitialized = useRef(false)
 
@@ -272,7 +272,6 @@ const DynamicGraph = ({ width = '100%', height = '830px' }: DynamicGraphProps) =
   }, [expandedNodeIds])
 
   return (
-    // [수정됨] 배경색(bg-...), 테두리(border...), 그림자(shadow...)를 제거했습니다.
     <div 
       className="relative overflow-hidden border-lg border-minimal-gray rounded-minimal-lg shadow-minimal"
       style={{ width, height }}
@@ -354,139 +353,143 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#1A233B] font-serif">
-        <button
-          onClick={() => navigate('/')}
-          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
-        >
-          <div className="inline-block p-1 rounded-full">
-            <img
-              src={logow}
-              alt="logo"
-              className="w-10 h-10 object-contain justify-center items-center "
-            />
-          </div>
-        </button>
+    /* [수정] overflow-x-auto를 추가하여 창이 작아질 때 가로 스크롤이 생기도록 함 */
+    <div className="min-h-screen bg-[#F5F3EB] font-serif overflow-x-auto">
+      {/* [수정] 모든 내부 섹션이 일정한 최소 너비를 유지하도록 min-w-[1024px] 설정 */}
+      <div className="min-w-[1024px] flex flex-col">
+        <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#1A233B] font-serif">
+          <button
+            onClick={() => navigate('/')}
+            className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+          >
+            <div className="inline-block p-1 rounded-full">
+              <img
+                src={logow}
+                alt="logo"
+                className="w-10 h-10 object-contain justify-center items-center "
+              />
+            </div>
+          </button>
 
-        <div className="pr-[3%] flex gap-4 items-center">
-          <SignedIn>
-            <span className="text-sm text-white font-light">
-              환영합니다 {user?.firstName || user?.username}님!
-            </span>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          <div className="pr-[3%] flex gap-4 items-center">
+            <SignedIn>
+              <span className="text-sm text-white font-light">
+                환영합니다 {user?.firstName || user?.username}님!
+              </span>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
 
-          <SignedOut>
-            <button
-              onClick={() => navigate('/login')}
-              className="btn-minimal"
-            >
-              로그인
-            </button>
-            <button
-              onClick={() => navigate('/signup')}
-              className="btn-minimal-primary"
-            >
-              회원가입
-            </button>
-          </SignedOut>
-        </div>
-      </header>
-
-      <div className="flex flex-col items-center justify-start w-full border-t-[3px] border-[#CFB982]">
-        {/* 상단 로고 & 검색 섹션 */}
-        <div
-          className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 shadow-xl"
-          style={{
-            backgroundImage: `url(${background2})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        >
-          <div className="w-full max-w-5xl flex flex-col items-center gap-10">
-            <div className="flex flex-col items-center">
+            <SignedOut>
               <button
-                onClick={() => navigate('/')}
-                className="mb-2 transition-opacity hover:opacity-80 focus:outline-none"
+                onClick={() => navigate('/login')}
+                className="btn-minimal"
               >
-                <img
-                  src={logotext}
-                  alt="LAWDING"
-                  className="w-[320px] h-auto object-contain"
-                />
+                로그인
               </button>
-
-              <p className="text-sm text-[#F5F3EB] font-medium tracking-wide drop-shadow-md">
-                국내 최초 AI 판례 검색 로딩중
-              </p>
-            </div>
-
-            <form onSubmit={handleSearch} className="w-full flex justify-center">
-              <div className="relative w-full max-w-2xl">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="키워드를 입력하세요"
-                  className="w-full pl-6 pr-16 py-4 rounded-lg border border-gray-200 text-lg outline-none focus:border-[#CFB982] transition-colors placeholder:text-gray-400 shadow-lg font-sans"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-2 bottom-2 bg-[#C8A45D] hover:bg-[#b8934d] text-[#F5F3EB] rounded-md w-12 flex items-center justify-center transition-colors"
-                >
-                  <Search size={24} />
-                </button>
-              </div>
-            </form>
+              <button
+                onClick={() => navigate('/signup')}
+                className="btn-minimal-primary"
+              >
+                회원가입
+              </button>
+            </SignedOut>
           </div>
-        </div>
+        </header>
 
-        {/* 액션 버튼 영역 */}
-        <div className="flex gap-6 w-full max-w-5xl px-6 mb-16">
-          <button
-            onClick={handleAIChatClick}
-            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
+        <div className="flex flex-col items-center justify-start w-full border-t-[3px] border-[#CFB982]">
+          {/* 상단 로고 & 검색 섹션 */}
+          <div
+            className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 shadow-xl"
+            style={{
+              backgroundImage: `url(${background2})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
           >
-            <div className="relative z-10 flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
-                  나와 유사한 판례 찾기
-                </h3>
-                <p className="text-sm text-gray-300 font-light opacity-90">
-                  AI 챗봇으로 필요한 판례를 찾아보세요!
+            <div className="w-full max-w-5xl flex flex-col items-center gap-10">
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={() => navigate('/')}
+                  className="mb-2 transition-opacity hover:opacity-80 focus:outline-none"
+                >
+                  <img
+                    src={logotext}
+                    alt="LAWDING"
+                    className="w-[320px] h-auto object-contain"
+                  />
+                </button>
+
+                <p className="text-sm text-[#F5F3EB] font-medium tracking-wide drop-shadow-md">
+                  국내 최초 AI 판례 검색 로딩중
                 </p>
               </div>
-              <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
-                <Gavel className="text-[#CFB982]" size={50} />
-              </div>
-            </div>
-          </button>
 
-          <button
-            onClick={handleDocumentClick}
-            className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
-          >
-            <div className="relative z-10 flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
-                  문서 작성하러 가기
-                </h3>
-                <p className="text-sm text-gray-300 font-light opacity-90">
-                  문서 정리를 AI로 간단하게!
-                </p>
-              </div>
-              <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
-                <FileText className="text-[#CFB982]" size={50} />
-              </div>
+              <form onSubmit={handleSearch} className="w-full flex justify-center">
+                <div className="relative w-full max-w-2xl">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="키워드를 입력하세요"
+                    className="w-full pl-6 pr-16 py-4 rounded-lg border border-gray-200 text-lg outline-none focus:border-[#CFB982] transition-colors placeholder:text-gray-400 shadow-lg font-sans"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-2 bottom-2 bg-[#C8A45D] hover:bg-[#b8934d] text-[#F5F3EB] rounded-md w-12 flex items-center justify-center transition-colors"
+                  >
+                    <Search size={24} />
+                  </button>
+                </div>
+              </form>
             </div>
-          </button>
-        </div>
+          </div>
 
-        {/* 그래프 섹션 */}
-        <div className="w-full max-w-5xl px-6 mb-12">
-            <DynamicGraph width="100%" height="800px" />
+          {/* 액션 버튼 영역 */}
+          <div className="flex gap-6 w-full max-w-5xl px-6 mb-16">
+            <button
+              onClick={handleAIChatClick}
+              className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
+            >
+              <div className="relative z-10 flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
+                    나와 유사한 판례 찾기
+                  </h3>
+                  <p className="text-sm text-gray-300 font-light opacity-90">
+                    AI 챗봇으로 필요한 판례를 찾아보세요!
+                  </p>
+                </div>
+                <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                  <Gavel className="text-[#CFB982]" size={50} />
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={handleDocumentClick}
+              className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
+            >
+              <div className="relative z-10 flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
+                    문서 작성하러 가기
+                  </h3>
+                  <p className="text-sm text-gray-300 font-light opacity-90">
+                    문서 정리를 AI로 간단하게!
+                  </p>
+                </div>
+                <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                  <FileText className="text-[#CFB982]" size={50} />
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* 그래프 섹션 */}
+          <div className="w-full max-w-5xl px-6 mb-12">
+              <DynamicGraph width="100%" height="773px" />
+          </div>
         </div>
       </div>
 
