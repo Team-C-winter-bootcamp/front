@@ -8,7 +8,7 @@ interface Memo {
   content: string
 }
 
-// 채팅 관련 타입 (export 필수임 AIChatPage에서 사용)
+// 채팅 관련 타입 (document 페이지에서 사용)
 export interface Message {
   id: number
   text: string
@@ -22,7 +22,7 @@ export interface ChatHistory {
   name: string
   messages: Message[]
   createdAt: string
-  isPinned?: boolean // [추가] 고정 여부 속성
+  isPinned?: boolean // 고정 여부 속성
 }
 
 interface StoreState {
@@ -39,7 +39,7 @@ interface StoreState {
   addMemo: (memo: Memo) => void
   deleteMemo: (id: string) => void
 
-  // --- ai 채팅 관련 ---
+  // --- 채팅 관련 (document 페이지용, 현재 미사용) ---
   chatHistories: ChatHistory[]
   currentChatId: string | null
   // 함수형 업데이트((prev) => ...)를 지원하기 위한 타입 정의
@@ -47,7 +47,7 @@ interface StoreState {
   setCurrentChatId: (id: string | null) => void
   clearChatSession: () => void
   
-  // [추가] 채팅방 고정 토글 함수
+  // 채팅방 고정 토글 함수 (현재 미사용)
   toggleChatPin: (chatId: string) => void 
 }
 

@@ -180,18 +180,13 @@ const JudgmentDetailPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#F5F3EB] font-serif">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
-          onClick={() => navigate('/')}
-          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+          onClick={() => navigate('/home')}
+          className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
         >
-          <div className="inline-block p-1 rounded-full">
-            <img 
-                src={logo} 
-                alt="logo" 
-                className="w-10 h-10 object-contain justify-center items-center opacity-50" />
-                </div>
+          LAWDING
         </button> 
         
         {/* 중앙 SearchBar */}
@@ -207,23 +202,22 @@ const JudgmentDetailPage = () => {
         {/* [변경 3] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
         <div className="pr-[3%] flex gap-4 items-center">
           <SignedIn>
-            <span className="text-sm text-minimal-dark-gray font-light">
+            <span className="text-sm text-slate-700 font-light">
               환영합니다 {user?.firstName || user?.username}님!
             </span>
-            {/* Clerk 제공 유저 버튼 (로그아웃 포함) */}
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           
           <SignedOut>
             <button
               onClick={() => navigate('/login')}
-              className="btn-minimal"
+              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
             >
               로그인
             </button>
             <button
               onClick={() => navigate('/signup')}
-              className="btn-minimal-primary"
+              className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
             >
               회원가입
             </button>
@@ -232,22 +226,22 @@ const JudgmentDetailPage = () => {
       </header>
 
       {/* Main Container */}
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
+      <div className="pt-24 max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
         
         {/* Header Info */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="px-2.5 py-1 text-xs font-light text-minimal-dark-gray bg-[#F5F3EB] border border-[#CFB982] rounded-minimal">
+            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
               {displayData.judgmentType || '판결'}
             </span>
-            <span className="px-2.5 py-1 text-xs font-light text-minimal-dark-gray bg-[#F5F3EB] border border-[#CFB982] rounded-minimal">
+            <span className="px-2.5 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg">
               {displayData.caseType || '형사'}
             </span>
-            <span className="text-sm text-minimal-medium-gray ml-1 font-light">
+            <span className="text-sm text-slate-600 ml-1 font-light">
               {judgmentData.judgment.court} • {judgmentData.judgment.judgmentDate} 선고
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-minimal-charcoal leading-tight break-keep tracking-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-800 leading-tight break-keep tracking-tight">
             {judgmentData.title}
           </h1>
         </div>
@@ -258,13 +252,13 @@ const JudgmentDetailPage = () => {
           <div className="flex-1 min-w-0" ref={contentRef}>
             
             {/* Tabs (Navigation) */}
-            <div className="flex border-b border-minimal-gray mb-6 bg-[#F5F3EB] pt-2">
+            <div className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl">
               <button
                 onClick={() => scrollToSection('ai')}
                 className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
                   activeTab === 'ai' 
-                    ? 'border-minimal-charcoal text-minimal-charcoal font-medium' 
-                    : 'border-transparent text-minimal-medium-gray hover:text-minimal-dark-gray font-light'
+                    ? 'border-indigo-600 text-indigo-600 font-medium' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-light'
                 }`}
               >
                 AI 요약
@@ -273,8 +267,8 @@ const JudgmentDetailPage = () => {
                 onClick={() => scrollToSection('original')}
                 className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
                   activeTab === 'original' 
-                    ? 'border-minimal-charcoal text-minimal-charcoal font-medium' 
-                    : 'border-transparent text-minimal-medium-gray hover:text-minimal-dark-gray font-light'
+                    ? 'border-indigo-600 text-indigo-600 font-medium' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-light'
                 }`}
               >
                 판결문 전문
@@ -285,11 +279,11 @@ const JudgmentDetailPage = () => {
               
               {/* === AI 요약 섹션 === */}
               <div id="ai" className="scroll-mt-32">
-                <div className="card-minimal p-6 md:p-8 relative">
+                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
                   
                   {/* 헤더 영역 */}
                   <div className="flex items-center gap-3 mb-5 border-b border-minimal-gray pb-4">
-                    <div className="w-[90px] h-auto rounded-full bg-[#F5F3EB] border border-[#CFB982] flex items-center justify-center text-minimal-dark-gray font-bold text-lg flex-shrink-0">
+                    <div className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0">
                       AI 요약 
                     </div>
                   </div>
@@ -298,11 +292,11 @@ const JudgmentDetailPage = () => {
                   <div className={`relative transition-all duration-500 ease-in-out ${!isAiExpanded ? 'max-h-[300px] overflow-hidden' : ''}`}>
                     <div className="space-y-8">
                       <div>
-                        <h3 className="text-minimal-charcoal font-light mb-3">결과 요약</h3>
+                        <h3 className="text-slate-800 font-light mb-3">결과 요약</h3>
                         <ul className="space-y-3">
                           {judgmentData.aiSummary.resultSummary.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-minimal-charcoal leading-relaxed text-base font-light">
-                              <span className="text-minimal-medium-gray mt-1.5 text-xs">●</span>
+                            <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
                               <span>{item}</span>
                             </li>
                           ))}
@@ -310,11 +304,11 @@ const JudgmentDetailPage = () => {
                       </div>
 
                       <div>
-                        <h3 className="text-minimal-charcoal font-light mb-3">사실관계</h3>
+                        <h3 className="text-slate-800 font-light mb-3">사실관계</h3>
                         <ul className="space-y-3">
                           {judgmentData.aiSummary.facts.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-minimal-dark-gray leading-relaxed text-base font-light">
-                              <span className="text-minimal-medium-gray mt-1.5 text-xs">●</span>
+                            <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
                               <span>{item}</span>
                             </li>
                           ))}
@@ -324,7 +318,7 @@ const JudgmentDetailPage = () => {
 
                     {/* Gradient Overlay */}
                     {!isAiExpanded && (
-                      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#F5F3EB] via-[#F5F3EB]/80 to-transparent pointer-events-none"></div>
+                      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
                     )}
                   </div>
 
@@ -332,7 +326,7 @@ const JudgmentDetailPage = () => {
                   <div className="mt-6 flex justify-center">
                     <button 
                       onClick={() => setIsAiExpanded(!isAiExpanded)}
-                      className="btn-minimal flex items-center gap-1 px-6 py-2 rounded-full font-light"
+                      className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 flex items-center gap-1 px-6 py-2 rounded-full font-light shadow-md transition-all"
                     >
                       {isAiExpanded ? '접기' : '더 보기'}
                       <span className={`transform transition-transform ${isAiExpanded ? 'rotate-180' : ''}`}>
@@ -345,22 +339,22 @@ const JudgmentDetailPage = () => {
 
               {/* === 판결문 전문 섹션 === */}
               <div id="original" className="scroll-mt-32">
-                <div className="card-minimal p-6 md:p-8">
-                  <h2 className="text-xl font-bold text-minimal-charcoal mb-6 border-b border-minimal-gray pb-4 tracking-tight">판결문 전문</h2>
+                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8">
+                  <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4 tracking-tight">판결문 전문</h2>
                   
-                  <div className="space-y-8 text-minimal-charcoal leading-8 text-justify font-light">
+                  <div className="space-y-8 text-slate-700 leading-8 text-justify font-light">
                     <section>
-                      <h3 className="text-lg font-light text-minimal-charcoal mb-4">주문</h3>
+                      <h3 className="text-lg font-light text-slate-800 mb-4">주문</h3>
                       <ol className="list-decimal pl-6 space-y-2 mb-6">
                         {judgmentData.judgment.order.map((line, idx) => (
-                          <li key={idx} className="text-minimal-charcoal font-light">{line}</li>
+                          <li key={idx} className="text-slate-700 font-light">{line}</li>
                         ))}
                       </ol>
                     </section>
 
                     <section>
-                      <h3 className="text-lg font-light text-minimal-charcoal mb-4">이유</h3>
-                      <div className="whitespace-pre-wrap text-minimal-charcoal font-light">
+                      <h3 className="text-lg font-light text-slate-800 mb-4">이유</h3>
+                      <div className="whitespace-pre-wrap text-slate-700 font-light">
                         {judgmentData.judgment.reasons}
                       </div>
                     </section>
@@ -375,69 +369,69 @@ const JudgmentDetailPage = () => {
             <div className="sticky top-8 space-y-4">
               
               {/* Action Buttons */}
-              <div className="card-minimal p-4">
+              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-4">
                 <div className="flex items-center gap-3 justify-between">
                   <button 
                     onClick={handleDownloadPDF} 
-                    className="btn-minimal p-2.5 flex-1 flex justify-center"
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm"
                     title="PDF 다운로드"
                   >
-                    <Download size={18} className="text-minimal-dark-gray opacity-60" />
+                    <Download size={18} className="text-slate-600" />
                   </button>
                   <button 
                     onClick={handleCopyLink} 
-                    className="btn-minimal p-2.5 flex-1 flex justify-center"
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm"
                     title="링크 복사"
                   >
-                    <Link2 size={18} className="text-minimal-dark-gray opacity-60" />
+                    <Link2 size={18} className="text-slate-600" />
                   </button>
                   <button
                     onClick={handleToggleBookmark}
-                    className={`p-2.5 border rounded-minimal transition-all duration-200 flex-1 flex justify-center ${
+                    className={`p-2.5 border rounded-lg transition-all duration-200 flex-1 flex justify-center shadow-sm ${
                       isBookmarked 
-                        ? 'border-[#CFB982] bg-[#E8E0D0]' 
-                        : 'btn-minimal'
+                        ? 'border-indigo-300 bg-indigo-50' 
+                        : 'bg-white hover:bg-slate-50 border-slate-200'
                     }`}
                     title="북마크"
                   >
                     {isBookmarked ? (
-                      <BookmarkCheck size={18} className="text-minimal-charcoal opacity-80 fill-current" />
+                      <BookmarkCheck size={18} className="text-indigo-600 fill-current" />
                     ) : (
-                      <Bookmark size={18} className="text-minimal-dark-gray opacity-60" />
+                      <Bookmark size={18} className="text-slate-600" />
                     )}
                   </button>
                 </div>
               </div>
 
               {/* Quick Info */}
-              <div className="card-minimal p-5">
-                <h3 className="font-light text-minimal-charcoal mb-4">사건 정보</h3>
+              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
+                <h3 className="font-light text-slate-800 mb-4">사건 정보</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-minimal-medium-gray font-light">법원</span>
-                    <span className="font-light text-minimal-charcoal">{judgmentData.judgment.court}</span>
+                    <span className="text-slate-500 font-light">법원</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.court}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-minimal-medium-gray font-light">사건번호</span>
-                    <span className="font-light text-minimal-charcoal">{judgmentData.judgment.caseNo}</span>
+                    <span className="text-slate-500 font-light">사건번호</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.caseNo}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-minimal-medium-gray font-light">사건명</span>
-                    <span className="font-light text-minimal-charcoal">{judgmentData.judgment.caseName}</span>
+                    <span className="text-slate-500 font-light">사건명</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.caseName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-minimal-medium-gray font-light">선고일</span>
-                    <span className="font-light text-minimal-charcoal">{judgmentData.judgment.judgmentDate}</span>
+                    <span className="text-slate-500 font-light">선고일</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.judgmentDate}</span>
                   </div>
                 </div>
               </div>
 
               {/* Navigation */}
-              <div className="card-minimal p-5">
+              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => navigate(-1)}
-                    className="btn-minimal w-full font-light"
+                    className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
                   >
                     ← 뒤로가기
                   </button>
@@ -446,13 +440,13 @@ const JudgmentDetailPage = () => {
 
               {/* Related Cases */}
               {judgmentData.relatedCases.length > 0 && (
-                <div className="card-minimal p-5">
-                  <h3 className="font-light text-minimal-charcoal mb-4">관련 판례</h3>
+                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
+                  <h3 className="font-light text-slate-800 mb-4">관련 판례</h3>
                   <ul className="space-y-3">
                     {judgmentData.relatedCases.map((c, idx) => (
-                      <li key={idx} className="p-3 rounded-minimal border border-[#CFB982] bg-[#F5F3EB] hover:bg-[#E8E0D0] transition-colors cursor-pointer">
-                        <div className="font-light text-sm text-minimal-charcoal mb-1">{c.name}</div>
-                        <div className="text-xs text-minimal-medium-gray font-light">{c.desc}</div>
+                      <li key={idx} className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer">
+                        <div className="font-light text-sm text-slate-800 mb-1">{c.name}</div>
+                        <div className="text-xs text-slate-500 font-light">{c.desc}</div>
                       </li>
                     ))}
                   </ul>

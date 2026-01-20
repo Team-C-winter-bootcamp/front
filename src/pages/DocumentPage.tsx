@@ -52,7 +52,7 @@ const DocumentPage = () => {
 
 
   return (
-    <div className="h-screen bg-[#F5F3EB] flex flex-col overflow-hidden text-minimal-charcoal font-serif">
+    <div className="h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col overflow-hidden text-slate-800">
       
       {/* 모달 렌더링 */}
       <DeleteAlertModal 

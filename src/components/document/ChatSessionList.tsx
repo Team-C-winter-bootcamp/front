@@ -74,9 +74,9 @@ export const ChatSessionList = ({
   })();
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar">
-      <div className="flex items-center gap-3 px-3 py-2 text-slate-400 mb-2">
-        <span className="text-sm font-semibold">히스토리</span>
+    <div className="flex-1 overflow-y-auto px-3 py-2 custom-scrollbar bg-white">
+      <div className="flex items-center gap-3 px-3 py-2 text-slate-500 mb-2">
+        <span className="text-sm font-semibold text-slate-700">히스토리</span>
       </div>
       <div className="space-y-1 mb-6 pb-20">
         {sortedSessions.map((session) => (
@@ -85,12 +85,12 @@ export const ChatSessionList = ({
             onClick={() => onSessionClick(session.id)}
             className={`group relative p-3 rounded-lg cursor-pointer transition-all text-sm flex items-center gap-3 ${
               currentSessionId === session.id 
-                ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-[#334155]' 
-                : 'text-slate-400 hover:bg-[#1E293B]/50 hover:text-slate-200'
+                ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200' 
+                : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
             }`}
           >
             {/* 왼쪽 말풍선 아이콘 */}
-            <MessageSquare size={16} className={currentSessionId === session.id ? 'text-blue-400' : 'opacity-70'} />
+            <MessageSquare size={16} className={currentSessionId === session.id ? 'text-indigo-600' : 'opacity-70'} />
             
             {editingSessionId === session.id ? (
               <input
@@ -100,7 +100,7 @@ export const ChatSessionList = ({
                 onBlur={onSessionRenameSave}
                 onKeyDown={(e) => e.key === 'Enter' && onSessionRenameSave()}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full bg-[#0F172A] border border-blue-500 rounded px-2 py-1 text-white text-sm outline-none"
+                className="w-full bg-white border border-indigo-300 rounded-lg px-2 py-1 text-slate-800 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
                 autoFocus
               />
             ) : (
@@ -110,23 +110,23 @@ export const ChatSessionList = ({
                 
                 {/* 고정 핀 아이콘 (이름 오른쪽, 메뉴 왼쪽) */}
                 {session.isPinned && (
-                  <Pin size={14} className="text-blue-400 fill-blue-400/20 rotate-45 flex-shrink-0" />
+                  <Pin size={14} className="text-indigo-600 fill-indigo-200 rotate-45 flex-shrink-0" />
                 )}
 
                 {/* 미트볼 메뉴 버튼 */}
                 <div className="relative">
                   <button 
                     onClick={(e) => handleMenuToggle(session.id, e)} 
-                    className={`p-1 rounded hover:bg-slate-700 transition-colors ${openMenuId === session.id ? 'opacity-100 bg-slate-700' : 'opacity-0 group-hover:opacity-100'}`}
+                    className={`p-1 rounded hover:bg-slate-100 transition-colors ${openMenuId === session.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'}`}
                   >
-                    <MoreVertical size={16} className="text-slate-400" />
+                    <MoreVertical size={16} className="text-slate-500" />
                   </button>
 
                   {/* 드롭다운 메뉴 */}
                   {openMenuId === session.id && (
                     <div 
                       ref={menuRef}
-                      className="absolute right-0 top-8 z-50 w-32 bg-[#2D3748] border border-slate-600 rounded-md shadow-xl overflow-hidden py-1 flex flex-col"
+                      className="absolute right-0 top-8 z-50 w-36 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden py-1 flex flex-col"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* 1. 고정 하기/해제 */}
@@ -135,7 +135,7 @@ export const ChatSessionList = ({
                           onTogglePin(session.id, e);
                           setOpenMenuId(null);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 w-full text-left transition-colors"
                       >
                         {session.isPinned ? <PinOff size={14} /> : <Pin size={14} />}
                         <span>{session.isPinned ? '고정 해제' : '고정'}</span>
@@ -147,7 +147,7 @@ export const ChatSessionList = ({
                           onSessionRename(session.id, e);
                           setOpenMenuId(null);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-600 w-full text-left transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 w-full text-left transition-colors"
                       >
                         <Edit2 size={14} />
                         <span>이름 변경</span>
@@ -159,7 +159,7 @@ export const ChatSessionList = ({
                           onSessionDeleteClick(session.id, e);
                           setOpenMenuId(null);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-slate-600 w-full text-left transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 w-full text-left transition-colors"
                       >
                         <Trash2 size={14} />
                         <span>삭제</span>

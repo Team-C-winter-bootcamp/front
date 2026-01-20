@@ -28,7 +28,7 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="키워드를 입력하세요"
-            className="w-full pl-12 pr-10 py-3 border border-[#CFB982] rounded-full focus:outline-none focus:ring-1 focus:ring-[#CFB982] focus:border-[#CFB982] bg-[#F5F3EB] text-base shadow-minimal transition-all placeholder-minimal-medium-gray text-minimal-charcoal font-light"
+            className="w-full pl-12 pr-10 py-3 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-base shadow-lg transition-all placeholder:text-slate-400 text-slate-800 font-light"
           />
 
           {/* 초기화 버튼 */}
@@ -36,7 +36,7 @@ export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: Se
             <button
               type="button"
               onClick={onClear}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-minimal-medium-gray hover:text-minimal-charcoal transition-colors p-1"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
             >
               ✕ 
             </button>

@@ -6,8 +6,8 @@ const LoginPage = () => {
   const navigate = useNavigate()
 
   return (
-    // 배경색 및 폰트 설정 (기존 유지)
-    <div className="min-h-screen bg-[#F5F3EB] font-serif flex flex-col items-center justify-center py-10">
+    // 배경색 및 폰트 설정
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center py-10">
 
       {/* 메인 로고 영역 (기존 유지) */}
       <button 
@@ -29,22 +29,22 @@ const LoginPage = () => {
         
         appearance={{
           variables: {
-            colorPrimary: '#C8A45D', // 기존 '로그인' 버튼 색상 (Gold)
-            colorText: '#1A233B',    // 기존 텍스트 색상 (Charcoal)
-            borderRadius: '0.5rem',
+            colorPrimary: '#6366f1', // Indigo 악센트 색상
+            colorText: '#1e293b',    // Slate 텍스트 색상
+            borderRadius: '0.75rem',
           },
           elements: {
-            // 카드 배경을 투명하게 하거나 깔끔한 흰색 박스로 유지
-            card: "shadow-xl border border-[#E5E7EB]",
+            // 카드 배경을 깔끔한 흰색 박스로 유지
+            card: "shadow-xl border border-slate-200 rounded-xl",
             
             // 입력창 스타일
-            formFieldInput: "border-gray-300 focus:border-[#C8A45D]",
+            formFieldInput: "border-slate-300 focus:border-indigo-500 rounded-lg shadow-sm",
             
-            // 로그인 버튼 스타일 (기존 btn-minimal-primary 느낌)
-            formButtonPrimary: "bg-[#C8A45D] hover:bg-[#b8934d] text-white",
+            // 로그인 버튼 스타일
+            formButtonPrimary: "bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-200",
             
             // 하단 링크 (회원가입 등) 색상
-            footerActionLink: "text-[#C8A45D] hover:text-[#b8934d] font-bold",
+            footerActionLink: "text-indigo-600 hover:text-indigo-700 font-bold",
           }
         }}
       />

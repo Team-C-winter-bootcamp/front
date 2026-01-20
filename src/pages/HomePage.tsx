@@ -5,10 +5,8 @@ import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import LoginAlertModal from '../components/AlertModal/LoginAlertModal'
 
 import logotext from '../assets/logotext.png'
-import background2 from '../assets/background2.png'
 import logow from '../assets/logow.png'
-import graphbackground from '../assets/graphbackground.png'
-import { Search, Gavel, FileText } from 'lucide-react'
+import { Search, FileText } from 'lucide-react'
 import ReactECharts from 'echarts-for-react'
 
 interface GraphNode {
@@ -33,13 +31,13 @@ interface DynamicGraphProps {
 }
 
 const COLORS = {
-  center: '#CFB982',
-  centerHighlight: '#EAD8B1',
-  root: '#3D4364',
-  rootHighlight: '#222538',
-  leaf: '#323958',
-  leafHighlight: '#5C6B9C',
-  line: '#B5A67B',
+  center: '#6366f1', // Indigo
+  centerHighlight: '#a5b4fc', // Light indigo
+  root: '#4f46e5', // Indigo 600
+  rootHighlight: '#3730a3', // Indigo 800
+  leaf: '#4338ca', // Indigo 700
+  leafHighlight: '#312e81', // Indigo 900
+  line: '#c7d2fe', // Light indigo (연결선)
   text: '#FFFFFF',
 }
 
@@ -102,35 +100,35 @@ const CATEGORIES = [
     name: '메인 허브',
     itemStyle: {
       color: create3DGradient(COLORS.center, COLORS.centerHighlight),
-      shadowBlur: 12,
-      shadowOffsetX: 3,
-      shadowOffsetY: 3,
-      shadowColor: 'rgba(0, 0, 0, 0.2)',
+      shadowBlur: 16,
+      shadowOffsetX: 0,
+      shadowOffsetY: 4,
+      shadowColor: 'rgba(99, 102, 241, 0.3)',
     },
   },
   {
     name: '핵심 키워드',
     itemStyle: {
-      borderColor: '#B5A67B',
+      borderColor: '#c7d2fe',
       borderWidth: 2,
       color: create3DGradient(COLORS.root, COLORS.rootHighlight),
-      shadowBlur: 8,
-      shadowOffsetX: 2,
-      shadowOffsetY: 2,
-      shadowColor: 'rgba(0, 0, 0, 0.25)',
+      shadowBlur: 12,
+      shadowOffsetX: 0,
+      shadowOffsetY: 3,
+      shadowColor: 'rgba(79, 70, 229, 0.25)',
     },
   },
   {
     name: '연관 키워드',
     itemStyle: {
-      borderColor: '#B5A67B',
+      borderColor: '#e0e7ff',
       borderWidth: 2,
       color: create3DGradient(COLORS.leaf, COLORS.leafHighlight),
       opacity: 1,
-      shadowBlur: 6,
-      shadowOffsetX: 1.5,
-      shadowOffsetY: 1.5,
-      shadowColor: 'rgba(0, 0, 0, 0.15)',
+      shadowBlur: 10,
+      shadowOffsetX: 0,
+      shadowOffsetY: 2,
+      shadowColor: 'rgba(67, 56, 202, 0.2)',
     },
   },
 ]
@@ -242,9 +240,9 @@ const DynamicGraph = ({ width = '100%', height = '700px' }: DynamicGraphProps) =
           },
           lineStyle: {
             color: COLORS.line,
-            width: 1.5,
-            curveness: 0.1,
-            opacity: 0.8,
+            width: 2,
+            curveness: 0.15,
+            opacity: 0.6,
           },
           force: {
             repulsion: 800,
@@ -256,14 +254,15 @@ const DynamicGraph = ({ width = '100%', height = '700px' }: DynamicGraphProps) =
             focus: 'adjacency',
             scale: true,
             itemStyle: {
-              shadowBlur: 20,
-              shadowOffsetX: 4,
-              shadowOffsetY: 4,
-              shadowColor: 'rgba(0,0,0,0.4)',
+              shadowBlur: 24,
+              shadowOffsetX: 0,
+              shadowOffsetY: 6,
+              shadowColor: 'rgba(99, 102, 241, 0.4)',
             },
             lineStyle: {
               width: 3,
-              opacity: 1,
+              opacity: 0.8,
+              color: '#a5b4fc',
             },
           },
         },
@@ -273,21 +272,15 @@ const DynamicGraph = ({ width = '100%', height = '700px' }: DynamicGraphProps) =
 
   return (
     <div 
-      className="relative overflow-hidden border-lg border-minimal-gray rounded-minimal-lg shadow-minimal"
+      className="relative overflow-hidden"
       style={{ width, height }}
     >
       <div
-        className="w-full h-full relative"
-        style={{
-          backgroundImage: `url(${graphbackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
+        className="w-full h-full relative bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50"
       >
         <div className="absolute top-8 left-8 z-10 select-none">
-          <h2 className="text-xl font-bold text-[#8C7B58] tracking-tight flex items-center gap-2 drop-shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8C7B58] opacity-80"></span>
+          <h2 className="text-xl font-bold text-indigo-700 tracking-tight flex items-center gap-2 drop-shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 opacity-90 shadow-sm"></span>
             최근 핫이슈 법률 연관 키워드
           </h2>
         </div>
@@ -301,13 +294,10 @@ const DynamicGraph = ({ width = '100%', height = '700px' }: DynamicGraphProps) =
       </div>
 
       <div className="absolute bottom-6 left-0 w-full flex justify-center pointer-events-none z-10">
-        <div className="bg-[#F5F3EB]/90 backdrop-blur-md pr-5 px-5 py-2 rounded-full border border-[#CFB982] shadow-minimal flex items-center gap-2">
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ backgroundColor: COLORS.root }}
-          ></span>
-          <span className="text-xs text-minimal-medium-gray font-light tracking-wide">
-            색 노드를 클릭하여 연관 키워드를 탐색해보세요
+        <div className="bg-white/95 backdrop-blur-md px-5 py-2.5 rounded-full border border-indigo-200 shadow-xl shadow-indigo-100 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full animate-pulse bg-indigo-600 shadow-sm"></span>
+          <span className="text-xs text-slate-700 font-medium tracking-wide">
+            노드를 클릭하여 연관 키워드를 탐색해보세요
           </span>
         </div>
       </div>
@@ -322,6 +312,11 @@ const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [targetPath, setTargetPath] = useState<string>('')
 
+  // 페이지 진입 시 상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   const handleSearch = (event: FormEvent) => {
     event.preventDefault()
     if (searchQuery.trim()) {
@@ -332,15 +327,6 @@ const HomePage = () => {
   const handleModalConfirm = () => {
     setIsModalOpen(false)
     navigate('/login', { state: { from: targetPath } })
-  }
-
-  const handleAIChatClick = () => {
-    if (!isSignedIn) {
-      setTargetPath('/ai-chat')
-      setIsModalOpen(true)
-      return
-    }
-    navigate('/ai-chat')
   }
 
   const handleDocumentClick = () => {
@@ -354,26 +340,20 @@ const HomePage = () => {
 
   return (
     /* [수정] overflow-x-auto를 추가하여 창이 작아질 때 가로 스크롤이 생기도록 함 */
-    <div className="min-h-screen bg-[#F5F3EB] font-serif overflow-x-auto">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-x-auto">
       {/* [수정] 모든 내부 섹션이 일정한 최소 너비를 유지하도록 min-w-[1024px] 설정 */}
       <div className="min-w-[1024px] flex flex-col">
-        <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#1A233B] font-serif">
+        <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
           <button
-            onClick={() => navigate('/')}
-            className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+            onClick={() => navigate('/home')}
+            className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
           >
-            <div className="inline-block p-1 rounded-full">
-              <img
-                src={logow}
-                alt="logo"
-                className="w-10 h-10 object-contain justify-center items-center "
-              />
-            </div>
+            LAWDING
           </button>
 
-          <div className="pr-[3%] flex gap-4 items-center">
+          <div className="flex gap-4 items-center">
             <SignedIn>
-              <span className="text-sm text-white font-light">
+              <span className="text-sm text-slate-700 font-light">
                 환영합니다 {user?.firstName || user?.username}님!
               </span>
               <UserButton afterSignOutUrl="/" />
@@ -382,13 +362,13 @@ const HomePage = () => {
             <SignedOut>
               <button
                 onClick={() => navigate('/login')}
-                className="btn-minimal"
+                className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
               >
                 로그인
               </button>
               <button
                 onClick={() => navigate('/signup')}
-                className="btn-minimal-primary"
+                className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
               >
                 회원가입
               </button>
@@ -396,102 +376,64 @@ const HomePage = () => {
           </div>
         </header>
 
-        <div className="flex flex-col items-center justify-start w-full border-t-[3px] border-[#CFB982]">
+        <div className="flex flex-col items-center justify-start w-full pt-24">
           {/* 상단 로고 & 검색 섹션 */}
           <div
-            className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 shadow-xl"
-            style={{
-              backgroundImage: `url(${background2})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
+            className="w-full flex flex-col items-center justify-center py-20 px-6 mb-12 bg-gradient-to-b from-slate-50 to-white"
           >
             <div className="w-full max-w-5xl flex flex-col items-center gap-10">
               <div className="flex flex-col items-center">
-                <button
-                  onClick={() => navigate('/')}
-                  className="mb-2 transition-opacity hover:opacity-80 focus:outline-none"
-                >
-                  <img
-                    src={logotext}
-                    alt="LAWDING"
-                    className="w-[320px] h-auto object-contain"
-                  />
-                </button>
-
-                <p className="text-sm text-[#F5F3EB] font-medium tracking-wide drop-shadow-md">
-                  국내 최초 AI 판례 검색 로딩중
+                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 leading-tight text-center">
+                  법례 검색의 새로운 기준 <br />
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">LAWDING</span>
+                </h1>
+                <p className="text-lg text-slate-500 font-medium tracking-wide">
+                  국내 최초 AI 판례 검색
                 </p>
               </div>
 
               <form onSubmit={handleSearch} className="w-full flex justify-center">
-                <div className="relative w-full max-w-2xl">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="키워드를 입력하세요"
-                    className="w-full pl-6 pr-16 py-4 rounded-lg border border-gray-200 text-lg outline-none focus:border-[#CFB982] transition-colors placeholder:text-gray-400 shadow-lg font-sans"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-2 bottom-2 bg-[#C8A45D] hover:bg-[#b8934d] text-[#F5F3EB] rounded-md w-12 flex items-center justify-center transition-colors"
-                  >
-                    <Search size={24} />
-                  </button>
+                <div className="relative max-w-2xl w-full group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+                  <div className="relative flex items-center bg-white rounded-2xl shadow-xl border border-purple-200 p-2">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="궁금한 법례 키워드를 입력하세요"
+                      className="flex-1 bg-transparent px-6 py-3 text-base outline-none text-slate-800 placeholder:text-slate-400"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center shadow-md"
+                    >
+                      <Search size={20} />
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
           </div>
 
-          {/* 액션 버튼 영역 */}
-          <div className="flex gap-6 w-full max-w-5xl px-6 mb-16">
-            <button
-              onClick={handleAIChatClick}
-              className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
-            >
-              <div className="relative z-10 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
-                    나와 유사한 판례 찾기
-                  </h3>
-                  <p className="text-sm text-gray-300 font-light opacity-90">
-                    AI 챗봇으로 필요한 판례를 찾아보세요!
-                  </p>
-                </div>
-                <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
-                  <Gavel className="text-[#CFB982]" size={50} />
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={handleDocumentClick}
-              className="flex-1 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A233B] via-[#253453] to-[#1A233B] p-8 text-left transition-all hover:shadow-lg hover:-translate-y-1 group"
-            >
-              <div className="relative z-10 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-[#E2CD8C] mb-2">
-                    문서 작성하러 가기
-                  </h3>
-                  <p className="text-sm text-gray-300 font-light opacity-90">
-                    문서 정리를 AI로 간단하게!
-                  </p>
-                </div>
-                <div className="rounded-full p-3 opacity-90 group-hover:opacity-100 transition-opacity">
-                  <FileText className="text-[#CFB982]" size={50} />
-                </div>
-              </div>
-            </button>
-          </div>
+          {/* 액션 버튼 영역 제거 - floating button으로 이동 */}
 
           {/* 그래프 섹션 */}
           <div className="w-full max-w-5xl px-6 mb-12">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
               <DynamicGraph width="100%" height="773px" />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Floating Document Button */}
+      <button
+        onClick={handleDocumentClick}
+        className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl shadow-xl shadow-indigo-200 transition-all duration-200 flex items-center gap-2 z-50 hover:scale-105 active:scale-95"
+      >
+        <FileText size={20} />
+        <span className="font-medium text-sm">문서 작성</span>
+      </button>
 
       <LoginAlertModal
         isOpen={isModalOpen}

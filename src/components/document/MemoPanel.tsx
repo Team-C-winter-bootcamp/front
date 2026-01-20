@@ -153,10 +153,10 @@ export const MemoPanel = ({
 
   if (!isRightPanelOpen) {
     return (
-      <div className="bg-[#F5F3EB] border-l border-minimal-gray flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 font-serif">
+      <div className="bg-white/80 backdrop-blur-md border-l border-slate-200 flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16">
         <div className="p-2 flex flex-col items-center gap-4 mt-4">
-          <button onClick={onOpenPanel} className="p-2 hover:bg-[#E8E0D0] rounded-minimal text-minimal-medium-gray transition-colors" title="메모장 열기">
-            <Menu size={20} className="text-minimal-medium-gray opacity-60" />
+          <button onClick={onOpenPanel} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors" title="메모장 열기">
+            <Menu size={20} className="text-slate-500 opacity-70" />
           </button>
         </div>
       </div>
@@ -165,18 +165,18 @@ export const MemoPanel = ({
 
   return (
     <div
-      className="bg-[#F5F3EB] p-4 flex-shrink-0 overflow-hidden flex flex-col h-full border-l border-minimal-gray transition-all duration-300 font-serif"
+      className="bg-white p-4 flex-shrink-0 overflow-hidden flex flex-col h-full border-l border-slate-200 transition-all duration-300"
       style={{ width: `${memoWidth}px` }}
     >
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <button onClick={onTogglePanel} className="p-2 hover:bg-[#E8E0D0] rounded-minimal text-minimal-medium-gray transition-colors" title="메모장 접기">
-            <Menu size={20} className="text-minimal-medium-gray opacity-60" />
+          <button onClick={onTogglePanel} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors" title="메모장 접기">
+            <Menu size={20} className="text-slate-500 opacity-70" />
           </button>
-          <h3 className="font-light text-minimal-charcoal">메모장 <span className="text-xs font-light text-minimal-medium-gray">({memos.length}/10)</span></h3>
+          <h3 className="font-medium text-slate-800">메모장 <span className="text-xs font-light text-slate-500">({memos.length}/10)</span></h3>
         </div>
-        <button onClick={onAddNewMemo} className="p-1 text-minimal-dark-gray hover:bg-[#E8E0D0] rounded-minimal transition-colors" title="새 메모 추가">
-          <span className="text-lg font-light">+</span>
+        <button onClick={onAddNewMemo} className="p-1 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="새 메모 추가">
+          <span className="text-lg font-medium">+</span>
         </button>
       </div> 
 
@@ -188,17 +188,17 @@ export const MemoPanel = ({
         {memos.map((memo) => (
           <div
             key={memo.id}
-            className={`flex items-center justify-between p-2 rounded-minimal border transition-all ${
+            className={`flex items-center justify-between p-2 rounded-xl border transition-all shadow-sm ${
               selectedMemoId === memo.id 
-                ? 'bg-[#E8E0D0] border-[#CFB982] shadow-minimal' 
-                : 'bg-[#F5F3EB] border border-[#CFB982] hover:border-[#C8A45D] shadow-minimal'
+                ? 'bg-indigo-50 border-indigo-200' 
+                : 'bg-white border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
             }`}
           >
-            <button onClick={() => onMemoClick(memo.id)} className="text-sm text-left flex-1 truncate font-light text-minimal-charcoal">
+            <button onClick={() => onMemoClick(memo.id)} className="text-sm text-left flex-1 truncate font-light text-slate-800">
               {memo.title || memo.content.replace(/<[^>]*>?/gm, '') || '새 메모'}
             </button>
             <div className="flex items-center gap-1">
-              <button onClick={() => onMemoDeleteClick(memo.id)} className="text-minimal-medium-gray hover:text-minimal-charcoal p-1 transition-colors">×</button>
+              <button onClick={() => onMemoDeleteClick(memo.id)} className="text-slate-400 hover:text-rose-600 p-1 transition-colors">×</button>
             </div>
           </div>
         ))}
@@ -207,14 +207,14 @@ export const MemoPanel = ({
      {/* 드래그 핸들바 */}
      <div 
         onMouseDown={startResizing}
-        className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-[#F5F3EB] transition-colors my-1 select-none"
+        className="group cursor-row-resize flex items-center justify-center h-4 -mx-4 hover:bg-slate-50 transition-colors my-1 select-none"
       >
-        <div className="w-14 h-1 bg-[#C8A45D] rounded-full group-hover:bg-[#CFB982] transition-colors"></div>
+        <div className="w-14 h-1 bg-slate-200 rounded-full group-hover:bg-slate-300 transition-colors"></div>
       </div>
 
       {selectedMemo ? (
-        <div className="flex flex-col flex-1 min-h-0 bg-[#F5F3EB] border border-[#F5F3EB] rounded-lg shadow-minimal overflow-hidden">
-          <div className="p-3 border-b border-[F5F3EB] flex items-center justify-between bg-[#F5F3EB]">
+        <div className="flex flex-col flex-1 min-h-0 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+          <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
             {editingMemoName ? (
               <input
                 type="text"
@@ -222,35 +222,35 @@ export const MemoPanel = ({
                 onChange={(e) => setEditingMemoNameValue(e.target.value)}
                 onBlur={onMemoNameSave}
                 onKeyDown={(e) => e.key === 'Enter' && onMemoNameSave()}
-                className="flex-1 px-2 py-1 border border-minimal-charcoal rounded-minimal text-sm focus:outline-none focus:ring-1 focus:ring-minimal-charcoal bg-[#F5F3EB]"
+                className="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-white"
                 autoFocus
               />
             ) : (
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="font-light text-sm truncate text-minimal-charcoal">{selectedMemo.title}</span>
-                <button onClick={onMemoNameEdit} className="text-minimal-medium-gray hover:text-minimal-charcoal transition-colors">✎</button>
+                <span className="font-medium text-sm truncate text-slate-800">{selectedMemo.title}</span>
+                <button onClick={onMemoNameEdit} className="text-slate-400 hover:text-indigo-600 transition-colors">✎</button>
               </div>
             )}
           </div>
           
-          <div className="flex items-center gap-1 p-2 border-b border-minimal-gray bg-[#F5F3EB] flex-wrap">
-            <button onClick={onUndo} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="실행 취소">
-              <Undo2 size={16} className="text-minimal-dark-gray opacity-60" />
+          <div className="flex items-center gap-1 p-2 border-b border-slate-200 bg-white flex-wrap">
+            <button onClick={onUndo} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors" title="실행 취소">
+              <Undo2 size={16} className="text-slate-600 opacity-70" />
             </button>
-            <button onClick={onRedo} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="다시 실행">
-              <Redo2 size={16} className="text-minimal-dark-gray opacity-60" />
+            <button onClick={onRedo} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors" title="다시 실행">
+              <Redo2 size={16} className="text-slate-600 opacity-70" />
             </button>
-            <button onClick={handleToolbarPaste} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal text-minimal-dark-gray transition-colors" title="붙여넣기">
-              <Copy size={16} className="text-minimal-dark-gray opacity-60" />
+            <button onClick={handleToolbarPaste} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors" title="붙여넣기">
+              <Copy size={16} className="text-slate-600 opacity-70" />
             </button>
             
-            <div className="w-px h-4 bg-minimal-gray mx-1"></div>
+            <div className="w-px h-4 bg-slate-200 mx-1"></div>
             
-            <button onMouseDown={(e) => applyStyle(e, 'bold')} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal font-medium text-minimal-dark-gray transition-colors" title="굵게">
-              <Bold size={16} className="text-minimal-dark-gray opacity-60" />
+            <button onMouseDown={(e) => applyStyle(e, 'bold')} className="p-1.5 hover:bg-slate-100 rounded-lg font-medium text-slate-600 transition-colors" title="굵게">
+              <Bold size={16} className="text-slate-600 opacity-70" />
             </button>
-            <button onMouseDown={(e) => applyStyle(e, 'italic')} className="p-1.5 hover:bg-[#E8E0D0] rounded-minimal italic text-minimal-dark-gray transition-colors" title="기울임">
-              <Italic size={16} className="text-minimal-dark-gray opacity-60" />
+            <button onMouseDown={(e) => applyStyle(e, 'italic')} className="p-1.5 hover:bg-slate-100 rounded-lg italic text-slate-600 transition-colors" title="기울임">
+              <Italic size={16} className="text-slate-600 opacity-70" />
             </button>
           </div>
 
@@ -259,21 +259,21 @@ export const MemoPanel = ({
             contentEditable={true}
             onInput={handleContentInput}
             onPaste={handlePasteOnDiv}
-            className="flex-1 w-full p-4 focus:outline-none text-sm leading-relaxed overflow-y-auto custom-scrollbar bg-[#F5F3EB] text-minimal-charcoal font-light"
+            className="flex-1 w-full p-4 focus:outline-none text-sm leading-relaxed overflow-y-auto custom-scrollbar bg-white text-slate-800 font-light"
             suppressContentEditableWarning={true}
           />
 
-          <div className="p-2 bg-[#F5F3EB] border-t border-minimal-gray flex gap-2">
-            <button onClick={onConvertToHWP} className="flex-1 text-xs font-light px-4 py-2 bg-[#F5F3EB] border border-[#CFB982] rounded-lg text-minimal-charcoal hover:bg-[#E8E0D0] transition-all">
+          <div className="p-2 bg-white border-t border-slate-200 flex gap-2">
+            <button onClick={onConvertToHWP} className="flex-1 text-xs font-medium px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
               HWP 저장
             </button>
-            <button onClick={onConvertToWord} className="flex-1 text-xs font-light px-4 py-2 bg-[#F5F3EB] border border-[#CFB982] rounded-lg text-minimal-charcoal hover:bg-[#E8E0D0] transition-all">
+            <button onClick={onConvertToWord} className="flex-1 text-xs font-medium px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
               Word 저장
             </button>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center text-minimal-medium-gray text-sm font-light">
+        <div className="flex-1 flex items-center justify-center text-slate-500 text-sm font-light">
           메모를 선택하세요
         </div>
       )}
