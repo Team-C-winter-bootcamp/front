@@ -7,6 +7,7 @@ import Features from './Features';
 import UseCases from './UseCases';
 import TrendingSection from './TrendingSection';
 import Footer from './Footer';
+import StatsSection from './StatsSection';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const LandingPage: React.FC = () => {
         
         <UseCases />
         
+        <StatsSection />
         {/* Final CTA Section */}
         <section className="py-32 bg-indigo-600 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
@@ -56,11 +58,11 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 leading-tight">
-              법률 업무의 복잡함을 <br />
-              LAWDING으로 단순하게 해결하세요.
+              복잡한 법률 업무를 <br />
+              LAWDING으로 간편하게 해결하세요!
             </h2>
-            <p className="text-indigo-100 text-lg mb-12 opacity-90 leading-relaxed">
-              지금 가입하시면 무료로 고급 법례 검색과 <br />
+            <p className="text-indigo-100 text-lg mb-10 opacity-90 leading-relaxed">
+              지금 가입하시면 무료로 AI 법례 검색과 <br />
               AI 문서 요약 기능을 체험해 보실 수 있습니다.
             </p>
             <div className="flex justify-center">

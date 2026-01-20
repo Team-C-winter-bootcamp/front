@@ -382,12 +382,9 @@ const HomePage = () => {
             <div className="w-full max-w-5xl flex flex-col items-center gap-10">
               <div className="flex flex-col items-center">
                 <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 leading-tight text-center">
-                  법례 검색의 새로운 기준 <br />
+                  판례 검색의 새로운 기준 <br />
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">LAWDING</span>
                 </h1>
-                <p className="text-lg text-slate-500 font-medium tracking-wide">
-                  국내 최초 AI 판례 검색
-                </p>
               </div>
 
               <form onSubmit={handleSearch} className="w-full flex justify-center">
@@ -398,7 +395,7 @@ const HomePage = () => {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="궁금한 법례 키워드를 입력하세요"
+                      placeholder="궁금한 판례 키워드를 검색하세요"
                       className="flex-1 bg-transparent px-6 py-3 text-base outline-none text-slate-800 placeholder:text-slate-400"
                     />
                     <button

@@ -5,25 +5,25 @@ import { FeatureSection } from '../../types/landing';
 const features: FeatureSection[] = [
   {
     id: 'search',
-    title: '고급 법례 검색',
+    title: '빈틈없는 정밀 검색 시스템',
     description: '키워드뿐만 아니라 사건 유형, 법원, 재판유형 등 정밀한 필터를 제공합니다.',
     details: [
-      '형사, 민사, 가사 등 20여개 카테고리 필터링',
-      '전문판례 및 선고 일자별 상세 조회',
-      '유사 판례 하이라이트 시스템'
+      '형사, 민사, 가사 등 10여개 카테고리 필터링',
+      '전문판례 및 선고 일자별 상세 조회 가능',
+      '유사 판례 제공 기능'
     ],
-    image: 'https://picsum.photos/seed/search/800/600'
+    image: 'https://picsum.photos/seed/search/800/600'// 기능 사진 집어 넣기 
   },
   {
     id: 'matching',
-    title: '나만의 맞춤형 법례 매칭',
-    description: '현재 본인의 상황을 자연어로 설명하면 AI가 가장 유사한 판례를 매칭합니다.',
+    title: '나만의 맞춤형 판례 매칭',
+    description: '현재 본인의 상황을 설명하면 AI가 맞춤형 판례를 찾아줍니다.',
     details: [
       '대화형 AI 엔진의 상황 맥락 이해',
-      '수십만 건의 판례 중 유사도 90% 이상 추출',
+      '수만 건의 판례 중 유사도 90% 이상 추출',
       '판결 핵심 쟁점 자동 정리'
     ],
-    image: 'https://picsum.photos/seed/ai-chat/800/600',
+    image: 'https://picsum.photos/seed/ai-chat/800/600', // 기능 사진 집어 넣기 
     reverse: true
   },
   {
@@ -32,10 +32,10 @@ const features: FeatureSection[] = [
     description: '방대한 판례와 계약서를 10초 만에 요약하고 필요한 초안을 작성합니다.',
     details: [
       '계약서 핵심 조항 리스크 분석',
-      'OCR 기술을 통한 이미지 내 텍스트 인식',
-      '고소장, 준비서면 등 법률 서식 자동 생성'
+      'AI 기술을 통한 파일 내 텍스트 인식',
+      '고소장, 준비서면 등 법률 서식 초안 제공'
     ],
-    image: 'https://picsum.photos/seed/editor/800/600'
+    image: 'https://picsum.photos/seed/editor/800/600' // 기능 사진 집어 넣기 
   }
 ];
 

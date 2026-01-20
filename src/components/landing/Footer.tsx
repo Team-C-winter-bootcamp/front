@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
           <span className="text-3xl font-black text-indigo-600 tracking-tighter mb-6">LAWDING</span>
           <p className="text-slate-500 text-lg leading-relaxed max-w-xl mx-auto mb-12">
             법률 전문가와 일반인을 위한 가장 똑똑한 법례 파트너.<br />
-            AI 기반의 검색과 분석으로 업무의 질을 높입니다.
+            AI 기반의 검색과 분석으로 법적 문제를 빠르게 해결합니다.
           </p>
         </div>
 
@@ -17,17 +17,6 @@ const Footer: React.FC = () => {
           <p className="text-slate-400 text-xs mb-6 md:mb-0">
             © 2026 Techeer - LAWDING. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-indigo-50 transition group">
-              <div className="w-5 h-5 bg-slate-300 group-hover:bg-indigo-400 rounded-sm"></div>
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-indigo-50 transition group">
-              <div className="w-5 h-5 bg-slate-300 group-hover:bg-indigo-400 rounded-sm"></div>
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-indigo-50 transition group">
-              <div className="w-5 h-5 bg-slate-300 group-hover:bg-indigo-400 rounded-sm"></div>
-            </a>
-          </div>
         </div>
       </div>
     </footer>
