@@ -110,7 +110,7 @@ export const LeftSidebar = ({
         <div className="p-4 flex flex-col gap-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/Home')}
               className="font-black text-lg text-indigo-600 tracking-tight hover:opacity-70 transition-opacity cursor-pointer"
             >
               LAWDING

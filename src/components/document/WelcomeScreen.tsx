@@ -1,4 +1,3 @@
-import logoImage from '../../assets/logo.png'
 import { Send } from 'lucide-react'
 
 interface WelcomeScreenProps {
@@ -19,13 +18,6 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
     <div className="flex-1 flex flex-col items-center justify-center p-6 pb-20 overflow-y-auto bg-gradient-to-b from-slate-50 to-white">
       <div className="text-center max-w-2xl w-full">
         <div className="mb-8">
-          <div className="inline-block p-4 rounded-full mb-4 bg-white shadow-lg border border-slate-200">
-            <img 
-              src={logoImage} 
-              alt="법례를 찾아드립니다" 
-              className="w-24 h-24 object-contain" 
-            />
-          </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
             법례를 찾아드립니다
           </h1>
@@ -36,7 +28,6 @@ export const WelcomeScreen = ({ input, setInput, onSend }: WelcomeScreenProps) =
         
         <form onSubmit={onSend} className="relative w-full">
           <div className="relative max-w-2xl w-full mx-auto group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-700"></div>
           <input
             type="text"
             value={input}
