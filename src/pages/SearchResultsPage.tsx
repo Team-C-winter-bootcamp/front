@@ -106,15 +106,15 @@ const SearchResultsPage = () => {
   // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
-  const [activeTab, setActiveTab] = useState<'expert' | 'all' | 'ai'>(
-    (tabParam as 'expert' | 'all' | 'ai') || 'expert'
+  const [activeTab, setActiveTab] = useState<'expert' | 'all'>(
+    (tabParam as 'expert' | 'all') || 'expert'
   )
 
   const filters = useSearchFilters(MOCK_RESULTS, query, activeTab)
 
   // 3. 브라우저 뒤로가기 등으로 URL이 변경될 때 탭 상태 동기화
   useEffect(() => {
-    const currentTab = searchParams.get('tab') as 'expert' | 'all' | 'ai'
+    const currentTab = searchParams.get('tab') as 'expert' | 'all'
     if (currentTab && currentTab !== activeTab) {
       setActiveTab(currentTab)
     }
@@ -136,18 +136,6 @@ const SearchResultsPage = () => {
     setSearchParams({ q: searchInput, tab: activeTab })
   }
 
-  // [변경 3] AI 탭 클릭 시 Clerk 인증 상태 확인
-  const handleAITabClick = () => {
-    if (!isLoaded) return // 로딩 중이면 클릭 무시
-
-    if (!isSignedIn) {
-      setIsAlertModalOpen(true)
-      return
-    }
-    setActiveTab('ai')
-    navigate('/ai-chat')
-  }
-
   const handleAlertModalConfirm = () => {
     setIsAlertModalOpen(false)
     navigate('/login', { state: { from: '/search' } })
@@ -160,18 +148,13 @@ const SearchResultsPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB] font-serif">
-      <header className="flex justify-between items-center px-8 py-4 border-b border-minimal-gray bg-[#F5F3EB] font-serif">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
-          onClick={() => navigate('/')}
-          className="pl-[3%] text-2xl font-medium text-minimal-charcoal hover:opacity-70 transition-opacity"
+          onClick={() => navigate('/home')}
+          className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
         >
-          <div className="inline-block p-1 rounded-full">
-            <img 
-                src={logo} 
-                alt="logo" 
-                className="w-10 h-10 object-contain justify-center items-center opacity-50" />
-                </div>
+          LAWDING
         </button> 
         
         {/* 중앙 SearchBar */}
@@ -200,13 +183,13 @@ const SearchResultsPage = () => {
           <SignedOut>
             <button
               onClick={() => navigate('/login')}
-              className="btn-minimal"
+              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
             >
               로그인
             </button>
             <button
               onClick={() => navigate('/signup')}
-              className="btn-minimal-primary"
+              className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
             >
               회원가입
             </button>
@@ -214,8 +197,9 @@ const SearchResultsPage = () => {
         </div>
       </header>
 
+      <div className="pt-20">
       {/* Mobile Filter Toggle */}
-      <div className="xl:hidden px-4 py-3 border-b border-minimal-gray bg-[#F5F3EB] overflow-x-auto whitespace-nowrap">
+      <div className="xl:hidden px-4 py-3 border-b border-slate-200 bg-white overflow-x-auto whitespace-nowrap">
         <div className="flex gap-2">
           {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
             <button 
@@ -223,8 +207,8 @@ const SearchResultsPage = () => {
               onClick={() => setMobileFilterOpen(mobileFilterOpen === filter ? null : filter)}
               className={`px-3 py-1.5 text-sm border rounded-full font-light transition-all ${
                 mobileFilterOpen === filter 
-                  ? 'bg-[#F5F3EB] text-black border-[#CFB982] font-medium shadow-md' 
-                  : 'bg-[#F5F3EB] border-[#CFB982] text-minimal-dark-gray hover:bg-[#E8E0D0]'
+                  ? 'bg-white text-indigo-600 border-indigo-300 font-medium shadow-lg' 
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
               }`}
             >
               {filter} ▼
@@ -232,7 +216,7 @@ const SearchResultsPage = () => {
           ))}
         </div>
         {mobileFilterOpen && (
-          <div className="mt-3 p-4 card-minimal animate-fade-in-down">
+          <div className="mt-3 p-4 bg-white rounded-xl shadow-xl border border-slate-200 animate-fade-in-down">
             {mobileFilterOpen === '사건종류' && (
               <div className="flex flex-wrap gap-2">
                 {CASE_TYPES.map(type => (
@@ -241,8 +225,8 @@ const SearchResultsPage = () => {
                     onClick={() => filters.handleCaseTypeChange(type)}
                     className={`px-3 py-1 text-sm rounded-full transition-all ${
                       filters.selectedCaseTypes.includes(type) 
-                        ? 'bg-[#F5F3EB] text-black font-medium shadow-md scale-105' 
-                        : 'bg-[#F5F3EB] text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                        ? 'bg-indigo-600 text-white font-medium shadow-lg scale-105' 
+                        : 'bg-white text-slate-700 hover:bg-slate-50 font-light border border-slate-200'
                     }`}
                   >
                     {type}
@@ -268,8 +252,8 @@ const SearchResultsPage = () => {
                       onClick={() => filters.handleCourtChange(court)}
                       className={`px-3 py-1 text-sm rounded-full transition-all ${
                         filters.selectedCourts.includes(court) 
-                          ? 'bg-[#F5F3EB] text-black font-medium shadow-md scale-105' 
-                          : 'bg-[#F5F3EB] text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                          ? 'bg-indigo-600 text-white font-medium shadow-lg scale-105' 
+                          : 'bg-white text-slate-700 hover:bg-slate-50 font-light border border-slate-200'
                       }`}
                     >
                       {court}
@@ -335,8 +319,8 @@ const SearchResultsPage = () => {
               onClick={() => handleTabChange('expert')}
               className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
                 activeTab === 'expert' 
-                  ? 'bg-[#F5F3EB] text-black font-bold shadow-md scale-105' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                  ? 'bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-200 scale-105' 
+                  : 'shadow-md bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-50 font-light border border-slate-200'
               }`}
             >
               전문판례
@@ -348,32 +332,21 @@ const SearchResultsPage = () => {
               onClick={() => handleTabChange('all')}
               className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
                 activeTab === 'all' 
-                  ? 'bg-[#F5F3EB] text-black font-bold shadow-md scale-105' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
+                  ? 'bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-200 scale-105' 
+                  : 'shadow-md bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-50 font-light border border-slate-200'
               }`}
             >
               전체
             </button>
-
-            <button
-              onClick={handleAITabClick}
-              className={`ml-auto sm:ml-2 px-5 py-2.5 rounded-full text-sm text-black transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'ai' 
-                  ? 'bg-black text-white font-medium shadow-md ring-2 ring-black ring-offset-1' 
-                  : 'shadow-md bg-transparent text-minimal-medium-gray hover:text-minimal-dark-gray hover:bg-[#E8E0D0] font-light'
-              }`}
-            >
-              나의 유사 판례 찾기
-            </button>
           </div>
 
           {/* Results Header - w-full 및 justify-between으로 양 끝 정렬 보장 */}
-          <div className="flex flex-row w-full justify-between items-center mb-4 pb-4 border-b border-minimal-gray gap-2">
+          <div className="flex flex-row w-full justify-between items-center mb-4 pb-4 border-b border-slate-200 gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-light text-minimal-charcoal">검색 결과</span>
-              <span className="text-minimal-dark-gray font-light">{filters.filteredResults.length}건</span>
+              <span className="text-xl font-light text-slate-800">검색 결과</span>
+              <span className="text-slate-600 font-light">{filters.filteredResults.length}건</span>
             </div>
-            <select className="input-minimal px-3 py-1.5 text-sm w-auto">
+            <select className="px-3 py-1.5 text-sm w-auto bg-white border border-slate-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
               <option>정확도순</option>
               <option>최신순</option>
             </select>
@@ -390,9 +363,9 @@ const SearchResultsPage = () => {
                 />
               ))
             ) : (
-              <div className="text-center py-20 card-minimal">
-                <p className="text-minimal-charcoal text-2xl font-light">검색 결과가 없습니다.</p>
-                <p className="text-minimal-medium-gray text-sm mt-2 font-light">단어의 철자가 정확한지 확인해 보세요.</p>
+              <div className="text-center py-20 bg-white rounded-xl shadow-xl border border-slate-200">
+                <p className="text-slate-800 text-2xl font-light">검색 결과가 없습니다.</p>
+                <p className="text-slate-500 text-sm mt-2 font-light">단어의 철자가 정확한지 확인해 보세요.</p>
               </div>
             )}
           </div>
@@ -417,6 +390,7 @@ const SearchResultsPage = () => {
             onPeriodChange={filters.setSelectedPeriod}
           />
         </div>
+      </div>
       </div>
 
       <SearchPageAlertModal 

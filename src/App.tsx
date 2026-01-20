@@ -2,11 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 // [핵심] Clerk 인증 컴포넌트 불러오기
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 
+import LandingPage from './pages/LandingPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import SearchResultsPage from './pages/SearchResultsPage'
-import AIChatPage from './pages/AIChatPage'
 import DocumentPage from './pages/DocumentPage'
 import JudgmentDetailPage from './pages/JudgmentDetailPage'
 
@@ -15,7 +15,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* 1. 누구나 접속 가능한 공개 페이지 (Public Routes) */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
@@ -25,20 +26,6 @@ function App() {
             - SignedIn 내부: 로그인된 사용자만 볼 수 있음
             - SignedOut 내부: 로그인 안 된 사용자는 로그인 페이지로 강제 이동
         */}
-        <Route
-          path="/ai-chat"
-          element={
-            <>
-              <SignedIn>
-                <AIChatPage />
-              </SignedIn>
-              <SignedOut>
-                <RedirectToSignIn />
-              </SignedOut>
-            </>
-          }
-        />
-
         <Route
           path="/document"
           element={

@@ -83,11 +83,11 @@ export const LeftSidebar = ({
   // 닫혔을 때: 얇은 사이드바 + 햄버거 버튼 표시
   if (!isLeftPanelOpen) {
     return (
-      <div className="bg-[#111e31] border-r border-[#1E293B] flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 z-20 font-sans">
+      <div className="bg-white/80 backdrop-blur-md border-r border-slate-200 flex-shrink-0 flex flex-col h-full transition-all duration-300 w-16 z-20">
         <div className="p-2 flex flex-col items-center gap-4 mt-4">
           <button 
             onClick={onTogglePanel}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-500 hover:text-indigo-600 transition-colors"
             title="사이드바 열기"
           >
             <PanelLeftOpen size={24} />
@@ -102,7 +102,7 @@ export const LeftSidebar = ({
     <>
       <div
         ref={leftSidebarRef}
-        className="border-r border-[#1E293B] bg-[#111e31] flex flex-col flex-shrink-0 z-10 transition-all duration-300 font-sans text-slate-300"
+        className="border-r border-slate-200 bg-white flex flex-col flex-shrink-0 z-10 transition-all duration-300 text-slate-700"
         // 너비 조절 기능을 제거했으므로 sourceWidth 대신 고정값 사용 (예: 260px)
         style={{ width: '260px' }}
       >
@@ -111,13 +111,13 @@ export const LeftSidebar = ({
           <div className="flex items-center justify-between">
             <button 
               onClick={() => navigate('/')}
-              className="font-bold text-lg text-white tracking-wider hover:opacity-70 transition-opacity cursor-pointer"
+              className="font-black text-lg text-indigo-600 tracking-tight hover:opacity-70 transition-opacity cursor-pointer"
             >
               LAWDING
             </button>
             <button 
               onClick={onTogglePanel}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="text-slate-500 hover:text-indigo-600 transition-colors"
               title="패널 접기"
             >
               <PanelLeftClose size={24} />
@@ -126,7 +126,7 @@ export const LeftSidebar = ({
 
           <button
             onClick={onNewChat}
-            className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-lg transition-all shadow-md w-full py-3 px-4"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-200 w-full py-3 px-4"
           >
             <Plus size={20} />
             <span className="font-medium text-sm">새 채팅</span>
@@ -159,10 +159,10 @@ export const LeftSidebar = ({
             e.preventDefault()
             onFileDividerResizeStart()
           }}
-          className="h-6 w-full cursor-ns-resize flex-shrink-0 relative group my-2 rounded-lg flex items-center justify-center transition-colors hover:bg-gray-100"
+          className="h-6 w-full cursor-ns-resize flex-shrink-0 relative group my-2 rounded-lg flex items-center justify-center transition-colors hover:bg-slate-50"
           title="드래그하여 높이 조절"
         >
-          <div className="h-1 w-12 bg-gray-300 rounded-full group-hover:bg-gray-400 transition-colors"></div>
+          <div className="h-1 w-12 bg-slate-200 rounded-full group-hover:bg-slate-300 transition-colors"></div>
         </div>
 
         {/* 하단: 소스 (파일 목록) */}
