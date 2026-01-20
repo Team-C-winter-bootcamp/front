@@ -10,7 +10,7 @@ const useCases: UseCase[] = [
   { category: '상대방 준비서면', items: ['반박서면 작성', '주장 분석', '방어논리 구성'] },
   { category: '본인 준비서면', items: ['판례 법령 인용', '주장 보강', '종합서면 작성'] },
   { category: '판결문', items: ['항소이유서 작성', '판결 분석', '승소율 예측'] },
-  { category: '이미지/OCR', items: ['사실 관계 정리', '증거 사진 분석', '문서 스캐닝'] },
+  { category: '문서 파일', items: ['사실 관계 정리', '증거 사진 분석', '문서 스캐닝'] },
 ];
 
 const UseCases: React.FC = () => {
@@ -19,7 +19,7 @@ const UseCases: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-4">문서/사건 기반 대화 활용 예시</h2>
-          <p className="text-slate-400">LAWDING은 다양한 법률 실무 영역에서 최고의 효율을 보장합니다.</p>
+          <p className="text-slate-400">LAWDING은 다양한 법률 실무 영역에서 최고의 효율을 자랑합니다.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">

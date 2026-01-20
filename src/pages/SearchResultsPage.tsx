@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-// [변경 1] Clerk 관련 Hook과 컴포넌트 import
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
-
-// [삭제] 기존 useStore 및 LogoutModal 제거
-// import { useStore } from '../store/useStore'
-// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
-
 import { SearchBar } from '../components/search/SearchBar'
-import logo from '../assets/logo.png'
 import { FilterSidebar } from '../components/search/FilterSidebar'
 import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
@@ -95,17 +88,12 @@ const SearchResultsPage = () => {
   const query = searchParams.get('q') || ''
   const tabParam = searchParams.get('tab')
 
-  // [변경 2] Clerk useUser 훅 사용 (기존 useStore 대체)
-  const { isSignedIn, user, isLoaded } = useUser()
+  const {user} = useUser()
   
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
-  
-  // [삭제] LogoutModal 관련 state 삭제 (UserButton이 대신함)
-  // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
-  // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all'>(
     (tabParam as 'expert' | 'all') || 'expert'
   )
@@ -378,7 +366,7 @@ const SearchResultsPage = () => {
         </div>
 
         {/* Sidebar Filters */}
-        <div className="hidden lg:block w-[280px] flex-shrink-0 order-1 lg:order-2">
+        <div className="hidden lg:block w-[280px] flex-shrink-0 order-1 lg:order-2 sticky top-24 h-fit">
           <FilterSidebar
             selectedCaseTypes={filters.selectedCaseTypes}
             selectedCourts={filters.selectedCourts}

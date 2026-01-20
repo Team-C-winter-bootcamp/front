@@ -1,14 +1,13 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 const data = [
-  { name: '지식재산권', value: 920, color: '#6366f1' },
-  { name: '기업합병', value: 780, color: '#818cf8' },
-  { name: '증권사기', value: 710, color: '#a5b4fc' },
-  { name: '공정거래', value: 580, color: '#c7d2fe' },
-  { name: '파산/회생', value: 490, color: '#e0e7ff' },
-  { name: '부동산', value: 410, color: '#eef2ff' },
+  { name: '교통사고', value: 920, color: '#2563eb' },       // Blue 600
+  { name: '전세 보증금 분쟁', value: 850, color: '#3b82f6' }, // Blue 500
+  { name: '이혼/상속', value: 760, color: '#60a5fa' },       // Blue 400
+  { name: '사기/보이스피싱', value: 600, color: '#93c5fd' },  // Blue 300
+  { name: '명예훼손', value: 530, color: '#bfdbfe' },        // Blue 200
+  { name: '층간소음', value: 500, color: '#dbeafe' },        // Blue 100
 ];
 
 const TrendingSection: React.FC = () => {
@@ -16,8 +15,8 @@ const TrendingSection: React.FC = () => {
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-3">Trending Legal Topics</h2>
-          <p className="text-slate-500">현재 법률 시장에서 가장 주목받는 검색 키워드입니다.</p>
+          <h2 className="text-3xl font-bold mb-3">LAWDING과 함께라면 전문가의 도움없이 상황을 빠르게 대체할 수 있습니다!</h2>
+          <p className="text-slate-500">최근 6개월 동안 가장 많이 검색된 법적 주제 TOP 6</p>
         </div>
 
         <div className="h-[350px] w-full bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
