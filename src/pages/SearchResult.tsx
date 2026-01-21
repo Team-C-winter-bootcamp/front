@@ -1,18 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-// [변경 1] Clerk 관련 Hook과 컴포넌트 import
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
-
-// [삭제] 기존 useStore 및 LogoutModal 제거
-// import { useStore } from '../store/useStore'
-// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
-
-
-import { SearchBar } from '../components/search/SearchBar'
-import { FilterSidebar } from '../components/search/FilterSidebar'
-import { Pagination } from '../components/search/Pagination'
-import { useSearchFilters } from '../hooks/useSearchFilters'
-import SearchPageAlertModal from '../components/AlertModal/SearchPageAlertModal'
+import { motion } from 'framer-motion'
+import { Button } from '../components/ui/Button'
 
 export interface SearchResult {
   id: number
@@ -22,6 +12,7 @@ export interface SearchResult {
   date: string
   caseType: string
   judgmentType: string
+  similarity?: number
 }
 
 export const MOCK_RESULTS: SearchResult[] = [
@@ -32,7 +23,8 @@ export const MOCK_RESULTS: SearchResult[] = [
     court: '서울고등법원',
     date: '2014. 7. 11.',
     caseType: '형사',
-    judgmentType: '판결'
+    judgmentType: '판결',
+    similarity: 92
   },
   {
     id: 2,
@@ -41,7 +33,8 @@ export const MOCK_RESULTS: SearchResult[] = [
     court: '대법원',
     date: '2020. 3. 12.',
     caseType: '민사',
-    judgmentType: '판결'
+    judgmentType: '판결',
+    similarity: 88
   },
   {
     id: 3,
@@ -50,7 +43,8 @@ export const MOCK_RESULTS: SearchResult[] = [
     court: '서울지방법원',
     date: '2018. 5. 20.',
     caseType: '민사',
-    judgmentType: '판결'
+    judgmentType: '판결',
+    similarity: 85
   },
   {
     id: 4,
@@ -59,7 +53,8 @@ export const MOCK_RESULTS: SearchResult[] = [
     court: '대법원',
     date: '2021. 8. 15.',
     caseType: '형사',
-    judgmentType: '결정'
+    judgmentType: '결정',
+    similarity: 82
   },
   {
     id: 5,
@@ -68,16 +63,8 @@ export const MOCK_RESULTS: SearchResult[] = [
     court: '부산고등법원',
     date: '2019. 11. 25.',
     caseType: '형사',
-    judgmentType: '판결'
-  },
-  {
-    id: 6,
-    title: '서울행정법원 2022. 1. 10. 선고 2021구합12345 판결 과세처분',
-    content: '과세처분의 취소를 구하는 소송에서 처분의 위법성과 피해 사실을 입증해야 한다.',
-    court: '서울행정법원',
-    date: '2022. 1. 10.',
-    caseType: '행정',
-    judgmentType: '판결'
+    judgmentType: '판결',
+    similarity: 80
   }
 ]
 
@@ -88,60 +75,21 @@ const PERIOD_TYPES = ['전체 기간', '최근 1년', '최근 3년', '최근 5�
 
 const SearchResultsPage = () => {
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  
-  // 1. URL 파라미터 읽기
-  const query = searchParams.get('q') || ''
-  const tabParam = searchParams.get('tab')
-
-  // [변경 2] Clerk useUser 훅 사용 (기존 useStore 대체)
   const { user } = useUser()
-  
-  const [searchInput, setSearchInput] = useState(query)
-  const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
-  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
-  
-  // [삭제] LogoutModal 관련 state 삭제 (UserButton이 대신함)
-  // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
 
-  // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
-  const [activeTab, setActiveTab] = useState<'expert' | 'all'>(
-    (tabParam as 'expert' | 'all') || 'expert'
-  )
-
-  const filters = useSearchFilters(MOCK_RESULTS, query, activeTab)
-
-  // 3. 브라우저 뒤로가기 등으로 URL이 변경될 때 탭 상태 동기화
-  useEffect(() => {
-    const currentTab = searchParams.get('tab') as 'expert' | 'all'
-    if (currentTab && currentTab !== activeTab) {
-      setActiveTab(currentTab)
-    }
-    // 검색어도 동기화
-    const currentQuery = searchParams.get('q') || ''
-    if (currentQuery !== searchInput) {
-      setSearchInput(currentQuery)
-    }
-  }, [searchParams, activeTab, searchInput])
-
-  // 4. 탭 변경 핸들러: 상태 변경 + URL 업데이트
-  const handleTabChange = (newTab: 'expert' | 'all') => {
-    setActiveTab(newTab)
-    setSearchParams({ q: query, tab: newTab })
-  }
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSearchParams({ q: searchInput, tab: activeTab })
-  }
-
-  const handleAlertModalConfirm = () => {
-    setIsAlertModalOpen(false)
-    navigate('/login', { state: { from: '/search' } })
-  }
+  // 5개만 표시
+  const displayedResults = MOCK_RESULTS.slice(0, 5)
 
   const handleResultClick = (id: number) => {
     navigate(`/judgment/${id}`, { state: { from: 'search' } })
+  }
+
+  const handleSelectClick = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation()
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+    )
   }
 
   // [삭제] Logout 관련 핸들러 삭제
@@ -150,32 +98,17 @@ const SearchResultsPage = () => {
     <div className="min-h-screen bg-[#F5F3EB]">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/')}
           className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
         >
           LAWDING
         </button> 
-        
-        {/* 중앙 SearchBar */}
-        <div className="flex-1 max-w-2xl mx-4">
-          <SearchBar
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
-            onSearch={handleSearch}
-            onClear={() => {
-              setSearchInput('')
-              setSearchParams({ tab: activeTab })
-            }} 
-          />
-        </div>
-        
-        {/* [변경 4] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
+
         <div className="pr-[3%] flex gap-4 items-center">
           <SignedIn>
             <span className="text-sm text-slate-700 font-light">
               환영합니다 {user?.firstName || user?.username}님!
             </span>
-            {/* Clerk 제공 유저 버튼 (로그아웃 포함) */}
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
 
@@ -197,228 +130,75 @@ const SearchResultsPage = () => {
       </header>
 
       <div className="pt-20">
-      {/* Mobile Filter Toggle */}
-      <div className="xl:hidden px-4 py-3 border-b border-slate-200 bg-white overflow-x-auto whitespace-nowrap">
-        <div className="flex gap-2">
-          {['사건종류', '법원', '재판유형', '기간'].map((filter) => (
-            <button 
-              key={filter}
-              onClick={() => setMobileFilterOpen(mobileFilterOpen === filter ? null : filter)}
-              className={`px-3 py-1.5 text-sm border rounded-full font-light transition-all ${
-                mobileFilterOpen === filter 
-                  ? 'bg-white text-indigo-600 border-indigo-300 font-medium shadow-lg' 
-                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              {filter} ▼
-            </button>
-          ))}
-        </div>
-        {mobileFilterOpen && (
-          <div className="mt-3 p-4 bg-white rounded-xl shadow-xl border border-slate-200 animate-fade-in-down">
-            {mobileFilterOpen === '사건종류' && (
-              <div className="flex flex-wrap gap-2">
-                {CASE_TYPES.map(type => (
+      {/* Main Container */}
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+        {/* Search Results List */}
+        <div className="space-y-4">
+          {displayedResults.map((result: SearchResult, index) => {
+            const isSelected = selectedIds.includes(result.id)
+            return (
+              <motion.div
+                key={result.id}
+                onClick={() => handleResultClick(result.id)}
+                className={`relative bg-white rounded-lg border-2 p-6 hover:shadow-lg transition-all cursor-pointer ${
+                  isSelected 
+                    ? 'border-green-500 shadow-md' 
+                    : 'border-[#CFB982]'
+                }`}
+                animate={isSelected ? { scale: 1.02 } : { scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center gap-2 mb-2 text-sm text-slate-700">
+                  <span className="font-medium">{result.court}</span>
+                  <span>|</span>
+                  <span>{result.date}</span>
+                  <span className="text-green-600 font-semibold ml-2">
+                    유사도 {result.similarity || 85}%
+                  </span>
+                  <div className="ml-auto flex gap-2">
+                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                      {result.caseType}
+                    </span>
+                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                      {result.judgmentType}
+                    </span>
+                  </div>
+                </div>
+                <h3 className="text-base font-semibold text-slate-900 mb-2 leading-tight">
+                  {result.title}
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  {result.content}
+                </p>
+                <div className="absolute bottom-4 right-4">
                   <button
-                    key={type}
-                    onClick={() => filters.handleCaseTypeChange(type)}
-                    className={`px-3 py-1 text-sm rounded-full transition-all ${
-                      filters.selectedCaseTypes.includes(type) 
-                        ? 'bg-indigo-600 text-white font-medium shadow-lg scale-105' 
-                        : 'bg-white text-slate-700 hover:bg-slate-50 font-light border border-slate-200'
+                    onClick={(e) => handleSelectClick(e, result.id)}
+                    className={`text-xs px-3 py-1 rounded-full transition-all ${
+                      isSelected
+                        ? 'bg-green-500 text-white font-medium'
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                     }`}
                   >
-                    {type}
+                    선택
                   </button>
-                ))}
-                {filters.selectedCaseTypes.length > 0 && (
-                  <button
-                    onClick={() => filters.handleCaseTypeChange('')}
-                    // 초기화 버튼: 붉은 계열(Rose)로 구분
-                    className="px-3 py-1 text-sm rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium transition-colors"
-                  >
-                    초기화
-                  </button>
-                )}
-              </div>
-            )}
-             {mobileFilterOpen === '법원' && (
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap gap-2">
-                  {COURT_TYPES.map(court => (
-                    <button
-                      key={court}
-                      onClick={() => filters.handleCourtChange(court)}
-                      className={`px-3 py-1 text-sm rounded-full transition-all ${
-                        filters.selectedCourts.includes(court) 
-                          ? 'bg-indigo-600 text-white font-medium shadow-lg scale-105' 
-                          : 'bg-white text-slate-700 hover:bg-slate-50 font-light border border-slate-200'
-                      }`}
-                    >
-                      {court}
-                    </button>
-                  ))}
-                  {filters.selectedCourts.length > 0 && (
-                    <button
-                      onClick={() => filters.handleCourtChange('')}
-                      // 초기화 버튼: 붉은 계열(Rose)로 구분
-                      className="px-3 py-1 text-sm rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium transition-colors"
-                    >
-                      초기화
-                    </button>
-                  )}
                 </div>
-              </div>
-            )}
-            {/* ... 재판유형, 기간 필터는 기존 유지 ... */}
-            {mobileFilterOpen === '재판유형' && (
-              <div className="flex flex-col gap-2">
-                {JUDGMENT_TYPES.map(type => (
-                  <label key={type} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="mobileJudgmentType"
-                      checked={filters.selectedJudgmentType === type}
-                      onChange={() => filters.setSelectedJudgmentType(type)}
-                      className="text-slate-700 focus:ring-indigo-500 w-4 h-4 border-slate-300"
-                    />
-                    <span className="text-sm text-slate-700 font-light">{type}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-            {mobileFilterOpen === '기간' && (
-              <div className="flex flex-col gap-2">
-                {PERIOD_TYPES.map(period => (
-                  <label key={period} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="mobilePeriod"
-                      checked={filters.selectedPeriod === period}
-                      onChange={() => filters.setSelectedPeriod(period)}
-                      className="text-slate-700 focus:ring-indigo-500 w-4 h-4 border-slate-300"
-                    />
-                    <span className="text-sm text-slate-700 font-light">{period}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Main Container */}
-      <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-1 py-6 max-w-[1400px] mx-auto lg:mx-0 lg:ml-[5%]">
-        
-        {/* Main Content */}
-        <div className="flex-1 order-2 lg:order-1 lg:min-w-[1100px]">
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-3 mb-6 items-center">
-            <button
-              onClick={() => handleTabChange('expert')}
-              className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
-                activeTab === 'expert' 
-                  ? 'bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-200 scale-105' 
-                  : 'shadow-md bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-50 font-light border border-slate-200'
-              }`}
-            >
-              전문판례
-            </button>
-            
-            <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
-            
-            <button
-              onClick={() => handleTabChange('all')}
-              className={`px-5 py-2.5 rounded-full text-sm transition-all duration-200 ${
-                activeTab === 'all' 
-                  ? 'bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-200 scale-105' 
-                  : 'shadow-md bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-50 font-light border border-slate-200'
-              }`}
-            >
-              전체
-            </button>
-          </div>
-
-          {/* Results Header - w-full 및 justify-between으로 양 끝 정렬 보장 */}
-          <div className="flex flex-row w-full justify-between items-center mb-4 pb-4 border-b border-slate-200 gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-light text-slate-800">검색 결과</span>
-              <span className="text-slate-600 font-light">{filters.filteredResults.length}건</span>
-            </div>
-            <select className="px-3 py-1.5 text-sm w-auto bg-white border border-slate-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-              <option>정확도순</option>
-              <option>최신순</option>
-            </select>
-          </div>
-
-          {/* Search Results List */}
-          <div className="space-y-4">
-            {filters.paginatedResults.length > 0 ? (
-              filters.paginatedResults.map((result: SearchResult) => (
-                <div
-                  key={result.id}
-                  onClick={() => handleResultClick(result.id)}
-                  className="bg-white rounded-lg border border-[#CFB982] p-6 hover:shadow-lg transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 mb-3 text-sm text-slate-700">
-                    <span className="font-medium">{result.court}</span>
-                    <span>|</span>
-                    <span>{result.date}</span>
-                    <div className="ml-auto flex gap-2">
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
-                        {result.caseType}
-                      </span>
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
-                        {result.judgmentType}
-                      </span>
-                    </div>
-                  </div>
-                  <h3 className="text-base font-semibold text-slate-900 mb-2 leading-tight">
-                    {result.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {result.content}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-20 bg-white rounded-xl shadow-xl border border-slate-200">
-                <p className="text-slate-800 text-2xl font-light">검색 결과가 없습니다.</p>
-                <p className="text-slate-500 text-sm mt-2 font-light">단어의 철자가 정확한지 확인해 보세요.</p>
-              </div>
-            )}
-          </div>
-
-          <Pagination
-            currentPage={filters.currentPage}
-            totalPages={filters.totalPages}
-            onPageChange={filters.setCurrentPage}
-          />
+              </motion.div>
+            )
+          })}
         </div>
 
-        {/* Sidebar Filters */}
-        <div className="hidden lg:block w-[280px] flex-shrink-0 order-1 lg:order-2">
-          <FilterSidebar
-            selectedCaseTypes={filters.selectedCaseTypes}
-            selectedCourts={filters.selectedCourts}
-            selectedJudgmentType={filters.selectedJudgmentType}
-            selectedPeriod={filters.selectedPeriod}
-            onCaseTypeChange={filters.handleCaseTypeChange}
-            onCourtChange={filters.handleCourtChange}
-            onJudgmentTypeChange={filters.setSelectedJudgmentType}
-            onPeriodChange={filters.setSelectedPeriod}
-          />
+        {/* 다음 단계 버튼 */}
+        <div className="mt-8 flex justify-center">
+          <Button
+            size="lg"
+            onClick={() => navigate('/solution')}
+            className="shadow-lg shadow-blue-500/20"
+          >
+            다음 단계로
+          </Button>
         </div>
       </div>
       </div>
-
-      <SearchPageAlertModal 
-        isOpen={isAlertModalOpen}
-        onClose={() => setIsAlertModalOpen(false)}
-        onConfirm={handleAlertModalConfirm}
-      />
-
-      {/* [변경 5] LogoutAlertModal 제거 (UserButton 사용으로 불필요) */}
     </div>
   )
 }

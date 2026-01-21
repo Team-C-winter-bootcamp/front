@@ -6,12 +6,13 @@ const Hero: React.FC = () => {
     <header className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-4xl mx-auto px-6 text-center">
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-          판례 검색의 새로운 기준 <br />
-          <span className="gradient-text">LAWDING</span>
+          변호사 없이도 법률 문제를 <br />
+          <span className="gradient-text">쉽게 해결하세요</span>
         </h1>
         <p className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-          방대한 판례 데이터를 AI로 빠르게 분석하고 정확하게 찾으세요.<br />
-          복잡한 서면 작성부터 요약까지, 당신의 법률 파트너가 되어드립니다.
+          변호사 선임이 부담스러우신가요? <br />
+          간단한 질문과 상황 입력만으로 유사 판례를 찾고, 문서 작성을 도와드립니다.<br />
+          금전적, 시간적 부담 없이 법률 문제를 해결해보세요.
         </p>
 
         <div className="relative max-w-2xl mx-auto group">

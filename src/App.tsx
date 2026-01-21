@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { CaseCreation } from './pages/CaseCreation';
 import { CaseLaw } from './pages/CaseLaw';
 import { Document } from './pages/Document';
+import { Solution } from './pages/Solution';
 import SearchResult from './pages/SearchResult';
 import JudmentDetail from './pages/JudmentDetail';
 import LandingPage from './pages/LandingPage';
@@ -27,6 +28,7 @@ export function App() {
           <Route path="/case/:id/caselaw" element={<CaseLaw />} />
           <Route path="/judgment/:id" element={<JudmentDetail />} />
           <Route path="/search" element={<SearchResult />} />
+          <Route path="/solution" element={<Solution />} />
           <Route path="/document" element={<Document />} />
 
           {/* 없는 페이지로 접근 시 메인으로 리다이렉트 */}

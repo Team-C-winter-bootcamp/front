@@ -75,6 +75,8 @@ export function CaseCreation() {
   ]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [showChatInput, setShowChatInput] = useState(false);
+  const [chatInput, setChatInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -87,23 +89,30 @@ export function CaseCreation() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // Initial delay for the first question
+  // Initial delay for the first question - 중복 방지
   useEffect(() => {
     if (currentStep === 0 && messages.length === 1) {
       setIsTyping(true);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setIsTyping(false);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `q-${steps[0].id}`,
-            text: steps[0].question,
-            sender: 'ai'
+        setMessages((prev) => {
+          // 이미 첫 번째 질문이 있는지 확인
+          if (prev.some(msg => msg.id === `q-${steps[0].id}`)) {
+            return prev;
           }
-        ]);
+          return [
+            ...prev,
+            {
+              id: `q-${steps[0].id}`,
+              text: steps[0].question,
+              sender: 'ai'
+            }
+          ];
+        });
       }, 1500);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [currentStep, messages.length]);
 
   const handleOptionClick = (option: string) => {
     // Add user response
@@ -133,7 +142,7 @@ export function CaseCreation() {
           }
         ]);
       } else {
-        // Finish flow
+        // Finish flow - 대화창 표시
         setMessages((prev) => {
           // 이미 finish 메시지가 있는지 확인
           if (prev.some(msg => msg.id === 'finish')) {
@@ -143,35 +152,48 @@ export function CaseCreation() {
             ...prev,
             {
               id: 'finish',
-              text: "세부사항을 공유해 주셔서 감사합니다. 유사한 사건을 바탕으로 귀하의 상황을 분석했습니다. 요약과 권장 다음 단계를 준비했습니다.",
+              text: "세부사항을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요? 아래 입력창에 자유롭게 작성해 주세요.",
               sender: 'ai'
             }
           ];
         });
+        setShowChatInput(true);
       }
     }, 1500);
   };
 
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || chatInput.trim().length < 15) {
+      alert('15자 이상 입력해주세요.');
+      return;
+    }
+    
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-chat-${Date.now()}`,
+        text: chatInput,
+        sender: 'user'
+      },
+      {
+        id: `ai-response-${Date.now()}`,
+        text: '상황을 잘 이해했습니다. 이제 유사 판례를 찾아드리겠습니다.',
+        sender: 'ai'
+      }
+    ]);
+    setChatInput('');
+    setTimeout(() => {
+      setShowChatInput(false);
+    }, 500);
+  };
+
   const isFinished =
-    currentStep === steps.length - 1 && messages.length > steps.length * 2 + 1;
+    currentStep === steps.length - 1 && messages.length > steps.length * 2 + 1 && !showChatInput;
 
   return (
-    <Layout showNav={false}>
+    <Layout>
       <div className="max-w-3xl mx-auto flex flex-col h-screen bg-[#FAFAFA]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-10">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="text-center">
-            <h2 className="font-semibold text-gray-900">사건 평가</h2>
-            <p className="text-xs text-gray-400">비공개 및 기밀</p>
-          </div>
-          <div className="w-8" /> {/* Spacer */}
-        </div>
 
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -192,7 +214,35 @@ export function CaseCreation() {
 
         {/* Input Area (Options) */}
         <div className="p-6 bg-white border-t border-gray-100">
-          {!isFinished ? (
+          {showChatInput ? (
+            <form onSubmit={handleChatSubmit} className="max-w-2xl mx-auto">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                >
+                  <span className="text-gray-600 text-xl">+</span>
+                </button>
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="사례를 입력해 주세요.(15자 이상)"
+                  className="flex-1 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  minLength={15}
+                />
+                <button
+                  type="submit"
+                  className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors"
+                >
+                  <span className="text-white text-lg">↑</span>
+                </button>
+              </div>
+              {chatInput.length > 0 && chatInput.length < 15 && (
+                <p className="text-xs text-red-500 mt-2 ml-14">15자 이상 입력해주세요.</p>
+              )}
+            </form>
+          ) : !isFinished ? (
             <div className="max-w-2xl mx-auto">
               <p className="text-sm text-gray-400 mb-3 text-center">
                 계속하려면 옵션을 선택하세요:
@@ -238,7 +288,7 @@ export function CaseCreation() {
                 onClick={() => navigate('/search')}
                 className="w-full sm:w-auto min-w-[200px] shadow-lg shadow-blue-500/20"
               >
-                사건 요약 보기
+                유사 판례 보기
               </Button>
             </motion.div>
           )}
