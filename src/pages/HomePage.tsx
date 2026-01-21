@@ -16,36 +16,36 @@ export function HomePage() {
   const navigate = useNavigate();
   const categories = [
     {
-      id: 'fire',
-      title: 'Fire Damage',
+      id: 'money',
+      title: '못받은 돈',
       description:
         'Insurance claims, property loss, and liability disputes from fire incidents.',
       icon: <Flame size={24} />
     },
     {
-      id: 'defamation',
-      title: 'Defamation',
+      id: 'labor',
+      title: '근로/알바 계약서',
       description:
         'Slander, libel, and reputation damage issues online or offline.',
       icon: <MessageSquare size={24} />
     },
     {
-      id: 'assault',
-      title: 'Assault & Injury',
+      id: 'realestate',
+      title: '부동산/임대차',
       description:
         'Physical altercations, personal injury claims, and self-defense cases.',
       icon: <ShieldAlert size={24} />
     },
     {
-      id: 'property',
-      title: 'Property Dispute',
+      id: 'fraud',
+      title: '중고사기 온라인 모욕',
       description:
         'Boundary issues, landlord-tenant conflicts, and real estate disagreements.',
       icon: <Home size={24} />
     },
     {
-      id: 'employment',
-      title: 'Employment',
+      id: 'assault',
+      title: '폭행/폭언',
       description:
         'Wrongful termination, harassment, wage theft, and contract disputes.',
       icon: <Briefcase size={24} />
@@ -138,7 +138,7 @@ export function HomePage() {
           {/* "Other" Card */}
           <motion.div variants={item}>
             <CategoryCard
-              title="Something Else"
+              title="기타"
               description="Not sure where your case fits? Tell us what happened in your own words."
               icon={<Sparkles size={24} />}
               onClick={() => navigate('/chat')}

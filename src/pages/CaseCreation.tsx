@@ -22,44 +22,44 @@ const steps: Step[] = [
   {
     id: 1,
     question:
-      'I can help you understand your options. First, could you tell me your role in this situation?',
+      '옵션을 이해하는 데 도움을 드릴 수 있습니다. 먼저 이 상황에서 귀하의 역할을 알려주실 수 있나요?',
     options: [
-      'I am the victim / claimant',
-      'I am the alleged offender',
-      'I am a witness',
-      'Other'
+      '저는 피해자/청구인입니다',
+      '저는 피의자입니다',
+      '저는 증인입니다',
+      '기타'
     ]
   },
   {
     id: 2,
     question:
-      'Thank you. To give you the best guidance, I need to know: Is there any insurance policy that might cover this incident?',
+      '감사합니다. 최선의 안내를 위해 다음을 알려주세요: 이 사건을 보장할 수 있는 보험 정책이 있나요?',
     options: [
-      'Yes, I have insurance',
-      'The other party has insurance',
-      'No insurance involved',
-      "I'm not sure"
+      '네, 저에게 보험이 있습니다',
+      '상대방에게 보험이 있습니다',
+      '보험이 관련되지 않았습니다',
+      '확실하지 않습니다'
     ]
   },
   {
     id: 3,
-    question: 'Understood. Was anyone physically injured during the incident?',
+    question: '알겠습니다. 사건 중에 신체적 부상을 입은 사람이 있나요?',
     options: [
-      'Yes, serious injuries',
-      'Yes, minor injuries',
-      'No injuries',
-      'Not applicable'
+      '네, 심각한 부상입니다',
+      '네, 경미한 부상입니다',
+      '부상이 없습니다',
+      '해당 없음'
     ]
   },
   {
     id: 4,
     question:
-      'Okay. Do you have any documented evidence (photos, emails, police reports) available right now?',
+      '알겠습니다. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
     options: [
-      'Yes, I have strong evidence',
-      'I have some evidence',
-      'No written evidence',
-      'I can get it later'
+      '네, 강력한 증거가 있습니다',
+      '일부 증거가 있습니다',
+      '서면 증거가 없습니다',
+      '나중에 가져올 수 있습니다'
     ]
   }
 ];
@@ -69,7 +69,7 @@ export function CaseCreation() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
-      text: "Hello. I'm your legal assistant. I'm here to help you understand your situation calmly and clearly. Everything you share here is private.",
+      text: "안녕하세요. 저는 여러분의 법률 도우미입니다. 여러분의 상황을 차분하고 명확하게 이해할 수 있도록 도와드리기 위해 여기 있습니다. 여기서 공유하는 모든 내용은 비공개입니다.",
       sender: 'ai'
     }
   ]);
@@ -134,18 +134,20 @@ export function CaseCreation() {
         ]);
       } else {
         // Finish flow
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: 'finish',
-            text: "Thank you for sharing those details. I've analyzed your situation based on similar cases. I've prepared a summary and some recommended next steps for you.",
-            sender: 'ai'
+        setMessages((prev) => {
+          // 이미 finish 메시지가 있는지 확인
+          if (prev.some(msg => msg.id === 'finish')) {
+            return prev;
           }
-        ]);
-        // Show button to proceed after a moment
-        setTimeout(() => {
-          // This could be a state to show a "View Summary" button
-        }, 1000);
+          return [
+            ...prev,
+            {
+              id: 'finish',
+              text: "세부사항을 공유해 주셔서 감사합니다. 유사한 사건을 바탕으로 귀하의 상황을 분석했습니다. 요약과 권장 다음 단계를 준비했습니다.",
+              sender: 'ai'
+            }
+          ];
+        });
       }
     }, 1500);
   };
@@ -165,8 +167,8 @@ export function CaseCreation() {
             <ArrowLeft size={20} />
           </button>
           <div className="text-center">
-            <h2 className="font-semibold text-gray-900">Case Assessment</h2>
-            <p className="text-xs text-gray-400">Private & Confidential</p>
+            <h2 className="font-semibold text-gray-900">사건 평가</h2>
+            <p className="text-xs text-gray-400">비공개 및 기밀</p>
           </div>
           <div className="w-8" /> {/* Spacer */}
         </div>
@@ -193,7 +195,7 @@ export function CaseCreation() {
           {!isFinished ? (
             <div className="max-w-2xl mx-auto">
               <p className="text-sm text-gray-400 mb-3 text-center">
-                Select an option to continue:
+                계속하려면 옵션을 선택하세요:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {steps[currentStep].options.map((option, idx) => (
@@ -233,10 +235,10 @@ export function CaseCreation() {
             >
               <Button
                 size="lg"
-                onClick={() => navigate('/summary')}
+                onClick={() => navigate('/search')}
                 className="w-full sm:w-auto min-w-[200px] shadow-lg shadow-blue-500/20"
               >
-                View Case Summary
+                사건 요약 보기
               </Button>
             </motion.div>
           )}
