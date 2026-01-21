@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CaseProvider } from './context/CaseContext';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import { Landing } from './pages/Landing';
 import { CaseCreation } from './pages/CaseCreation';
 import { DocumentEditor } from './pages/DocumentEditor';
@@ -9,21 +9,11 @@ import { SubmissionGuidance } from './pages/SubmissionGuidance';
 import { SendFile } from './pages/SendFile';
 import { Response } from './pages/Response';
 import { Resolution } from './pages/Resolution';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-
 export function App() {
   return (
     <CaseProvider>
       <Router>
         <Routes>
-          {/* 공개 페이지 */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          
-          {/* Case 관련 페이지 */}
           <Route path="/home" element={<Landing />} />
           <Route path="/case/new" element={<CaseCreation />} />
           <Route path="/case/:id/document" element={<DocumentEditor />} />
@@ -32,27 +22,8 @@ export function App() {
           <Route path="/case/:id/send" element={<SendFile />} />
           <Route path="/case/:id/response" element={<Response />} />
           <Route path="/case/:id/resolution" element={<Resolution />} />
-          
-          {/* 보호된 페이지 */}
-          <Route
-            path="/document"
-            element={
-              <>
-                <SignedIn>
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
-
-          {/* 없는 페이지로 접근 시 메인으로 리다이렉트 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
-    </CaseProvider>
-  );
-}
+    </CaseProvider>);
 
-export default App;
+}

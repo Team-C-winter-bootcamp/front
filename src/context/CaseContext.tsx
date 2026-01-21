@@ -14,7 +14,17 @@ export interface CaseData {
   hasEvidence: 'yes' | 'no' | 'unsure' | null;
   documentContent: string;
   selectedCaseLaws: string[];
-  status: 'drafting' | 'reviewing' | 'filed' | 'served' | 'hearing' | 'judgment';
+  status: 'drafting' | 'reviewing' | 'filed' | 'served' | 'hearing' | 'judgment' | 'sent' | 'responded' | 'resolved';
+  sentMethod?: 'mail' | 'court' | 'email' | 'hand' | null;
+  sentDate?: string;
+  trackingNumber?: string;
+  responseType?: 'paid' | 'partial' | 'refused' | 'counter' | 'none' | null;
+  responseDate?: string;
+  responseAmount?: string;
+  responseNotes?: string;
+  resolutionType?: 'settled' | 'judgment-favor' | 'judgment-against' | 'dismissed' | 'ongoing' | null;
+  resolutionDate?: string;
+  resolutionAmount?: string;
 }
 
 interface CaseContextType {
