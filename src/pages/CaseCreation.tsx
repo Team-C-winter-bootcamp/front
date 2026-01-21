@@ -1,241 +1,247 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';// 채팅 
 import { useNavigate } from 'react-router-dom';
-import { useCase } from '../context/CaseContext';
+import { Layout } from '../components/ui/Layout';
+import { ChatBubble } from '../components/ChatPage/ChatBubble';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Textarea } from '../components/ui/Textarea';
-import { Card } from '../components/ui/Card';
-import { ProgressIndicator } from '../components/case/ProgressIndicator';
-import { ArrowLeft, ArrowRight, Sparkles, FileText } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+type Message = {
+  id: string;
+  text: string;
+  sender: 'ai' | 'user';
+};
+
+type Step = {
+  id: number;
+  question: string;
+  options: string[];
+};
+
+const steps: Step[] = [
+  {
+    id: 1,
+    question:
+      'I can help you understand your options. First, could you tell me your role in this situation?',
+    options: [
+      'I am the victim / claimant',
+      'I am the alleged offender',
+      'I am a witness',
+      'Other'
+    ]
+  },
+  {
+    id: 2,
+    question:
+      'Thank you. To give you the best guidance, I need to know: Is there any insurance policy that might cover this incident?',
+    options: [
+      'Yes, I have insurance',
+      'The other party has insurance',
+      'No insurance involved',
+      "I'm not sure"
+    ]
+  },
+  {
+    id: 3,
+    question: 'Understood. Was anyone physically injured during the incident?',
+    options: [
+      'Yes, serious injuries',
+      'Yes, minor injuries',
+      'No injuries',
+      'Not applicable'
+    ]
+  },
+  {
+    id: 4,
+    question:
+      'Okay. Do you have any documented evidence (photos, emails, police reports) available right now?',
+    options: [
+      'Yes, I have strong evidence',
+      'I have some evidence',
+      'No written evidence',
+      'I can get it later'
+    ]
+  }
+];
+
 export function CaseCreation() {
   const navigate = useNavigate();
-  const { caseData, updateCaseData } = useCase();
-  const [step, setStep] = useState(1);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  // Local state for form inputs
-  const [description, setDescription] = useState(caseData.description);
-  const [plaintiff, setPlaintiff] = useState(caseData.parties.plaintiff);
-  const [defendant, setDefendant] = useState(caseData.parties.defendant);
-  const [date, setDate] = useState(caseData.incidentDate);
-  const [amount, setAmount] = useState(caseData.amount);
-  const [evidence, setEvidence] = useState<'yes' | 'no' | 'unsure' | null>(
-    caseData.hasEvidence
-  );
-  const handleAnalyze = () => {
-    if (!description.trim()) return;
-    setIsAnalyzing(true);
-    updateCaseData({
-      description
-    });
-    // Simulate AI analysis
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setStep(2);
-      // Simulate classification
-      updateCaseData({
-        type: 'loan'
-      });
-    }, 2000);
-  };
-  const handleComplete = () => {
-    updateCaseData({
-      parties: {
-        plaintiff,
-        defendant
-      },
-      incidentDate: date,
-      amount,
-      hasEvidence: evidence
-    });
-    navigate('/case/1/document');
-  };
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => step > 1 ? setStep(step - 1) : navigate('/')}
-            className="pl-0 hover:bg-transparent hover:text-blue-600"
-            leftIcon={<ArrowLeft className="w-4 h-4" />}>
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'init',
+      text: "Hello. I'm your legal assistant. I'm here to help you understand your situation calmly and clearly. Everything you share here is private.",
+      sender: 'ai'
+    }
+  ]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-            뒤로
-          </Button>
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  // Initial delay for the first question
+  useEffect(() => {
+    if (currentStep === 0 && messages.length === 1) {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `q-${steps[0].id}`,
+            text: steps[0].question,
+            sender: 'ai'
+          }
+        ]);
+      }, 1500);
+    }
+  }, []);
+
+  const handleOptionClick = (option: string) => {
+    // Add user response
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `a-${Date.now()}`,
+        text: option,
+        sender: 'user'
+      }
+    ]);
+
+    // Simulate AI thinking and next step
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      if (currentStep < steps.length - 1) {
+        // Next question
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `q-${steps[nextStep].id}`,
+            text: steps[nextStep].question,
+            sender: 'ai'
+          }
+        ]);
+      } else {
+        // Finish flow
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: 'finish',
+            text: "Thank you for sharing those details. I've analyzed your situation based on similar cases. I've prepared a summary and some recommended next steps for you.",
+            sender: 'ai'
+          }
+        ]);
+        // Show button to proceed after a moment
+        setTimeout(() => {
+          // This could be a state to show a "View Summary" button
+        }, 1000);
+      }
+    }, 1500);
+  };
+
+  const isFinished =
+    currentStep === steps.length - 1 && messages.length > steps.length * 2 + 1;
+
+  return (
+    <Layout showNav={false}>
+      <div className="max-w-3xl mx-auto flex flex-col h-screen bg-[#FAFAFA]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-10">
+          <button
+            onClick={() => navigate('/')}
+            className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="text-center">
+            <h2 className="font-semibold text-gray-900">Case Assessment</h2>
+            <p className="text-xs text-gray-400">Private & Confidential</p>
+          </div>
+          <div className="w-8" /> {/* Spacer */}
         </div>
 
-        <ProgressIndicator
-          currentStep={step}
-          totalSteps={3}
-          label={step === 1 ? '초기 설명' : step === 2 ? '세부 정보' : '검토'} />
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <ChatBubble
+                key={msg.id}
+                message={msg.text}
+                sender={msg.sender}
+              />
+            ))}
+            {isTyping && (
+              <ChatBubble key="typing" message="" sender="ai" isTyping={true} />
+            )}
+          </AnimatePresence>
+          <div ref={messagesEndRef} />
+        </div>
 
-
-        {step === 1 &&
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                무슨 일이 있었나요?
-              </h1>
-              <p className="text-gray-600">
-                상황을 자신의 말로 설명해주세요. 법률 용어는 걱정하지 마세요.
-                그냥 이야기를 들려주세요.
+        {/* Input Area (Options) */}
+        <div className="p-6 bg-white border-t border-gray-100">
+          {!isFinished ? (
+            <div className="max-w-2xl mx-auto">
+              <p className="text-sm text-gray-400 mb-3 text-center">
+                Select an option to continue:
               </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {steps[currentStep].options.map((option, idx) => (
+                  <motion.button
+                    key={idx}
+                    initial={{
+                      opacity: 0,
+                      y: 10
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0
+                    }}
+                    transition={{
+                      delay: idx * 0.1
+                    }}
+                    onClick={() => !isTyping && handleOptionClick(option)}
+                    disabled={isTyping}
+                    className="p-4 text-left text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#4A90E2] hover:bg-[#E8F0F7] hover:text-[#4A90E2] transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {option}
+                  </motion.button>
+                ))}
+              </div>
             </div>
-
-            <Card>
-              <Textarea
-              placeholder="예시: 작년에 친구 철수에게 차 수리비로 500만원을 빌려줬습니다. 12월까지 갚겠다고 약속했지만 그 이후로 연락이 안 됩니다..."
-              className="min-h-[200px] text-lg"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)} />
-
-            </Card>
-
-            <div className="flex justify-end">
+          ) : (
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.9
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1
+              }}
+              className="text-center"
+            >
               <Button
-              size="lg"
-              onClick={handleAnalyze}
-              disabled={!description.trim()}
-              isLoading={isAnalyzing}
-              rightIcon={!isAnalyzing && <Sparkles className="w-4 h-4" />}>
-
-                {isAnalyzing ? '사건 분석 중...' : '계속하기'}
+                size="lg"
+                onClick={() => navigate('/summary')}
+                className="w-full sm:w-auto min-w-[200px] shadow-lg shadow-blue-500/20"
+              >
+                View Case Summary
               </Button>
-            </div>
-          </div>
-        }
-
-        {step === 2 &&
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                세부 정보를 입력해주세요
-              </h1>
-              <p className="text-gray-600">
-                이 사건은{' '}
-                <span className="font-semibold text-blue-600">대여금 분쟁</span>
-                으로 파악됩니다. 주요 정보를 입력해주세요.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <Card className="space-y-6">
-                <Input
-                label="누가 돈을 빌려갔나요? (피고)"
-                placeholder="성명"
-                value={defendant}
-                onChange={(e) => setDefendant(e.target.value)} />
-
-
-                <Input
-                label="귀하의 성명 (원고)"
-                placeholder="성명"
-                value={plaintiff}
-                onChange={(e) => setPlaintiff(e.target.value)} />
-
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input
-                  label="빌려준 금액"
-                  placeholder="0"
-                  type="number"
-                  leftIcon={<span className="text-gray-500">₩</span>}
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)} />
-
-
-                  <Input
-                  label="대여 날짜"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)} />
-
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    서면 증거가 있나요? (문자, 이메일, 계약서)
-                  </label>
-                  <div className="flex gap-3">
-                    {['yes', 'no', 'unsure'].map((option) =>
-                  <button
-                    key={option}
-                    onClick={() => setEvidence(option as any)}
-                    className={`
-                          flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all
-                          ${evidence === option ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}
-                        `}>
-
-                        {option === 'yes' ?
-                    '있음' :
-                    option === 'no' ?
-                    '없음' :
-                    '잘 모름'}
-                      </button>
-                  )}
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button
-              size="lg"
-              onClick={() => setStep(3)}
-              disabled={!defendant || !amount}
-              rightIcon={<ArrowRight className="w-4 h-4" />}>
-
-                다음 단계
-              </Button>
-            </div>
-          </div>
-        }
-
-        {step === 3 &&
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                작성 준비 완료
-              </h1>
-              <p className="text-gray-600">
-                <span className="font-semibold text-blue-600">내용증명</span>{' '}
-                작성을 시작할 충분한 정보가 모였습니다. 다음 단계에서 수정하고
-                다듬을 수 있습니다.
-              </p>
-            </div>
-
-            <Card className="bg-blue-50 border-blue-100">
-              <h3 className="font-semibold text-blue-900 mb-2">요약</h3>
-              <ul className="space-y-2 text-blue-800 text-sm">
-                <li className="flex justify-between">
-                  <span>유형:</span>
-                  <span className="font-medium">대여금 분쟁</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>당사자:</span>
-                  <span className="font-medium">
-                    {plaintiff} vs. {defendant}
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>금액:</span>
-                  <span className="font-medium">₩{amount}</span>
-                </li>
-              </ul>
-            </Card>
-
-            <div className="flex justify-end pt-4">
-              <Button
-              size="lg"
-              onClick={handleComplete}
-              rightIcon={<FileText className="w-4 h-4" />}>
-
-                문서 작성 시작
-              </Button>
-            </div>
-          </div>
-        }
+            </motion.div>
+          )}
+        </div>
       </div>
-    </div>);
-
+    </Layout>
+  );
 }

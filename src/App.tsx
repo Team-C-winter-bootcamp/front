@@ -1,14 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CaseProvider } from './context/CaseContext';
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
-import { Landing } from './pages/Landing';
+import { HomePage } from './pages/HomePage';
 import { CaseCreation } from './pages/CaseCreation';
-import { DocumentEditor } from './pages/DocumentEditor';
 import { CaseLaw } from './pages/CaseLaw';
-import { SubmissionGuidance } from './pages/SubmissionGuidance';
-import { SendFile } from './pages/SendFile';
-import { Response } from './pages/Response';
-import { Resolution } from './pages/Resolution';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -24,14 +19,10 @@ export function App() {
           <Route path="/signup" element={<SignupPage />} />
           
           {/* Case 관련 페이지 */}
-          <Route path="/home" element={<Landing />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/chat" element={<CaseCreation />} />
           <Route path="/case/new" element={<CaseCreation />} />
-          <Route path="/case/:id/document" element={<DocumentEditor />} />
           <Route path="/case/:id/caselaw" element={<CaseLaw />} />
-          <Route path="/case/:id/submit" element={<SubmissionGuidance />} />
-          <Route path="/case/:id/send" element={<SendFile />} />
-          <Route path="/case/:id/response" element={<Response />} />
-          <Route path="/case/:id/resolution" element={<Resolution />} />
           
           {/* 보호된 페이지 */}
           <Route
