@@ -1,41 +1,47 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
-  if (totalPages <= 1) return null
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange
+}: PaginationProps) {
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="flex justify-center mt-10 gap-2">
-      <button 
+    <div className="flex items-center justify-center gap-2 mt-8">
+      <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="btn-minimal disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        &lt;
-      </button> 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+        <ChevronLeft className="w-5 h-5 text-slate-600" />
+      </button>
+      {pages.map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1 border rounded-minimal font-light transition-all duration-200 ${
-            currentPage === page 
-              ? 'bg-minimal-charcoal text-white border-minimal-charcoal shadow-minimal' 
-              : 'bg-[#F5F3EB] border-[#CFB982] text-minimal-dark-gray hover:bg-[#E8E0D0]'
+          className={`px-4 py-2 rounded-lg border transition-all ${
+            currentPage === page
+              ? 'bg-indigo-600 text-white border-indigo-600 font-medium shadow-lg'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-light'
           }`}
         >
           {page}
         </button>
       ))}
-      <button 
+      <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="btn-minimal disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        &gt;
+        <ChevronRight className="w-5 h-5 text-slate-600" />
       </button>
     </div>
-  )
+  );
 }

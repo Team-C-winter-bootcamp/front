@@ -16,6 +16,7 @@
     "axios": "^1.13.2",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.5",
+    "framer-motion": "^12.28.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.0.0",
     "lucide-react": "^0.562.0",

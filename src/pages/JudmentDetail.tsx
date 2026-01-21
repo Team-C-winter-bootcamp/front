@@ -1,18 +1,11 @@
 import { useMemo, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-// [변경 1] Clerk 관련 Hook과 컴포넌트 import
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
-
-// [삭제] 기존 useStore 및 LogoutModal 제거
-// import { useStore } from '../store/useStore'
-// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
-
-import { SearchBar } from '../components/search/SearchBar'
-import { MOCK_RESULTS } from './SearchResultsPage'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-
 import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react'
+import { SearchBar } from '../components/search/SearchBar'
+import { MOCK_RESULTS } from './SearchResult'
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
@@ -83,8 +76,8 @@ const JudgmentDetailPage = () => {
     },
     judgment: {
       court: displayData.court,
-      caseNo: '2014노1188',
-      caseName: '강간미수, 유사강간',
+      caseNo: displayData.title.match(/\d{4}[노도마가구]\d+/)?.[0] || '2014노1188',
+      caseName: displayData.title.split('선고')[1]?.trim() || '강간미수, 유사강간',
       plaintiff: '검사',
       defendant: '피고인',
       judgmentDate: displayData.date,
@@ -92,7 +85,7 @@ const JudgmentDetailPage = () => {
         '1. 원심판결을 파기하고, 사건을 서울고등법원에 환송한다.',
         '2. 피고인의 나머지 상고를 기각한다.'
       ],
-      reasons: displayData.content.repeat(5)
+      reasons: displayData.content || '항소이유의 요지 피고인의 이 사건 범행은 강간미수와 유사강간의 실체적 경합범으로 판단하여야 함에도...'
     },
     relatedCases: [
       { name: '대법원 2012도1234', desc: '유사한 사실관계 판례' },
@@ -179,7 +172,7 @@ const JudgmentDetailPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-[#F5F3EB]">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/home')}
@@ -281,7 +274,7 @@ const JudgmentDetailPage = () => {
                 <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
                   
                   {/* 헤더 영역 */}
-                  <div className="flex items-center gap-3 mb-5 border-b border-minimal-gray pb-4">
+                  <div className="flex items-center gap-3 mb-5 border-b border-slate-200 pb-4">
                     <div className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0">
                       AI 요약 
                     </div>
@@ -429,10 +422,16 @@ const JudgmentDetailPage = () => {
               <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/document')}
                     className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
                   >
-                    ← 뒤로가기
+                    문서 작성하기
+                  </button>
+                  <button
+                    onClick={() => navigate('/home')}
+                    className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
+                  >
+                    홈으로 돌아가기
                   </button>
                 </div>
               </div>

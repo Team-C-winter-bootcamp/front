@@ -1,48 +1,40 @@
-import Search from '../../assets/Search.png'
+import React from 'react';
+import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
-  searchInput: string
-  setSearchInput: (value: string) => void
-  onSearch: (e: React.FormEvent) => void
-  onClear: () => void
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+  onSearch: (e: React.FormEvent) => void;
+  onClear: () => void;
 }
 
-export const SearchBar = ({ searchInput, setSearchInput, onSearch, onClear }: SearchBarProps) => {
+export function SearchBar({
+  searchInput,
+  setSearchInput,
+  onSearch,
+  onClear
+}: SearchBarProps) {
   return (
-    <div className="w-full">
-      <form onSubmit={onSearch} className="w-full">
-        <div className="relative w-full">
-          
-          {/* 검색 아이콘: 위치를 조금 더 안쪽으로 당김 */}
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 flex items-center justify-center pointer-events-none">
-            <img 
-              src={Search} 
-              alt="search" 
-              className="w-5 h-5 object-contain opacity-50" 
-            />
-          </div>
-
-          {/* Input 필드 */}
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="키워드를 입력하세요"
-            className="w-full pl-12 pr-10 py-3 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-base shadow-lg transition-all placeholder:text-slate-400 text-slate-800 font-light"
-          />
-
-          {/* 초기화 버튼 */}
-          {searchInput && (
-            <button
-              type="button"
-              onClick={onClear}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
-            >
-              ✕ 
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
-  )
+    <form onSubmit={onSearch} className="relative w-full">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="판례 검색..."
+          className="w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-full bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+        />
+        {searchInput && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    </form>
+  );
 }

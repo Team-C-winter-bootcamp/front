@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+// [변경 1] Clerk 관련 Hook과 컴포넌트 import
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+
+// [삭제] 기존 useStore 및 LogoutModal 제거
+// import { useStore } from '../store/useStore'
+// import LogoutAlertModal from '../components/AlertModal/LogoutAlertModal'
+
+
 import { SearchBar } from '../components/search/SearchBar'
 import { FilterSidebar } from '../components/search/FilterSidebar'
-import { SearchResultItem } from '../components/search/SearchResultItem'
 import { Pagination } from '../components/search/Pagination'
 import { useSearchFilters } from '../hooks/useSearchFilters'
 import SearchPageAlertModal from '../components/AlertModal/SearchPageAlertModal'
@@ -88,12 +94,17 @@ const SearchResultsPage = () => {
   const query = searchParams.get('q') || ''
   const tabParam = searchParams.get('tab')
 
-  const {user} = useUser()
+  // [변경 2] Clerk useUser 훅 사용 (기존 useStore 대체)
+  const { user } = useUser()
   
   const [searchInput, setSearchInput] = useState(query)
   const [mobileFilterOpen, setMobileFilterOpen] = useState<string | null>(null)
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false)
+  
+  // [삭제] LogoutModal 관련 state 삭제 (UserButton이 대신함)
+  // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
+  // 2. 초기 탭 상태를 URL 파라미터 기반으로 설정 (없으면 'expert')
   const [activeTab, setActiveTab] = useState<'expert' | 'all'>(
     (tabParam as 'expert' | 'all') || 'expert'
   )
@@ -111,7 +122,7 @@ const SearchResultsPage = () => {
     if (currentQuery !== searchInput) {
       setSearchInput(currentQuery)
     }
-  }, [searchParams])
+  }, [searchParams, activeTab, searchInput])
 
   // 4. 탭 변경 핸들러: 상태 변경 + URL 업데이트
   const handleTabChange = (newTab: 'expert' | 'all') => {
@@ -136,7 +147,7 @@ const SearchResultsPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-[#F5F3EB]">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/home')}
@@ -161,7 +172,7 @@ const SearchResultsPage = () => {
         {/* [변경 4] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
         <div className="pr-[3%] flex gap-4 items-center">
           <SignedIn>
-            <span className="text-sm text-minimal-dark-gray font-light">
+            <span className="text-sm text-slate-700 font-light">
               환영합니다 {user?.firstName || user?.username}님!
             </span>
             {/* Clerk 제공 유저 버튼 (로그아웃 포함) */}
@@ -269,9 +280,9 @@ const SearchResultsPage = () => {
                       name="mobileJudgmentType"
                       checked={filters.selectedJudgmentType === type}
                       onChange={() => filters.setSelectedJudgmentType(type)}
-                      className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray"
+                      className="text-slate-700 focus:ring-indigo-500 w-4 h-4 border-slate-300"
                     />
-                    <span className="text-sm text-minimal-dark-gray font-light">{type}</span>
+                    <span className="text-sm text-slate-700 font-light">{type}</span>
                   </label>
                 ))}
               </div>
@@ -285,9 +296,9 @@ const SearchResultsPage = () => {
                       name="mobilePeriod"
                       checked={filters.selectedPeriod === period}
                       onChange={() => filters.setSelectedPeriod(period)}
-                      className="text-minimal-charcoal focus:ring-minimal-charcoal w-4 h-4 border-minimal-gray"
+                      className="text-slate-700 focus:ring-indigo-500 w-4 h-4 border-slate-300"
                     />
-                    <span className="text-sm text-minimal-dark-gray font-light">{period}</span>
+                    <span className="text-sm text-slate-700 font-light">{period}</span>
                   </label>
                 ))}
               </div>
@@ -314,7 +325,7 @@ const SearchResultsPage = () => {
               전문판례
             </button>
             
-            <div className="h-4 w-px bg-minimal-gray/50 hidden sm:block"></div>
+            <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
             
             <button
               onClick={() => handleTabChange('all')}
@@ -343,12 +354,32 @@ const SearchResultsPage = () => {
           {/* Search Results List */}
           <div className="space-y-4">
             {filters.paginatedResults.length > 0 ? (
-              filters.paginatedResults.map((result) => (
-                <SearchResultItem
+              filters.paginatedResults.map((result: SearchResult) => (
+                <div
                   key={result.id}
-                  result={result}
-                  onClick={handleResultClick}
-                />
+                  onClick={() => handleResultClick(result.id)}
+                  className="bg-white rounded-lg border border-[#CFB982] p-6 hover:shadow-lg transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 mb-3 text-sm text-slate-700">
+                    <span className="font-medium">{result.court}</span>
+                    <span>|</span>
+                    <span>{result.date}</span>
+                    <div className="ml-auto flex gap-2">
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                        {result.caseType}
+                      </span>
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                        {result.judgmentType}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 mb-2 leading-tight">
+                    {result.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    {result.content}
+                  </p>
+                </div>
               ))
             ) : (
               <div className="text-center py-20 bg-white rounded-xl shadow-xl border border-slate-200">
@@ -366,7 +397,7 @@ const SearchResultsPage = () => {
         </div>
 
         {/* Sidebar Filters */}
-        <div className="hidden lg:block w-[280px] flex-shrink-0 order-1 lg:order-2 sticky top-24 h-fit">
+        <div className="hidden lg:block w-[280px] flex-shrink-0 order-1 lg:order-2">
           <FilterSidebar
             selectedCaseTypes={filters.selectedCaseTypes}
             selectedCourts={filters.selectedCourts}
