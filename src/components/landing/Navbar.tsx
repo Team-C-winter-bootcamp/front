@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
       <button 
-        onClick={() => navigate('/home')}
+        onClick={() => navigate('/')}
         className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
       >
         LAWDING

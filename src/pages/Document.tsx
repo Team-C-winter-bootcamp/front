@@ -1,16 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Input } from '../components/ui/Input';
-import { Textarea } from '../components/ui/Textarea';
 import { Button } from '../components/ui/Button';
-import { X, Save, Star, Info } from 'lucide-react';
+import { Info, Plus, ArrowUp, Download, ChevronLeft, ChevronRight, Minus } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 type DocumentType = 'notice' | 'agreement' | 'complaint' | null;
 
 export function Document() {
-  const navigate = useNavigate();
-  const [documentType, setDocumentType] = useState<DocumentType>(null);
+  const location = useLocation();
+  const [documentType] = useState<DocumentType>(
+    (location.state as any)?.documentType || null
+  );
+  const [chatMessages, setChatMessages] = useState<Array<{ text: string; sender: 'user' | 'ai' }>>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [perpetrator, setPerpetrator] = useState({ 
     name: '', 
     address: '', 
@@ -39,13 +45,16 @@ export function Document() {
   const [property, setProperty] = useState('');
   const [deposit, setDeposit] = useState('');
   const [monthlyRent, setMonthlyRent] = useState('');
-  const [showSample, setShowSample] = useState(true);
   const [relationship, setRelationship] = useState('');
   const [incidentDate, setIncidentDate] = useState('');
   const [incidentTime, setIncidentTime] = useState('');
   const [incidentPlace, setIncidentPlace] = useState('');
   const [policeStation, setPoliceStation] = useState('');
   const [evidence, setEvidence] = useState<string[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isPerpetratorOpen, setIsPerpetratorOpen] = useState(false);
+  const [isVictimOpen, setIsVictimOpen] = useState(false);
+  const documentRef = useRef<HTMLDivElement>(null);
 
   const renderDocument = () => {
     if (!documentType) {
@@ -194,39 +203,91 @@ export function Document() {
     return null;
   };
 
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || chatInput.trim().length < 15) {
+      return;
+    }
+
+    setChatMessages((prev) => [
+      ...prev,
+      { text: chatInput, sender: 'user' }
+    ]);
+    setChatInput('');
+
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setChatMessages((prev) => [
+        ...prev,
+        { text: '상황을 이해했습니다. 문서를 자동으로 생성하겠습니다.', sender: 'ai' }
+      ]);
+    }, 1500);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!documentRef.current || !documentType) return;
+
+    try {
+      const canvas = await html2canvas(documentRef.current, {
+        // @ts-ignore
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const fileName = documentType === 'notice' ? '내용증명서' : documentType === 'agreement' ? '합의서' : '고소장';
+      pdf.save(`${fileName}.pdf`);
+    } catch (error) {
+      console.error('PDF 생성 실패:', error);
+      alert('PDF 저장 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <Layout>
       <div className="flex h-screen bg-[#F5F3EB]">
         {/* Left Sidebar */}
-        <div className="w-96 bg-white border-r border-[#CFB982] overflow-y-auto custom-scrollbar">
-          <div className="p-6 space-y-6">
-            {/* Document Type Selection */}
-            <div>
-              <h3 className="text-base font-bold text-slate-900 mb-3">문서 유형 선택</h3>
-              <div className="space-y-3">
-                {[
-                  { id: 'notice', label: '내용증명서' },
-                  { id: 'agreement', label: '합의서' },
-                  { id: 'complaint', label: '고소장' }
-                ].map((type) => (
-                  <label key={type.id} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="documentType"
-                      checked={documentType === type.id}
-                      onChange={() => setDocumentType(type.id as DocumentType)}
-                      className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
-                    />
-                    <span className="text-sm font-medium text-slate-700">{type.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Perpetrator Input */}
-            <div>
-              <h3 className="text-base font-bold text-slate-900 mb-3">가해자</h3>
-              <div className="space-y-3">
+        <div className={`${isSidebarOpen ? 'w-96' : 'w-0'} bg-white border-r border-[#CFB982] overflow-hidden transition-all duration-300 relative`}>
+          {/* Sidebar Toggle Button */}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={`absolute top-4 ${isSidebarOpen ? 'right-4' : '-right-12'} z-50 w-8 h-8 bg-white border border-slate-300 rounded-lg shadow-md flex items-center justify-center hover:bg-slate-50 transition-all duration-300`}
+          >
+            {isSidebarOpen ? <ChevronLeft className="w-5 h-5 text-slate-600" /> : <ChevronRight className="w-5 h-5 text-slate-600" />}
+          </button>
+          
+          <div className={`p-6 space-y-6 overflow-y-auto custom-scrollbar h-full ${!isSidebarOpen ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+            {/* Perpetrator Input - Accordion */}
+            <div className="border border-slate-200 rounded-lg">
+              <button
+                onClick={() => setIsPerpetratorOpen(!isPerpetratorOpen)}
+                className="w-full flex items-center justify-between p-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors rounded-lg"
+              >
+                <span>가해자</span>
+                {isPerpetratorOpen ? <Minus className="w-5 h-5 text-slate-600" /> : <Plus className="w-5 h-5 text-slate-600" />}
+              </button>
+              {isPerpetratorOpen && (
+                <div className="px-4 pb-4 space-y-3">
                 <Input
                   label="성명"
                   value={perpetrator.name}
@@ -276,13 +337,21 @@ export function Document() {
                   onChange={(e) => setPerpetrator({ ...perpetrator, email: e.target.value })}
                   placeholder="이메일 주소"
                 />
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Victim Input */}
-            <div>
-              <h3 className="text-base font-bold text-slate-900 mb-3">피해자</h3>
-              <div className="space-y-3">
+            {/* Victim Input - Accordion */}
+            <div className="border border-slate-200 rounded-lg">
+              <button
+                onClick={() => setIsVictimOpen(!isVictimOpen)}
+                className="w-full flex items-center justify-between p-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors rounded-lg"
+              >
+                <span>피해자</span>
+                {isVictimOpen ? <Minus className="w-5 h-5 text-slate-600" /> : <Plus className="w-5 h-5 text-slate-600" />}
+              </button>
+              {isVictimOpen && (
+                <div className="px-4 pb-4 space-y-3">
                 <Input
                   label="성명"
                   value={victim.name}
@@ -332,7 +401,8 @@ export function Document() {
                   onChange={(e) => setVictim({ ...victim, email: e.target.value })}
                   placeholder="이메일 주소"
                 />
-              </div>
+                </div>
+              )}
             </div>
 
             {/* 사건의 경위 */}
@@ -497,7 +567,7 @@ export function Document() {
         {/* Right Document Preview */}
         <div className="flex-1 flex flex-col bg-slate-50">
           {/* Header */}
-          <div className="bg-white border-b border-[#CFB982] px-6 py-4 flex items-center justify-between">
+          <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-semibold text-slate-900">
                 {documentType === 'notice' && '내용증명(보증금 반환 청구)'}
@@ -505,48 +575,100 @@ export function Document() {
                 {documentType === 'complaint' && '고소장'}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Star className="w-5 h-5 text-slate-600" />
-              </button>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <span className="text-sm text-slate-700">법률문서 선택하기</span>
-              </button>
-            </div>
+            <Button
+              onClick={handleDownloadPDF}
+              disabled={!documentType}
+              leftIcon={<Download className="w-4 h-4" />}
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              PDF 다운로드
+            </Button>
           </div>
 
-          {/* Document Preview */}
+          {/* Document Preview - A4 용지로 분할 */}
           <div className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-4xl mx-auto bg-white shadow-lg min-h-[800px] p-12 relative">
-              {showSample && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="text-6xl font-bold text-slate-200 opacity-20 rotate-[-45deg]">Sample</span>
+            <div className="max-w-4xl mx-auto">
+              {/* A4 용지 - 내용이 넘어가면 자동으로 다음 페이지로 */}
+              <div 
+                ref={documentRef}
+                className="bg-white shadow-lg p-12 relative" 
+                style={{ 
+                  minHeight: '1123px',
+                  maxHeight: '1123px',
+                  overflow: 'hidden',
+                  pageBreakAfter: 'always',
+                  breakAfter: 'page'
+                }}
+              >
+                <div className="relative z-10" style={{ height: '100%', overflow: 'auto' }}>
+                  {renderDocument()}
                 </div>
-              )}
-              <div className="relative z-10">
-                {renderDocument()}
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="bg-white border-t border-[#CFB982] px-6 py-4 flex items-center justify-between">
-            <button
-              onClick={() => setShowSample(!showSample)}
-              className="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900 transition-colors"
-            >
-              <X className="w-4 h-4" />
-              샘플 문서 {showSample ? '닫기' : '열기'}
-            </button>
-            <Button
-              onClick={() => {
-                // Save functionality
-                alert('문서가 저장되었습니다.');
-              }}
-              leftIcon={<Save className="w-4 h-4" />}
-            >
-              저장하기
-            </Button>
+          {/* Chat Section */}
+          <div className="bg-white border-t border-gray-200 p-6">
+            <div className="max-w-4xl mx-auto">
+              {chatMessages.length > 0 && (
+                <div className="mb-4 space-y-3 max-h-60 overflow-y-auto">
+                  {chatMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${msg.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                          msg.sender === 'ai'
+                            ? 'bg-gray-100 text-gray-900'
+                            : 'bg-indigo-600 text-white'
+                        }`}
+                      >
+                        <p className="text-sm">{msg.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-lg px-4 py-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <form onSubmit={handleChatSubmit} className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                >
+                  <Plus className="w-5 h-5 text-gray-600" />
+                </button>
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="사례를 입력해 주세요.(15자 이상)"
+                  className="flex-1 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  minLength={15}
+                />
+                <button
+                  type="submit"
+                  disabled={chatInput.trim().length < 15}
+                  className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ArrowUp className="w-5 h-5" />
+                </button>
+              </form>
+              {chatInput.length > 0 && chatInput.length < 15 && (
+                <p className="text-xs text-red-500 mt-2 ml-14">15자 이상 입력해주세요.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

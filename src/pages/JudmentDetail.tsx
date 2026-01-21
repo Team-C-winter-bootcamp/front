@@ -4,7 +4,6 @@ import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react'
-import { SearchBar } from '../components/search/SearchBar'
 import { MOCK_RESULTS } from './SearchResult'
 
 const JudgmentDetailPage = () => {
@@ -35,14 +34,6 @@ const JudgmentDetailPage = () => {
     }
   })
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchInput.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`)
-    } else {
-      navigate('/search')
-    }
-  }
 
   const foundResult = useMemo(() => {
     return MOCK_RESULTS.find(r => r.id === numericId)
@@ -175,23 +166,13 @@ const JudgmentDetailPage = () => {
     <div className="min-h-screen bg-[#F5F3EB]">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/')}
           className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
         >
           LAWDING
         </button> 
         
-        {/* 중앙 SearchBar */}
-        <div className="flex-1 max-w-2xl mx-4">
-          <SearchBar
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
-            onSearch={handleSearch}
-            onClear={() => setSearchInput('')}
-          />
-        </div>
-        
-        {/* [변경 3] 헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
+        {/*  헤더 우측 로그인/로그아웃 버튼 Clerk 컴포넌트로 교체 */}
         <div className="pr-[3%] flex gap-4 items-center">
           <SignedIn>
             <span className="text-sm text-slate-700 font-light">
@@ -422,16 +403,10 @@ const JudgmentDetailPage = () => {
               <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => navigate('/document')}
+                    onClick={() => navigate('/search')}
                     className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
                   >
-                    문서 작성하기
-                  </button>
-                  <button
-                    onClick={() => navigate('/home')}
-                    className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
-                  >
-                    홈으로 돌아가기
+                    ← 뒤로가기
                   </button>
                 </div>
               </div>

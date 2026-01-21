@@ -4,38 +4,73 @@ import { FeatureSection } from '../../types/landing';
 
 const features: FeatureSection[] = [
   {
-    id: 'search',
-    title: '빈틈없는 정밀 검색 시스템',
-    description: '키워드뿐만 아니라 사건 유형, 법원, 재판유형 등 정밀한 필터를 제공합니다.',
+    id: 'select',
+    title: '1. 사건 종류 선택',
+    description: '못받은 돈, 근로/알바 계약서, 부동산/임대차 등 사건 유형을 간단히 선택하세요.',
     details: [
-      '형사, 민사, 가사 등 10여개 카테고리 필터링',
-      '전문판례 및 선고 일자별 상세 조회 가능',
-      '유사 판례 제공 기능'
+      '6가지 주요 사건 카테고리 제공',
+      '명확한 사건 분류로 빠른 시작',
+      '기타 사건도 직접 설명 가능'
     ],
-    image: 'https://picsum.photos/seed/search/800/600'// 기능 사진 집어 넣기 
+    image: 'https://picsum.photos/seed/search/800/600'
   },
   {
     id: 'matching',
-    title: '나만의 맞춤형 판례 매칭',
-    description: '현재 본인의 상황을 설명하면 AI가 맞춤형 판례를 찾아줍니다.',
+    title: '2. 간단한 체크리스트와 상황 작성',
+    description: '버튼으로 간단한 체크리스트를 작성하고 현재 상황을 자유롭게 설명하세요.',
     details: [
-      '대화형 AI 엔진의 상황 맥락 이해',
-      '수만 건의 판례 중 유사도 90% 이상 추출',
-      '판결 핵심 쟁점 자동 정리'
+      '대화형 질문으로 상황 파악',
+      '자세한 상황 입력으로 정확도 향상',
+      '모든 정보는 비공개로 안전하게 보관'
     ],
-    image: 'https://picsum.photos/seed/ai-chat/800/600', // 기능 사진 집어 넣기 
+    image: 'https://picsum.photos/seed/ai-chat/800/600',
     reverse: true
   },
   {
-    id: 'draft',
-    title: '문서 요약 및 편집 가이드',
-    description: '방대한 판례와 계약서를 10초 만에 요약하고 필요한 초안을 작성합니다.',
+    id: 'precedent',
+    title: '3. 유사 판례 5개 제공',
+    description: '입력하신 정보를 바탕으로 가장 유사한 판례 5개를 찾아드립니다.',
     details: [
-      '계약서 핵심 조항 리스크 분석',
-      'AI 기술을 통한 파일 내 텍스트 인식',
-      '고소장, 준비서면 등 법률 서식 초안 제공'
+      'AI 기반 유사 판례 매칭',
+      '유사도 표시로 신뢰도 확인',
+      '판례 클릭 시 상세 정보 및 요약 제공'
     ],
-    image: 'https://picsum.photos/seed/editor/800/600' // 기능 사진 집어 넣기 
+    image: 'https://picsum.photos/seed/precedent/800/600'
+  },
+  {
+    id: 'summary',
+    title: '4. 전문 용어 쉬운 설명',
+    description: '판례의 전문 용어를 일반인도 이해하기 쉬운 언어로 자동 변환합니다.',
+    details: [
+      '복잡한 법률 용어 자동 해석',
+      '판례 요약으로 핵심 파악',
+      '원문 전문도 함께 제공'
+    ],
+    image: 'https://picsum.photos/seed/summary/800/600',
+    reverse: true
+  },
+  {
+    id: 'advice',
+    title: '5. 예상 합의금 및 해결 방안',
+    description: '유사 판례 데이터를 바탕으로 예상 합의금과 문제 해결 방안을 제시합니다.',
+    details: [
+      'AI 기반 합의금 예측',
+      '상황별 맞춤 해결 방안 조언',
+      '문서 선택 가이드 제공'
+    ],
+    image: 'https://picsum.photos/seed/advice/800/600'
+  },
+  {
+    id: 'draft',
+    title: '6. 법률 문서 자동 작성',
+    description: '합의서, 내용증명서, 고소장 중 선택하여 자동으로 문서를 작성하고 다운로드하세요.',
+    details: [
+      '표준 법률 문서 양식 제공',
+      '입력 정보 자동 반영',
+      'PDF 다운로드 지원'
+    ],
+    image: 'https://picsum.photos/seed/editor/800/600',
+    reverse: true
   }
 ];
 
