@@ -3,9 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
 import { Button } from '../components/ui/Button'
+import { CaseResult } from '../api/types'; // Import the new type
 
 export interface SearchResult {
   id: number
+  caseNo: string;
   title: string
   content: string
   court: string
@@ -15,59 +17,6 @@ export interface SearchResult {
   similarity?: number
 }
 
-export const MOCK_RESULTS: SearchResult[] = [
-  {
-    id: 1,
-    title: '서울고등법원 2014. 7. 11. 선고 2014노1188 판결 강간미수, 유사강간',
-    content: '항소이유의 요지 피고인의 이 사건 범행은 강간미수와 유사강간의 실체적 경합범으로 판단하여야 함에도...',
-    court: '서울고등법원',
-    date: '2014. 7. 11.',
-    caseType: '형사',
-    judgmentType: '판결',
-    similarity: 92
-  },
-  {
-    id: 2,
-    title: '대법원 2020. 3. 12. 선고 2019도12345 판결 계약금반환',
-    content: '계약금은 계약 이행의 담보로서 교부되는 것으로, 계약이 해제되면 계약금도 반환되어야 한다는 것이 원칙이다.',
-    court: '대법원',
-    date: '2020. 3. 12.',
-    caseType: '민사',
-    judgmentType: '판결',
-    similarity: 88
-  },
-  {
-    id: 3,
-    title: '서울지방법원 2018. 5. 20. 선고 2017가단12345 판결 손해배상',
-    content: '불법행위로 인한 손해배상 청구에서 과실상계가 적용될 수 있으며, 피해자의 과실 비율에 따라 배상액이 조정된다.',
-    court: '서울지방법원',
-    date: '2018. 5. 20.',
-    caseType: '민사',
-    judgmentType: '판결',
-    similarity: 85
-  },
-  {
-    id: 4,
-    title: '대법원 2021. 8. 15. 결정 2021마1234 상고기각',
-    content: '상고이유가 법령위반을 주장하는 것이나, 구체적인 위반 내용을 지적하지 아니한 경우 상고는 이유 없다.',
-    court: '대법원',
-    date: '2021. 8. 15.',
-    caseType: '형사',
-    judgmentType: '결정',
-    similarity: 82
-  },
-  {
-    id: 5,
-    title: '부산고등법원 2019. 11. 25. 선고 2019노5678 판결 교통사고',
-    content: '교통사고로 인한 상해의 경우, 가해자의 과실이 인정되고 인과관계가 입증되면 손해배상 책임이 발생한다.',
-    court: '부산고등법원',
-    date: '2019. 11. 25.',
-    caseType: '형사',
-    judgmentType: '판결',
-    similarity: 80
-  }
-]
-
 const SearchResultsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -76,26 +25,35 @@ const SearchResultsPage = () => {
   const [caseId, setCaseId] = useState<number | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
 
-  // location state에서 caseId 가져오기
   useEffect(() => {
-    const state = location.state as { caseId?: number } | null;
+    const state = location.state as { results?: CaseResult[], caseId?: number } | null;
+
+    if (state?.results) {
+      // Map the API response to the local SearchResult interface
+      const mappedResults: SearchResult[] = state.results.map(result => ({
+        id: result.id,
+        caseNo: result.case_number,
+        title: result.case_title,
+        content: result.preview,
+        court: result.court,
+        date: result.judgment_date,
+        caseType: result.law_category,
+        judgmentType: result.law_subcategory,
+        similarity: Math.round(result.similarity_score * 100)
+      }));
+      setSearchResults(mappedResults);
+    }
+    
     if (state?.caseId) {
       setCaseId(state.caseId);
     }
-  }, [location]);
+  }, [location.state]);
 
-  // 판례 검색 결과 조회 (현재는 MOCK 데이터 사용, 실제 API 연동 필요 시 추가)
-  useEffect(() => {
-    // TODO: caseId를 사용하여 실제 판례 검색 API 호출
-    // 현재는 MOCK 데이터 사용
-    setSearchResults(MOCK_RESULTS.slice(0, 5));
-  }, [caseId]);
 
-  // 5개만 표시
   const displayedResults = searchResults
 
-  const handleResultClick = (id: number) => {
-    navigate(`/judgment/${id}`, { state: { from: 'search', caseId } })
+  const handleResultClick = (caseNo: string) => {
+    navigate(`/judgment/${caseId}/${caseNo}`);
   }
 
   const handleSelectClick = (e: React.MouseEvent, id: number) => {
@@ -104,8 +62,6 @@ const SearchResultsPage = () => {
       prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
     )
   }
-
-  // [삭제] Logout 관련 핸들러 삭제
 
   return (
     <div className="min-h-screen bg-white pt-20"> 
@@ -151,7 +107,7 @@ const SearchResultsPage = () => {
             return (
               <motion.div
                 key={result.id}
-                onClick={() => handleResultClick(result.id)}
+                onClick={() => handleResultClick(result.caseNo)}
                 className={`relative rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer ${
                   isSelected 
                     ? 'bg-purple-50 border-2 border-purple-300 shadow-md' 
@@ -219,12 +175,15 @@ const SearchResultsPage = () => {
           <Button
             size="lg"
             onClick={() => {
-              // 선택된 첫 번째 판례의 ID를 precedentsId로 전달
-              const firstSelectedId = selectedIds.length > 0 ? selectedIds[0] : displayedResults[0]?.id;
+              // 선택된 첫 번째 판례의 사건번호를 precedentsId로 전달
+              const selectedId = selectedIds.length > 0 ? selectedIds[0] : displayedResults[0]?.id;
+              const selectedResult = searchResults.find(r => r.id === selectedId);
+              const precedentIdentifier = selectedResult ? selectedResult.caseNo : '';
+
               navigate('/solution', { 
                 state: { 
                   caseId, 
-                  precedentsId: firstSelectedId 
+                  precedentsId: precedentIdentifier
                 } 
               });
             }}

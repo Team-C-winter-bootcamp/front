@@ -28,7 +28,7 @@ export function App() {
           <Route path="/chat" element={<CaseCreation />} />
           <Route path="/case/new" element={<CaseCreation />} />
           <Route path="/case/:id/caselaw" element={<CaseLaw />} />
-          <Route path="/judgment/:id" element={<JudmentDetail />} />
+          <Route path="/judgment/:caseId/:precedentId" element={<JudmentDetail />} />
           <Route path="/search" element={<SearchResult />} />
           <Route path="/solution" element={<Solution />} />
           <Route path="/document/agree" element={<AgreeDocument />} />

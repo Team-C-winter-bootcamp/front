@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // API Base URL 설정 (환경 변수에서 가져오거나 기본값 사용)
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Axios 인스턴스 생성
 const apiClient: AxiosInstance = axios.create({
@@ -10,6 +10,9 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 쿠키를 포함하여 요청
+  xsrfCookieName: 'csrftoken', // Django의 기본 CSRF 쿠키 이름
+  xsrfHeaderName: 'X-CSRFToken', // Django가 헤더에서 찾는 이름
 });
 
 // Request 인터셉터: 요청 전에 토큰 추가 등 처리
