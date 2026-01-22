@@ -59,7 +59,7 @@ export type PostCaseInfoValidationError = {
 
 export type PostCaseInfoNotFound = {
   status: 'error';
-  code: string;
+  code: number;
   message: string;
 };
 

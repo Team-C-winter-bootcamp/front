@@ -14,27 +14,6 @@ export const API_ENDPOINTS = {
     MODIFYFILE: '/cases/{case_id}/documents', // 문서 수정(PATCH)
   },
 
-  // 사용자 (Users) - 기존 서비스용
-  users: {
-    ME: '/users/me', // 현재 사용자 정보 조회(GET)
-  },
-
-  // 세션 (Session) - 기존 서비스용
-  session: {
-    NEWCHAT: '/sessions', // 새로운 채팅방 생성(POST)
-    GETLIST: '/sessions', // 채팅방 목록 조회(GET)
-    MODIFY: '/sessions/{session_id}', // 채팅방 수정(PATCH)
-    DELETE: '/sessions/{session_id}', // 채팅방 삭제(DELETE)
-    GETMESSAGE: '/sessions/{session_id}/messages', // 특정 채팅방 메시지 조회(GET)
-    SENDMESSAGE: '/sessions/{session_id}/messages', // 채팅방 메시지 전송(POST)
-    MODIFYMESSAGE: '/messages/{message_id}', // 특정 메시지 수정(PATCH)
-  },
-
-  // 판례 (Precedents) - 기존 서비스용
-  precedents: {
-    PREVIEW: '/precedents/preview', // 판례 검색 및 미리보기(GET)
-    TOTALDATA: '/precedents/{precedents_id}', // 판례 데이터 전문 조회(GET)
-  },
 
 } as const;
 
