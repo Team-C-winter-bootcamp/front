@@ -5,9 +5,7 @@ import Navbar from './Navbar';
 import Hero from './Hero';
 import Features from './Features';
 import UseCases from './UseCases';
-import TrendingSection from './TrendingSection';
 import Footer from './Footer';
-import StatsSection from './StatsSection';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,13 +40,12 @@ const LandingPage: React.FC = () => {
       <main>
         <Hero />
         
-        <TrendingSection />
+        
 
         <Features />
         
         <UseCases />
         
-        <StatsSection />
         {/* Final CTA Section */}
         <section className="py-32 bg-indigo-600 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">

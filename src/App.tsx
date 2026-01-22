@@ -3,13 +3,15 @@ import { CaseProvider } from './context/CaseContext';
 import { HomePage } from './pages/HomePage';
 import { CaseCreation } from './pages/CaseCreation';
 import { CaseLaw } from './pages/CaseLaw';
-import { Document } from './pages/Document';
 import { Solution } from './pages/Solution';
 import SearchResult from './pages/SearchResult';
 import JudmentDetail from './pages/JudmentDetail';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import { AgreeDocument } from './pages/AgreeDocument';
+import { GosoDocument } from './pages/GosoDocument';
+import { ProofDocument } from './pages/ProofDocument';
 
 export function App() {
   return (
@@ -29,7 +31,9 @@ export function App() {
           <Route path="/judgment/:id" element={<JudmentDetail />} />
           <Route path="/search" element={<SearchResult />} />
           <Route path="/solution" element={<Solution />} />
-          <Route path="/document" element={<Document />} />
+          <Route path="/document/agree" element={<AgreeDocument />} />
+          <Route path="/document/goso" element={<GosoDocument />} />
+          <Route path="/document/proof" element={<ProofDocument />} />
 
           {/* 없는 페이지로 접근 시 메인으로 리다이렉트 */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,19 +1,13 @@
-import { useEffect, useState, useRef } from 'react';// 채팅 
+import { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
-import { ChatBubble } from '../components/ChatPage/ChatBubble';
-import { Button } from '../components/ui/Button';
-import { ArrowLeft } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-type Message = {
-  id: string;
-  text: string;
-  sender: 'ai' | 'user';
-};
+import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 type Step = {
   id: number;
+  label: string;
   question: string;
   options: string[];
 };
@@ -21,8 +15,8 @@ type Step = {
 const steps: Step[] = [
   {
     id: 1,
-    question:
-      '옵션을 이해하는 데 도움을 드릴 수 있습니다. 먼저 이 상황에서 귀하의 역할을 알려주실 수 있나요?',
+    label: '피해자 여부',
+    question: '옵션을 이해하는 데 도움을 드릴 수 있습니다. 먼저 이 상황에서 귀하의 역할을 알려주실 수 있나요?',
     options: [
       '저는 피해자/청구인입니다',
       '저는 피의자입니다',
@@ -32,8 +26,8 @@ const steps: Step[] = [
   },
   {
     id: 2,
-    question:
-      '감사합니다. 최선의 안내를 위해 다음을 알려주세요: 이 사건을 보장할 수 있는 보험 정책이 있나요?',
+    label: '보험여부',
+    question: '감사합니다. 최선의 안내를 위해 다음을 알려주세요: 이 사건을 보장할 수 있는 보험 정책이 있나요?',
     options: [
       '네, 저에게 보험이 있습니다',
       '상대방에게 보험이 있습니다',
@@ -43,6 +37,7 @@ const steps: Step[] = [
   },
   {
     id: 3,
+    label: '부상여부',
     question: '알겠습니다. 사건 중에 신체적 부상을 입은 사람이 있나요?',
     options: [
       '네, 심각한 부상입니다',
@@ -53,245 +48,204 @@ const steps: Step[] = [
   },
   {
     id: 4,
-    question:
-      '알겠습니다. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
+    label: '증거여부',
+    question: '알겠습니다. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
     options: [
       '네, 강력한 증거가 있습니다',
       '일부 증거가 있습니다',
       '서면 증거가 없습니다',
       '나중에 가져올 수 있습니다'
     ]
+  },
+  {
+    id: 5,
+    label: '세부사항 작성',
+    question: '세부사항을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요?',
+    options: []
   }
 ];
 
 export function CaseCreation() {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'init',
-      text: "안녕하세요. 저는 여러분의 법률 도우미입니다. 여러분의 상황을 차분하고 명확하게 이해할 수 있도록 도와드리기 위해 여기 있습니다. 여기서 공유하는 모든 내용은 비공개입니다.",
-      sender: 'ai'
-    }
-  ]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
-  const [showChatInput, setShowChatInput] = useState(false);
-  const [chatInput, setChatInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
-
-  // Initial delay for the first question - 중복 방지
-  useEffect(() => {
-    if (currentStep === 0 && messages.length === 1) {
-      setIsTyping(true);
-      const timer = setTimeout(() => {
-        setIsTyping(false);
-        setMessages((prev) => {
-          // 이미 첫 번째 질문이 있는지 확인
-          if (prev.some(msg => msg.id === `q-${steps[0].id}`)) {
-            return prev;
-          }
-          return [
-            ...prev,
-            {
-              id: `q-${steps[0].id}`,
-              text: steps[0].question,
-              sender: 'ai'
-            }
-          ];
-        });
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep, messages.length]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [detailText, setDetailText] = useState('');
+  const [showDetailInput, setShowDetailInput] = useState(false);
 
   const handleOptionClick = (option: string) => {
-    // Add user response
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `a-${Date.now()}`,
-        text: option,
-        sender: 'user'
-      }
-    ]);
-
-    // Simulate AI thinking and next step
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      if (currentStep < steps.length - 1) {
-        // Next question
-        const nextStep = currentStep + 1;
-        setCurrentStep(nextStep);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `q-${steps[nextStep].id}`,
-            text: steps[nextStep].question,
-            sender: 'ai'
-          }
-        ]);
-      } else {
-        // Finish flow - 대화창 표시
-        setMessages((prev) => {
-          // 이미 finish 메시지가 있는지 확인
-          if (prev.some(msg => msg.id === 'finish')) {
-            return prev;
-          }
-          return [
-            ...prev,
-            {
-              id: 'finish',
-              text: "세부사항을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요? 아래 입력창에 자유롭게 작성해 주세요.",
-              sender: 'ai'
-            }
-          ];
-        });
-        setShowChatInput(true);
-      }
-    }, 1500);
-  };
-
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || chatInput.trim().length < 15) {
-      alert('15자 이상 입력해주세요.');
-      return;
-    }
+    setSelectedOptions((prev) => [...prev, option]);
     
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-chat-${Date.now()}`,
-        text: chatInput,
-        sender: 'user'
-      },
-      {
-        id: `ai-response-${Date.now()}`,
-        text: '상황을 잘 이해했습니다. 이제 유사 판례를 찾아드리겠습니다.',
-        sender: 'ai'
-      }
-    ]);
-    setChatInput('');
-    setTimeout(() => {
-      setShowChatInput(false);
-    }, 500);
+    if (currentStep < steps.length - 2) {
+      setTimeout(() => {
+        setCurrentStep((prev) => prev + 1);
+      }, 300);
+    } else if (currentStep === steps.length - 2) {
+      // 4단계 완료 후 5단계로
+      setTimeout(() => {
+        setCurrentStep((prev) => prev + 1);
+        setShowDetailInput(true);
+      }, 300);
+    }
   };
 
-  const isFinished =
-    currentStep === steps.length - 1 && messages.length > steps.length * 2 + 1 && !showChatInput;
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+      setSelectedOptions((prev) => prev.slice(0, -1));
+      if (currentStep === steps.length - 1) {
+        setShowDetailInput(false);
+        setDetailText('');
+      }
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep === steps.length - 1 && detailText.trim().length >= 15) {
+      navigate('/search');
+    }
+  };
+
+  const isNextDisabled = currentStep === steps.length - 1 && detailText.trim().length < 15;
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto flex flex-col h-screen bg-[#FAFAFA]">
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Step Indicator */}
+        <div className="bg-white border-b border-gray-200 py-8">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="flex items-center w-full">
+              {steps.map((step, index) => {
+                const isCompleted = index < currentStep;
+                const isActive = index === currentStep;
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <ChatBubble
-                key={msg.id}
-                message={msg.text}
-                sender={msg.sender}
-              />
-            ))}
-            {isTyping && (
-              <ChatBubble key="typing" message="" sender="ai" isTyping={true} />
-            )}
-          </AnimatePresence>
-          <div ref={messagesEndRef} />
+                return (
+                  <React.Fragment key={step.id}>
+                    <div className="flex flex-col items-center flex-shrink-0" style={{ width: `${100 / steps.length}%` }}>
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
+                          isCompleted
+                            ? 'bg-[#6D5AED] border-[#6D5AED] text-white'
+                            : isActive
+                            ? 'bg-white border-[#6D5AED] text-[#6D5AED]'
+                            : 'bg-white border-gray-300 text-gray-400'
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <Check size={20} className="text-white" />
+                        ) : (
+                          <span className="text-base font-normal">{step.id}</span>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm mt-2 text-center font-normal whitespace-nowrap ${
+                          isActive ? 'text-gray-900' : isCompleted ? 'text-gray-900' : 'text-gray-500'
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+                    </div>
+                    {index < steps.length - 1 && (
+                      <div
+                        className={`h-0.5 flex-1 mx-2 transition-all ${
+                          isCompleted ? 'bg-[#6D5AED]' : 'bg-gray-300'
+                        }`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Input Area (Options) */}
-        <div className="p-6 bg-white border-t border-gray-100">
-          {showChatInput ? (
-            <form onSubmit={handleChatSubmit} className="max-w-2xl mx-auto">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  <span className="text-gray-600 text-xl">+</span>
-                </button>
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="사례를 입력해 주세요.(15자 이상)"
-                  className="flex-1 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  minLength={15}
-                />
-                <button
-                  type="submit"
-                  className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors"
-                >
-                  <span className="text-white text-lg">↑</span>
-                </button>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-12">
+          <div className="bg-[#F0F4F8] rounded-lg p-10 mb-8 flex-1 flex flex-col min-h-[400px]">
+            {/* Welcome Message - 1단계에서만 표시 */}
+            {currentStep === 0 && (
+              <div className="mb-8">
+                <p className="text-base text-gray-700 leading-relaxed font-normal">
+                  안녕하세요. 저는 여러분의 법률 도우미입니다. 여러분의 상황을 차분하고 명확하게 이해할 수 있도록 도와드리기 위해 여기 있습니다. 여기서 공유하는 모든 내용은 비공개입니다.
+                </p>
               </div>
-              {chatInput.length > 0 && chatInput.length < 15 && (
-                <p className="text-xs text-red-500 mt-2 ml-14">15자 이상 입력해주세요.</p>
-              )}
-            </form>
-          ) : !isFinished ? (
-            <div className="max-w-2xl mx-auto">
-              <p className="text-sm text-gray-400 mb-3 text-center">
-                계속하려면 옵션을 선택하세요:
+            )}
+
+            {/* Question */}
+            <div className="mb-6">
+              <p className="text-lg text-gray-900 font-normal mb-4">
+                {steps[currentStep].question}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {steps[currentStep].options.map((option, idx) => (
-                  <motion.button
-                    key={idx}
-                    initial={{
-                      opacity: 0,
-                      y: 10
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0
-                    }}
-                    transition={{
-                      delay: idx * 0.1
-                    }}
-                    onClick={() => !isTyping && handleOptionClick(option)}
-                    disabled={isTyping}
-                    className="p-4 text-left text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#4A90E2] hover:bg-[#E8F0F7] hover:text-[#4A90E2] transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {option}
-                  </motion.button>
-                ))}
-              </div>
             </div>
-          ) : (
-            <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.9
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1
-              }}
-              className="text-center"
-            >
-              <Button
-                size="lg"
-                onClick={() => navigate('/search')}
-                className="w-full sm:w-auto min-w-[200px] shadow-lg shadow-blue-500/20"
+
+            {/* Options or Detail Input */}
+            {currentStep < steps.length - 1 ? (
+              <>
+                <p className="text-sm text-gray-500 mb-4 font-normal">계속하려면 옵션을 선택하세요:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {steps[currentStep].options.map((option, idx) => (
+                    <motion.button
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      onClick={() => handleOptionClick(option)}
+                      className="p-5 text-left text-base font-normal text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#6D5AED] hover:bg-purple-50 hover:text-[#6D5AED] transition-all duration-200 shadow-sm"
+                    >
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <textarea
+                  value={detailText}
+                  onChange={(e) => setDetailText(e.target.value)}
+                  placeholder="상황에 대해 자세히 설명해 주세요. (15자 이상)"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6D5AED] focus:border-[#6D5AED] min-h-[150px] resize-none text-base font-normal"
+                  rows={6}
+                />
+                {detailText.length > 0 && detailText.length < 15 && (
+                  <p className="text-sm text-red-500 font-normal">
+                    상황에 대해 더 구체적으로 작성해주세요. (현재 {detailText.length}자 / 최소 15자)
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+            <div className="text-base text-[#6D5AED] font-normal underline">
+              Step {currentStep + 1} of {steps.length}
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`px-6 py-3 rounded-lg text-base font-normal transition-all ${
+                  currentStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#D3DDF4] text-[#6D5AED] hover:bg-[#C4D0EB] border border-[#D3DDF4]'
+                }`}
               >
-                유사 판례 보기
-              </Button>
-            </motion.div>
-          )}
+                Previous
+              </button>
+              {currentStep === steps.length - 1 && (
+                <button
+                  onClick={handleNext}
+                  disabled={isNextDisabled}
+                  className={`px-6 py-3 rounded-lg text-base font-normal text-white transition-all ${
+                    isNextDisabled
+                      ? 'bg-gray-300 cursor-not-allowed'
+                      : 'bg-[#6D5AED] hover:bg-[#5D4AD9]'
+                  }`}
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

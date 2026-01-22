@@ -3,11 +3,11 @@ import { Layout } from '../components/ui/Layout';
 import { CategoryCard } from '../components/HomePage/CategoryCard';
 import { Button } from '../components/ui/Button';
 import {
-  Flame,
-  MessageSquare,
-  ShieldAlert,
-  Home,
+  Wallet,
   Briefcase,
+  Building,
+  AlertTriangle,
+  AlertCircle,
   Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -20,35 +20,35 @@ export function HomePage() {
       title: '못받은 돈',
       description:
         '대여금 반환, 물품 대금 미지급, 손해배상금 청구 및 금전 채권 관련 분쟁.',
-      icon: <Flame size={24} />
+      icon: <Wallet size={24} />
     },
     {
       id: 'labor',
       title: '근로/알바 계약서',
       description:
         '부당 해고, 직장 내 괴롭힘, 임금 체불, 퇴직금 정산 및 근로계약 위반 분쟁.',
-      icon: <MessageSquare size={24} />
+      icon: <Briefcase size={24} />
     },
     {
       id: 'realestate',
       title: '부동산/임대차',
       description:
-        '전·월세 보증금 미반환, 층간 소음, 임대인-임차인 갈등 및 부동산 권리 분쟁.',
-      icon: <ShieldAlert size={24} />
+        '전·월세 보증금 미반환, 층간 소음, 임대인-임차인 갈등 및 부동산 권리분쟁.',
+      icon: <Building size={24} />
     },
     {
       id: 'fraud',
       title: '중고사기 온라인 모욕',
       description:
-        '중고 거래 사기 피해, 온라인상의 비방, 명예훼손(사이버 불링) 및 평판 훼손 대응.',
-      icon: <Home size={24} />
+        '중고 거래 사기 피해, 온라인상 비방, 명예훼손(사이버 불링) 및 평판 훼손.',
+      icon: <AlertTriangle size={24} />
     },
     {
       id: 'assault',
       title: '폭행/폭언',
       description:
-        '신체적 다툼, 상해 피해, 정당방위 주장 및 폭언으로 인한 위자료 청구 소송.',
-      icon: <Briefcase size={24} />
+        '신체적 다툼, 상해피해, 정당방위 주장 및 폭언으로 인한 위자료 청구 소송.',
+      icon: <AlertCircle size={24} />
     }
   ];
 
@@ -92,17 +92,14 @@ export function HomePage() {
               duration: 0.5
             }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F2ED] text-[#6B9B7F] text-sm font-medium mb-6">
-              <Sparkles size={14} />
-              <span>AI 기반 법률 상담</span>
-            </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
-              변호사 없이도 법률 문제를 <br className="hidden md:block" />
-              <span className="text-[#4A90E2]">쉽게 해결하세요</span>
+            변호사 상담이 망설여질 땐?<br className="hidden md:block" />
+              <span className="text-indigo-600">해답은 LAWDING</span>
             </h1>
-            <p className="text-xl text-gray-500 leading-relaxed mb-8">
-              차분하고 사적인 공간에서 상황을 탐색하세요. 압박 없이 권리, 잠재적 결과, 다음 단계에 대한 명확성을 얻을 수 있습니다.
-            </p>
+            <p className="text-lg md:text-xl text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
+  변호사 선임 비용과 복잡한 절차 때문에 혼자 끙끙 앓고 계셨나요?<br className="hidden md:block" />
+  부담 없이 상황을 진단하고 <span className="text-gray-700 font-semibold">최적의 법적 대응책</span>을 미리 확인해 보세요.
+</p>
             <Button
               size="lg"
               onClick={() => navigate('/chat')}
