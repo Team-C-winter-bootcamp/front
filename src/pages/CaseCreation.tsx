@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { caseService } from '../api';
 
 type Step = {
   id: number;
@@ -70,7 +71,7 @@ export function CaseCreation() {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [detailText, setDetailText] = useState('');
-  const [showDetailInput, setShowDetailInput] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOptionClick = (option: string) => {
     setSelectedOptions((prev) => [...prev, option]);
@@ -83,7 +84,6 @@ export function CaseCreation() {
       // 4단계 완료 후 5단계로
       setTimeout(() => {
         setCurrentStep((prev) => prev + 1);
-        setShowDetailInput(true);
       }, 300);
     }
   };
@@ -93,15 +93,44 @@ export function CaseCreation() {
       setCurrentStep((prev) => prev - 1);
       setSelectedOptions((prev) => prev.slice(0, -1));
       if (currentStep === steps.length - 1) {
-        setShowDetailInput(false);
         setDetailText('');
       }
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === steps.length - 1 && detailText.trim().length >= 15) {
-      navigate('/search');
+      setIsLoading(true);
+      try {
+        // 선택된 옵션들을 situation 객체로 변환
+        const situation: { detail: string; [key: string]: string } = {
+          detail: detailText.trim(),
+        };
+        
+        // 각 단계의 선택값을 키-값 쌍으로 추가
+        selectedOptions.forEach((option, index) => {
+          const stepKey = steps[index].label.toLowerCase().replace(/\s/g, '_');
+          situation[stepKey] = option;
+        });
+
+        // API 호출
+        const response = await caseService.createCase({
+          category: '일반', // 기본 카테고리 (실제로는 선택된 옵션에 따라 결정)
+          situation: situation,
+        });
+
+        if (response.status === 'success' && 'data' in response) {
+          // case_id를 state로 전달하여 SearchResult로 이동
+          navigate('/search', { state: { caseId: response.data.case_id } });
+        } else {
+          alert('사건 등록에 실패했습니다. 다시 시도해주세요.');
+        }
+      } catch (error: any) {
+        console.error('사건 등록 오류:', error);
+        alert(error.message || '사건 등록 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -246,14 +275,14 @@ export function CaseCreation() {
               {currentStep === steps.length - 1 && (
                 <button
                   onClick={handleNext}
-                  disabled={isNextDisabled}
+                  disabled={isNextDisabled || isLoading}
                   className={`px-6 py-3 rounded-lg text-base font-normal text-white transition-all ${
-                    isNextDisabled
+                    isNextDisabled || isLoading
                       ? 'bg-gray-300 cursor-not-allowed'
                       : 'bg-[#6D5AED] hover:bg-[#5D4AD9]'
                   }`}
                 >
-                  Next
+                  {isLoading ? '처리 중...' : 'Next'}
                 </button>
               )}
             </div>

@@ -1,25 +1,55 @@
-import { useMemo, useState, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useMemo, useState, useRef, useEffect } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react'
 import { MOCK_RESULTS } from './SearchResult'
+import { caseService } from '../api'
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams()
   
   // [변경 2] Clerk useUser 훅 사용
   const { user } = useUser()
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai')
   const [isAiExpanded, setIsAiExpanded] = useState(false)
+  const [caseId, setCaseId] = useState<number | null>(null)
+  const [precedentDetail, setPrecedentDetail] = useState<any>(null)
   
   // [삭제] LogoutModal 관련 state 삭제
   // const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
   
-  const numericId = Number(id)
+  const numericId = id ? Number(id) : 0
   const contentRef = useRef<HTMLDivElement>(null)
+
+  // location state에서 caseId 가져오기
+  useEffect(() => {
+    const state = location.state as { caseId?: number } | null;
+    if (state?.caseId) {
+      setCaseId(state.caseId);
+    }
+  }, [location]);
+
+  // 판례 상세 정보 조회
+  useEffect(() => {
+    const fetchPrecedentDetail = async () => {
+      if (caseId && numericId && !isNaN(numericId)) {
+        try {
+          const response = await caseService.getPrecedentDetail(caseId, numericId);
+          if (response.status === 'success' && 'data' in response) {
+            setPrecedentDetail(response.data);
+          }
+        } catch (error: any) {
+          console.error('판례 상세 조회 오류:', error);
+        }
+      }
+    };
+
+    fetchPrecedentDetail();
+  }, [caseId, numericId]);
 
   const [isBookmarked, setIsBookmarked] = useState(() => {
     const raw = localStorage.getItem('bookmarked_judgments')
@@ -37,7 +67,15 @@ const JudgmentDetailPage = () => {
     return MOCK_RESULTS.find(r => r.id === numericId)
   }, [numericId])
 
-  const displayData = foundResult || {
+  // API 응답 또는 MOCK 데이터 사용
+  const displayData = precedentDetail?.case_info ? {
+    title: precedentDetail.case_info.title,
+    content: precedentDetail.case_info.full_text,
+    court: precedentDetail.case_info.court,
+    date: precedentDetail.case_info.judgment_date,
+    caseType: '형사',
+    judgmentType: '판결'
+  } : foundResult || {
     title: '데이터를 찾을 수 없습니다.',
     content: '',
     court: '',
@@ -52,12 +90,12 @@ const JudgmentDetailPage = () => {
     summary: `${displayData.court} ${displayData.date} 선고`,
     aiSummary: {
       title: 'AI 판결 요약',
-      resultSummary: [
+      resultSummary: precedentDetail?.ai_analysis?.key_points || [
         '내수면어업개발촉진법상 공유수면에는 하천법의 적용 또는 준용을 받는 하천도 포함됨을 판시함.',
         '하천법의 적용 또는 준용을 받는 하천부지의 무단점용은 공유수면관리법 위반죄가 아닌 하천법 위반죄에 해당함을 판시하며, 원심의 공유수면관리법 위반죄 적용을 파기 환송함.'
       ],
       facts: [
-        '피고인은 하천법의 적용 또는 준용을 받는 하천부지에서 송어양식어업을 영위하며 하천부지를 무단으로 점용함.',
+        precedentDetail?.ai_analysis?.overview || '피고인은 하천법의 적용 또는 준용을 받는 하천부지에서 송어양식어업을 영위하며 하천부지를 무단으로 점용함.',
         '원심은 피고인의 행위를 내수면어업개발촉진법 위반 및 공유수면관리법 위반죄로 판단함.',
         '피고인은 이에 불복하여 상고함.',
         displayData.content
@@ -65,7 +103,7 @@ const JudgmentDetailPage = () => {
     },
     judgment: {
       court: displayData.court,
-      caseNo: displayData.title.match(/\d{4}[노도마가구]\d+/)?.[0] || '2014노1188',
+      caseNo: precedentDetail?.case_info?.case_number || displayData.title.match(/\d{4}[노도마가구]\d+/)?.[0] || '2014노1188',
       caseName: displayData.title.split('선고')[1]?.trim() || '강간미수, 유사강간',
       plaintiff: '검사',
       defendant: '피고인',
@@ -265,7 +303,7 @@ const JudgmentDetailPage = () => {
                       <div>
                         <h3 className="text-slate-800 font-light mb-3">결과 요약</h3>
                         <ul className="space-y-3">
-                          {judgmentData.aiSummary.resultSummary.map((item, idx) => (
+                          {judgmentData.aiSummary.resultSummary.map((item: string, idx: number) => (
                             <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
                               <span className="text-slate-400 mt-1.5 text-xs">●</span>
                               <span>{item}</span>
