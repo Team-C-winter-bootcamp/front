@@ -10,4 +10,10 @@ export * from './types'
 export { API_ENDPOINTS, replaceParams } from './endpoints'
 
 // Services
-export { userService, sessionService, precedentService } from './services/Service'
+export { 
+  initService, 
+  caseService,
+  userService, 
+  sessionService, 
+  precedentService 
+} from './services/Service'
