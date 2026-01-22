@@ -37,7 +37,6 @@ function getCookie(name: string): string | null {
   return cookieValue;
 }
 
-
 // ==========================================
 // 서비스 함수들
 // ==========================================

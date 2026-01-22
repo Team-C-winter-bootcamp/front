@@ -13,7 +13,4 @@ export { API_ENDPOINTS, replaceParams } from './endpoints'
 export { 
   initService, 
   caseService,
-  userService, 
-  sessionService, 
-  precedentService 
 } from './services/Service'

@@ -42,9 +42,6 @@ const Hero: React.FC = () => {
             alt="Dashboard Preview" 
             className="rounded-3xl shadow-2xl border border-slate-100 mx-auto transform -rotate-1 hover:rotate-0 transition-transform duration-700"
           />
-          <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 hidden md:block animate-bounce">
-            <p className="text-sm font-semibold">대법원 2019. 11. 25. 선고 판례...</p>
-          </div>
         </div>
       </div>
     </header>
