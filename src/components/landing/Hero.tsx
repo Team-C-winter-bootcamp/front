@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
+import solu from '../../assets/solu.png';
 
 const Hero: React.FC = () => {
   const navigate = useNavigate(); 
@@ -37,7 +38,7 @@ const Hero: React.FC = () => {
         </div>
         <div className="mt-20 relative reveal active">
           <img 
-            src="https://picsum.photos/seed/legal-dashboard/1200/800" 
+            src= {solu}
             alt="Dashboard Preview" 
             className="rounded-3xl shadow-2xl border border-slate-100 mx-auto transform -rotate-1 hover:rotate-0 transition-transform duration-700"
           />

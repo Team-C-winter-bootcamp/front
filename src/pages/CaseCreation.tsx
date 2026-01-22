@@ -160,7 +160,7 @@ export function CaseCreation() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-12">
-          <div className="bg-[#F0F4F8] rounded-lg p-10 mb-8 flex-1 flex flex-col min-h-[400px]">
+          <div className="bg-[#F0F4F8] rounded-lg p-10 flex-1 flex flex-col min-h-[200px]">
             {/* Welcome Message - 1단계에서만 표시 */}
             {currentStep === 0 && (
               <div className="mb-8">
@@ -210,6 +210,18 @@ export function CaseCreation() {
                     상황에 대해 더 구체적으로 작성해주세요. (현재 {detailText.length}자 / 최소 15자)
                   </p>
                 )}
+                
+                {/* 예시 글 */}
+                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
+                  <div className="text-sm text-gray-600 leading-relaxed font-normal whitespace-pre-line">
+                    {`2024년 1월 15일 오후 2시경, 강남역 사거리 인근에서 신호 대기를 위해 정차하고 있었습니다. 정차 후 약 10초 뒤, 후방에서 오던 승용차가 제 차의 범퍼를 강하게 들이받았습니다.
+
+가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.
+
+현장 사진과 블랙박스 영상은 모두 확보해 두었으며, 상대방의 과실 100%라고 생각되지만 상대방이 말을 바꾸고 있어 법적 대응을 준비하려 합니다.`}
+                  </div>
+                </div>
               </div>
             )}
           </div>
