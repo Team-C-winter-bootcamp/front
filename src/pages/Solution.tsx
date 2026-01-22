@@ -1,34 +1,78 @@
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Card } from '../components/ui/Card';
 import { FileText, Mail, AlertCircle, Check, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { caseService } from '../api';
 
 export function Solution() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [caseId, setCaseId] = useState<number | null>(null);
+  const [precedentsId, setPrecedentsId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [caseDetail, setCaseDetail] = useState<any>(null);
 
-  // 예상 합의금 (실제로는 백엔드에서 계산)
-  const estimatedAmount = '300만원 ~ 500만원';
+  // location state에서 caseId와 precedentsId 가져오기
+  useEffect(() => {
+    const state = location.state as { caseId?: number; precedentsId?: number } | null;
+    if (state?.caseId) {
+      setCaseId(state.caseId);
+    }
+    if (state?.precedentsId) {
+      setPrecedentsId(state.precedentsId);
+    }
+  }, [location]);
+
+  // 사건 분석 결과 조회
+  useEffect(() => {
+    const fetchCaseDetail = async () => {
+      if (caseId && precedentsId) {
+        setIsLoading(true);
+        try {
+          const response = await caseService.getCaseDetail(caseId, precedentsId);
+          if (response.status === 'success' && 'data' in response) {
+            setCaseDetail(response.data);
+          }
+        } catch (error: any) {
+          console.error('사건 분석 결과 조회 오류:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchCaseDetail();
+  }, [caseId, precedentsId]);
+
+  // 예상 합의금 (API 응답에서 가져오거나 기본값)
+  const estimatedAmount = caseDetail?.outcome_prediction?.estimated_compensation || '300만원 ~ 500만원';
   const averageAmount = '420만원';
 
-  // 타임라인 단계
-  const timelineSteps = [
+  // 타임라인 단계 (API 응답에서 가져오거나 기본값)
+  const timelineSteps = caseDetail?.action_roadmap?.map((step: { step?: number; title?: string; description?: string; action?: string }, index: number) => ({
+    id: step.step || index + 1,
+    label: step.title || `단계 ${index + 1}`,
+    status: index === 0 ? 'current' : index === 1 ? 'next' : 'final',
+    description: step.description || step.action || '',
+  })) || [
     {
       id: 1,
       label: '합의 시도',
-      status: 'current',
+      status: 'current' as const,
       description: '합의 시도를 분석하니 이 사건은 합의의 촉진을 주로 한 해결이 가장 효과적입니다.'
     },
     {
       id: 2,
       label: '내용증명 발송',
-      status: 'next',
+      status: 'next' as const,
       description: '내용증명 발송을 잘 보관하시고, 가능하면 서면적으로 모든 내용을 기록합니다.'
     },
     {
       id: 3,
       label: '소송 진행',
-      status: 'final',
+      status: 'final' as const,
       description: '소송 진행 데이터를 확보하고, 유사 사례를 바탕으로 주장을 강화합니다.'
     }
   ];
@@ -36,13 +80,13 @@ export function Solution() {
   const handleDocumentSelect = (type: 'agreement' | 'notice' | 'complaint') => {
     switch (type) {
       case 'agreement':
-        navigate('/document/agree');
+        navigate('/document/agree', { state: { caseId } });
         break;
       case 'notice':
-        navigate('/document/proof');
+        navigate('/document/proof', { state: { caseId } });
         break;
       case 'complaint':
-        navigate('/document/goso');
+        navigate('/document/goso', { state: { caseId } });
         break;
       default:
         break;
@@ -67,8 +111,17 @@ export function Solution() {
               <h2 className="text-lg font-bold text-gray-900">분석 요약</h2>
             </div>
             <p className="text-base text-gray-700 leading-relaxed">
-              귀하의 사건은 <span className="font-semibold">[손해배상]</span> 유형에 속하며, 선택하신 판례들은 주로{' '}
-              <span className="font-semibold">[과실 비율 70%]</span>를 인정하고 있습니다. 이에 따른 예상 솔루션은 다음과 같습니다.
+              {isLoading ? (
+                '분석 중...'
+              ) : caseDetail ? (
+                <>
+                  귀하의 사건은 <span className="font-semibold">{caseDetail.legal_foundation?.logic || '[분석 중]'}</span> 유형에 속하며, 
+                  예상 결과는 <span className="font-semibold">{caseDetail.outcome_prediction?.expected_result || '[분석 중]'}</span>입니다. 
+                  이에 따른 예상 솔루션은 다음과 같습니다.
+                </>
+              ) : (
+                '사건 정보를 불러오는 중입니다...'
+              )}
             </p>
           </Card>
         </motion.div>
@@ -116,7 +169,7 @@ export function Solution() {
             
             {/* 타임라인 */}
             <div className="flex items-start justify-between gap-4 md:gap-8 relative">
-              {timelineSteps.map((step, index) => (
+              {timelineSteps.map((step: { id: number; label: string; status: 'current' | 'next' | 'final'; description: string }, index: number) => (
                 <div key={step.id} className="flex-1 flex flex-col items-center relative">
                   {/* 단계 레이블 */}
                   <div className="mb-2">

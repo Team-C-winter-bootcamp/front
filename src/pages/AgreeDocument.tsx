@@ -1,13 +1,29 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
 import { Download, ArrowUp, RotateCcw } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { caseService } from '../api';
+import type { StreamEventInfo, StreamEventChunk, StreamEventComplete } from '../api/types';
 
 export function AgreeDocument() {
+  const location = useLocation();
   const [chatInput, setChatInput] = useState('');
+  const [documentContent, setDocumentContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [caseId, setCaseId] = useState<number | null>(null);
   const documentRef = useRef<HTMLDivElement>(null);
+
+  // location state에서 caseId 가져오기
+  useEffect(() => {
+    const state = location.state as { caseId?: number } | null;
+    if (state?.caseId) {
+      setCaseId(state.caseId);
+    }
+  }, [location]);
 
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
@@ -46,16 +62,63 @@ export function AgreeDocument() {
     }
   };
 
-  const handleSend = () => {
-    if (chatInput.trim().length >= 15) {
-      // TODO: API 호출하여 문서 생성
-      console.log('Sending:', chatInput);
+  const handleSend = async () => {
+    if (chatInput.trim().length < 15 || !caseId) return;
+
+    setIsGenerating(true);
+    try {
+      // 문서 생성 API 호출
+      const response = await caseService.generateDocument(caseId, {
+        document_type: '합의서',
+        case_id: caseId,
+      });
+
+      if (response.status === 'success' && 'data' in response) {
+        setDocumentContent(response.data.content);
+        setIsGenerating(false);
+        setIsStreaming(true);
+
+        // 문서 수정 API 호출 (SSE 스트리밍)
+        await caseService.modifyDocument(
+          caseId,
+          {
+            document_id: response.data.document_id,
+            user_answer: chatInput.trim(),
+          },
+          {
+            onInfo: (event: StreamEventInfo) => {
+              console.log('추출된 필드:', event.extracted_fields);
+            },
+            onChunk: (event: StreamEventChunk) => {
+              setDocumentContent((prev) => prev + event.text);
+            },
+            onComplete: (event: StreamEventComplete) => {
+              setIsStreaming(false);
+              console.log('문서 수정 완료:', event);
+            },
+            onError: (error) => {
+              setIsStreaming(false);
+              console.error('문서 수정 오류:', error);
+              alert('문서 생성 중 오류가 발생했습니다.');
+            },
+          }
+        );
+      } else {
+        alert('문서 생성에 실패했습니다.');
+        setIsGenerating(false);
+      }
+    } catch (error: any) {
+      console.error('문서 생성 오류:', error);
+      alert(error.message || '문서 생성 중 오류가 발생했습니다.');
+      setIsGenerating(false);
     }
   };
 
   const handleReset = () => {
     setChatInput('');
-    // TODO: 문서 초기화
+    setDocumentContent('');
+    setIsGenerating(false);
+    setIsStreaming(false);
   };
 
   return (
@@ -89,27 +152,51 @@ export function AgreeDocument() {
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8">
-          <div className="w-full max-w-2xl">
-            <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-              <p className="text-gray-700 text-lg">
-                채팅창에 상황을 입력하시면 문서가 자동으로 생성이 됩니다!
-              </p>
-              <div className="flex justify-center gap-1 mt-4">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-auto">
+          {documentContent ? (
+            <div className="w-full max-w-4xl">
+              <div ref={documentRef} className="bg-white p-12 space-y-6 text-slate-800 leading-relaxed shadow-lg rounded-lg">
+                <h2 className="text-2xl font-bold text-center mb-8">합의서</h2>
+                <div 
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: documentContent }}
+                />
+                {isStreaming && (
+                  <div className="flex justify-center gap-1 mt-4">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Hidden Document for PDF Generation */}
-        <div className="hidden">
-          <div ref={documentRef} className="p-12 space-y-6 text-slate-800 leading-relaxed">
-            <h2 className="text-2xl font-bold text-center mb-8">합의서</h2>
-            {/* 문서 내용은 API 응답으로 채워질 예정 */}
-          </div>
+          ) : (
+            <div className="w-full max-w-2xl">
+              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+                {isGenerating ? (
+                  <>
+                    <p className="text-gray-700 text-lg mb-4">문서를 생성하고 있습니다...</p>
+                    <div className="flex justify-center gap-1 mt-4">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-700 text-lg">
+                      채팅창에 상황을 입력하시면 문서가 자동으로 생성이 됩니다!
+                    </p>
+                    <div className="flex justify-center gap-1 mt-4">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Chat Input Section */}
@@ -134,9 +221,9 @@ export function AgreeDocument() {
                 />
                 <button
                   onClick={handleSend}
-                  disabled={chatInput.trim().length < 15}
+                  disabled={chatInput.trim().length < 15 || isGenerating || isStreaming || !caseId}
                   className={`p-3 rounded-lg transition-colors ${
-                    chatInput.trim().length >= 15
+                    chatInput.trim().length >= 15 && !isGenerating && !isStreaming && caseId
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}

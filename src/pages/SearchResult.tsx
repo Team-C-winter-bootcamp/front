@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
 import { Button } from '../components/ui/Button'
@@ -70,14 +70,32 @@ export const MOCK_RESULTS: SearchResult[] = [
 
 const SearchResultsPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useUser()
   const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [caseId, setCaseId] = useState<number | null>(null)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+
+  // location state에서 caseId 가져오기
+  useEffect(() => {
+    const state = location.state as { caseId?: number } | null;
+    if (state?.caseId) {
+      setCaseId(state.caseId);
+    }
+  }, [location]);
+
+  // 판례 검색 결과 조회 (현재는 MOCK 데이터 사용, 실제 API 연동 필요 시 추가)
+  useEffect(() => {
+    // TODO: caseId를 사용하여 실제 판례 검색 API 호출
+    // 현재는 MOCK 데이터 사용
+    setSearchResults(MOCK_RESULTS.slice(0, 5));
+  }, [caseId]);
 
   // 5개만 표시
-  const displayedResults = MOCK_RESULTS.slice(0, 5)
+  const displayedResults = searchResults
 
   const handleResultClick = (id: number) => {
-    navigate(`/judgment/${id}`, { state: { from: 'search' } })
+    navigate(`/judgment/${id}`, { state: { from: 'search', caseId } })
   }
 
   const handleSelectClick = (e: React.MouseEvent, id: number) => {
@@ -200,7 +218,16 @@ const SearchResultsPage = () => {
         <div className="mt-8 flex justify-center">
           <Button
             size="lg"
-            onClick={() => navigate('/solution')}
+            onClick={() => {
+              // 선택된 첫 번째 판례의 ID를 precedentsId로 전달
+              const firstSelectedId = selectedIds.length > 0 ? selectedIds[0] : displayedResults[0]?.id;
+              navigate('/solution', { 
+                state: { 
+                  caseId, 
+                  precedentsId: firstSelectedId 
+                } 
+              });
+            }}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-indigo-200 transition active:scale-95"
           >
             내 사건 예상 결과 확인하기
