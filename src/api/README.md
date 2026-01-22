@@ -20,12 +20,7 @@ src/api/
 ### 1. 환경 변수 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 API Base URL을 설정하세요:
-
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
-
-`.env.example` 파일을 참고하여 설정할 수 있습니다.
+env확인하기
 
 ### 2. API 클라이언트 사용
 
