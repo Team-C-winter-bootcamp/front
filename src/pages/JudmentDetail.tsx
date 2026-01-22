@@ -12,8 +12,6 @@ const JudgmentDetailPage = () => {
   
   // [변경 2] Clerk useUser 훅 사용
   const { user } = useUser()
-  
-  const [searchInput, setSearchInput] = useState('')
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai')
   const [isAiExpanded, setIsAiExpanded] = useState(false)
   
@@ -163,7 +161,7 @@ const JudgmentDetailPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB]">
+    <div className="min-h-screen bg-white">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/')}
@@ -207,7 +205,7 @@ const JudgmentDetailPage = () => {
             <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
               {displayData.judgmentType || '판결'}
             </span>
-            <span className="px-2.5 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg">
+            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
               {displayData.caseType || '형사'}
             </span>
             <span className="text-sm text-slate-600 ml-1 font-light">
@@ -230,8 +228,8 @@ const JudgmentDetailPage = () => {
                 onClick={() => scrollToSection('ai')}
                 className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
                   activeTab === 'ai' 
-                    ? 'border-indigo-600 text-indigo-600 font-medium' 
-                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-light'
+                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
                 }`}
               >
                 AI 요약
@@ -240,8 +238,8 @@ const JudgmentDetailPage = () => {
                 onClick={() => scrollToSection('original')}
                 className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
                   activeTab === 'original' 
-                    ? 'border-indigo-600 text-indigo-600 font-medium' 
-                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-light'
+                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
                 }`}
               >
                 판결문 전문
@@ -342,42 +340,42 @@ const JudgmentDetailPage = () => {
             <div className="sticky top-8 space-y-4">
               
               {/* Action Buttons */}
-              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-4">
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 <div className="flex items-center gap-3 justify-between">
                   <button 
                     onClick={handleDownloadPDF} 
-                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm"
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
                     title="PDF 다운로드"
                   >
-                    <Download size={18} className="text-slate-600" />
+                    <Download size={18} className="text-slate-600 hover:text-indigo-600" />
                   </button>
                   <button 
                     onClick={handleCopyLink} 
-                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm"
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
                     title="링크 복사"
                   >
-                    <Link2 size={18} className="text-slate-600" />
+                    <Link2 size={18} className="text-slate-600 hover:text-indigo-600" />
                   </button>
                   <button
                     onClick={handleToggleBookmark}
                     className={`p-2.5 border rounded-lg transition-all duration-200 flex-1 flex justify-center shadow-sm ${
                       isBookmarked 
                         ? 'border-indigo-300 bg-indigo-50' 
-                        : 'bg-white hover:bg-slate-50 border-slate-200'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300'
                     }`}
                     title="북마크"
                   >
                     {isBookmarked ? (
                       <BookmarkCheck size={18} className="text-indigo-600 fill-current" />
                     ) : (
-                      <Bookmark size={18} className="text-slate-600" />
+                      <Bookmark size={18} className="text-slate-600 hover:text-indigo-600" />
                     )}
                   </button>
                 </div>
               </div>
 
               {/* Quick Info */}
-              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
                 <h3 className="font-light text-slate-800 mb-4">사건 정보</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
@@ -400,11 +398,11 @@ const JudgmentDetailPage = () => {
               </div>
 
               {/* Navigation */}
-              <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => navigate('/search')}
-                    className="bg-white hover:bg-slate-50 border border-slate-200 w-full font-light px-4 py-2 rounded-lg transition-all shadow-sm"
+                    className="bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 w-full font-medium px-4 py-2 rounded-lg transition-all shadow-sm text-slate-700 hover:text-indigo-600"
                   >
                     ← 뒤로가기
                   </button>
@@ -413,13 +411,13 @@ const JudgmentDetailPage = () => {
 
               {/* Related Cases */}
               {judgmentData.relatedCases.length > 0 && (
-                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-5">
-                  <h3 className="font-light text-slate-800 mb-4">관련 판례</h3>
+                <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
+                  <h3 className="font-semibold text-slate-800 mb-4">관련 판례</h3>
                   <ul className="space-y-3">
                     {judgmentData.relatedCases.map((c, idx) => (
                       <li key={idx} className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer">
-                        <div className="font-light text-sm text-slate-800 mb-1">{c.name}</div>
-                        <div className="text-xs text-slate-500 font-light">{c.desc}</div>
+                        <div className="font-medium text-sm text-slate-800 mb-1">{c.name}</div>
+                        <div className="text-xs text-slate-500 font-normal">{c.desc}</div>
                       </li>
                     ))}
                   </ul>

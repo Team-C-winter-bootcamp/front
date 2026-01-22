@@ -1,6 +1,11 @@
 
 import React, { useEffect } from 'react';
 import { FeatureSection } from '../../types/landing';
+import pick from '../../assets/pick.png';
+import checklist from '../../assets/checklist.png';
+import pan from '../../assets/pan.png';
+import solu from '../../assets/solu.png';
+
 
 const features: FeatureSection[] = [
   {
@@ -12,7 +17,7 @@ const features: FeatureSection[] = [
       '명확한 사건 분류로 빠른 시작',
       '기타 사건도 직접 설명 가능'
     ],
-    image: 'https://picsum.photos/seed/search/800/600'
+    image: pick
   },
   {
     id: 'matching',
@@ -23,7 +28,7 @@ const features: FeatureSection[] = [
       '자세한 상황 입력으로 정확도 향상',
       '모든 정보는 비공개로 안전하게 보관'
     ],
-    image: 'https://picsum.photos/seed/ai-chat/800/600',
+    image: checklist,
     reverse: true
   },
   {
@@ -35,42 +40,30 @@ const features: FeatureSection[] = [
       '유사도 표시로 신뢰도 확인',
       '판례 클릭 시 상세 정보 및 요약 제공'
     ],
-    image: 'https://picsum.photos/seed/precedent/800/600'
-  },
-  {
-    id: 'summary',
-    title: '4. 전문 용어 쉬운 설명',
-    description: '판례의 전문 용어를 일반인도 이해하기 쉬운 언어로 자동 변환합니다.',
-    details: [
-      '복잡한 법률 용어 자동 해석',
-      '판례 요약으로 핵심 파악',
-      '원문 전문도 함께 제공'
-    ],
-    image: 'https://picsum.photos/seed/summary/800/600',
-    reverse: true
+    image: pan
   },
   {
     id: 'advice',
-    title: '5. 예상 합의금 및 해결 방안',
+    title: '4. 예상 합의금 및 해결 방안',
     description: '유사 판례 데이터를 바탕으로 예상 합의금과 문제 해결 방안을 제시합니다.',
     details: [
       'AI 기반 합의금 예측',
       '상황별 맞춤 해결 방안 조언',
       '문서 선택 가이드 제공'
     ],
-    image: 'https://picsum.photos/seed/advice/800/600'
+    image: solu,
+    reverse: true
   },
   {
     id: 'draft',
-    title: '6. 법률 문서 자동 작성',
+    title: '5. 법률 문서 자동 작성',
     description: '합의서, 내용증명서, 고소장 중 선택하여 자동으로 문서를 작성하고 다운로드하세요.',
     details: [
       '표준 법률 문서 양식 제공',
       '입력 정보 자동 반영',
       'PDF 다운로드 지원'
     ],
-    image: 'https://picsum.photos/seed/editor/800/600',
-    reverse: true
+    image: 'https://picsum.photos/seed/editor/800/600'
   }
 ];
 

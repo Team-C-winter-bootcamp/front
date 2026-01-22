@@ -68,11 +68,6 @@ export const MOCK_RESULTS: SearchResult[] = [
   }
 ]
 
-const CASE_TYPES = ['민사', '형사', '행정', '가사', '특허', '선거']
-const COURT_TYPES = ['대법원', '고등/특허/고등법원', '지방법원', '행정/가정/회생/군사법원', '헌법재판소']
-const JUDGMENT_TYPES = ['전체', '판결', '결정', '명령']
-const PERIOD_TYPES = ['전체 기간', '최근 1년', '최근 3년', '최근 5년']
-
 const SearchResultsPage = () => {
   const navigate = useNavigate()
   const { user } = useUser()
@@ -95,7 +90,7 @@ const SearchResultsPage = () => {
   // [삭제] Logout 관련 핸들러 삭제
 
   return (
-    <div className="min-h-screen bg-[#F5F3EB]">
+    <div className="min-h-screen bg-white pt-20"> 
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/')}
@@ -129,23 +124,22 @@ const SearchResultsPage = () => {
         </div>
       </header>
 
-      <div className="pt-20">
       {/* Main Container */}
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
         {/* Search Results List */}
         <div className="space-y-4">
-          {displayedResults.map((result: SearchResult, index) => {
+          {displayedResults.map((result: SearchResult) => {
             const isSelected = selectedIds.includes(result.id)
             return (
               <motion.div
                 key={result.id}
                 onClick={() => handleResultClick(result.id)}
-                className={`relative bg-white rounded-lg border-2 p-6 hover:shadow-lg transition-all cursor-pointer ${
+                className={`relative rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer ${
                   isSelected 
-                    ? 'border-green-500 shadow-md' 
-                    : 'border-[#CFB982]'
+                    ? 'bg-purple-50 border-2 border-purple-300 shadow-md' 
+                    : 'bg-white border border-slate-200 shadow-sm'
                 }`}
-                animate={isSelected ? { scale: 1.02 } : { scale: 1 }}
+                animate={isSelected ? { scale: 1.01 } : { scale: 1 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex items-center gap-2 mb-2 text-sm text-slate-700">
@@ -156,10 +150,18 @@ const SearchResultsPage = () => {
                     유사도 {result.similarity || 85}%
                   </span>
                   <div className="ml-auto flex gap-2">
-                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
+                      isSelected
+                        ? 'bg-purple-100 border border-purple-300 text-purple-700'
+                        : 'bg-white border border-slate-300 text-slate-700'
+                    }`}>
                       {result.caseType}
                     </span>
-                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white border border-slate-300 text-slate-700">
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
+                      isSelected
+                        ? 'bg-purple-100 border border-purple-300 text-purple-700'
+                        : 'bg-white border border-slate-300 text-slate-700'
+                    }`}>
                       {result.judgmentType}
                     </span>
                   </div>
@@ -173,13 +175,13 @@ const SearchResultsPage = () => {
                 <div className="absolute bottom-4 right-4">
                   <button
                     onClick={(e) => handleSelectClick(e, result.id)}
-                    className={`text-xs px-3 py-1 rounded-full transition-all ${
+                    className={`text-xs px-4 py-1.5 rounded-lg transition-all font-medium ${
                       isSelected
-                        ? 'bg-green-500 text-white font-medium'
+                        ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                     }`}
                   >
-                    선택
+                    {isSelected ? '선택됨' : '선택'}
                   </button>
                 </div>
               </motion.div>
@@ -187,17 +189,23 @@ const SearchResultsPage = () => {
           })}
         </div>
 
+        {/* 선택된 판례 개수 표시 */}
+        {selectedIds.length > 0 && (
+          <div className="mt-6 text-center text-sm text-gray-600">
+            현재 {selectedIds.length}개의 유사 판례가 선택되었습니다
+          </div>
+        )}
+
         {/* 다음 단계 버튼 */}
         <div className="mt-8 flex justify-center">
           <Button
             size="lg"
             onClick={() => navigate('/solution')}
-            className="shadow-lg shadow-blue-500/20"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-indigo-200 transition active:scale-95"
           >
-            다음 단계로
+            내 사건 예상 결과 확인하기
           </Button>
         </div>
-      </div>
       </div>
     </div>
   )
