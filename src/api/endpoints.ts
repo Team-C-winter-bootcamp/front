@@ -2,38 +2,39 @@
 export const API_ENDPOINTS = {
   // 사용자/카테고리 초기화
   inits: {
-    INIT: '/init', // 카테고리 및 질문 목록 조회(GET)
+    INIT: 'init', // 카테고리 및 질문 목록 조회(GET)
   },
 
   // 사건 (Cases)
   cases: {
-    INFO: '/cases', // 사건 정보 등록(POST)
-    SUMMARY: '/cases/{case_id}/{precedents_id}', // 판결문 요약 보기(GET)
-    ANSWER: '/cases/{case_id}/{precedents_id}/answer', // 판결문 답변 보기(GET)
-    CREATEFILE: '/cases/{case_id}/documents', // 문서 생성 시작(POST)
-    MODIFYFILE: '/cases/{case_id}/documents', // 문서 수정(PATCH)
+    INFO: 'cases/', // 사건 정보 등록(POST)
+    SUMMARY: 'cases/{case_id}/{precedents_id}/', // 판결문 요약 보기(GET)
+    ANSWER: 'cases/{case_id}/{precedents_id}/answer', // 판결문 답변 보기(GET)
+    GETFILEDETAIL: 'cases/{case_id}/documents', // 판례 상세 정보 조회(GET)
+    CREATEFILE: 'cases/{case_id}/documents', // 문서 생성 시작(POST)
+    MODIFYFILE: 'cases/{case_id}/documents', // 문서 수정(PATCH)
   },
 
   // 사용자 (Users) - 기존 서비스용
   users: {
-    ME: '/users/me', // 현재 사용자 정보 조회(GET)
+    ME: 'users/me', // 현재 사용자 정보 조회(GET)
   },
 
   // 세션 (Session) - 기존 서비스용
   session: {
-    NEWCHAT: '/sessions', // 새로운 채팅방 생성(POST)
-    GETLIST: '/sessions', // 채팅방 목록 조회(GET)
-    MODIFY: '/sessions/{session_id}', // 채팅방 수정(PATCH)
-    DELETE: '/sessions/{session_id}', // 채팅방 삭제(DELETE)
-    GETMESSAGE: '/sessions/{session_id}/messages', // 특정 채팅방 메시지 조회(GET)
-    SENDMESSAGE: '/sessions/{session_id}/messages', // 채팅방 메시지 전송(POST)
-    MODIFYMESSAGE: '/messages/{message_id}', // 특정 메시지 수정(PATCH)
+    NEWCHAT: 'sessions', // 새로운 채팅방 생성(POST)
+    GETLIST: 'sessions', // 채팅방 목록 조회(GET)
+    MODIFY: 'sessions/{session_id}', // 채팅방 수정(PATCH)
+    DELETE: 'sessions/{session_id}', // 채팅방 삭제(DELETE)
+    GETMESSAGE: 'sessions/{session_id}/messages', // 특정 채팅방 메시지 조회(GET)
+    SENDMESSAGE: 'sessions/{session_id}/messages', // 채팅방 메시지 전송(POST)
+    MODIFYMESSAGE: 'messages/{message_id}', // 특정 메시지 수정(PATCH)
   },
 
   // 판례 (Precedents) - 기존 서비스용
   precedents: {
-    PREVIEW: '/precedents/preview', // 판례 검색 및 미리보기(GET)
-    TOTALDATA: '/precedents/{precedents_id}', // 판례 데이터 전문 조회(GET)
+    PREVIEW: 'precedents/preview', // 판례 검색 및 미리보기(GET)
+    TOTALDATA: 'precedents/{precedents_id}', // 판례 데이터 전문 조회(GET)
   },
 
 } as const;

@@ -41,10 +41,26 @@ export type PostCaseInfoRequest = { // 이름 변경 제안 (INFO -> CaseInfo)
   };
 };
 
+export type CaseResult = {
+  id: number;
+  case_number: string;
+  case_title: string;
+  law_category: string;
+  law_subcategory: string;
+  court: string;
+  judgment_date: string;
+  similarity_score: number;
+  preview: string;
+};
+
 export type PostCaseInfoSuccess = {
   status: 'success';
+  code: number;
+  message: string;
   data: {
     case_id: number;
+    total_count: number;
+    results: CaseResult[];
   };
 };
 
@@ -72,26 +88,17 @@ export type PostCaseInfoResponse =
 // ==========================================
 // 3. SUMMARY (판례 상세 및 AI 분석)
 // ==========================================
-export type CaseInfo = {
-  precedent_id: number;
-  index: number;
-  title: string;
+export type PrecedentDetailData = {
   case_number: string;
+  case_title: string;
+  case_name: string;
   court: string;
   judgment_date: string;
-  full_text: string;
-};
-
-export type AiAnalysis = {
-  summary_status: 'completed' | 'processing' | 'failed' | string;
-  overview: string;
-  legal_conclusion: string;
-  key_points: string[];
-};
-
-export type PrecedentDetailData = {
-  case_info: CaseInfo;
-  ai_analysis: AiAnalysis;
+  precedent_id: number;
+  issue: string;
+  holding: string;
+  content: string;
+  summary: string;
 };
 
 export type GetPrecedentDetailSuccess = {

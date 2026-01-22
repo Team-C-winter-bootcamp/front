@@ -16,7 +16,27 @@ import {
 import { API_ENDPOINTS, replaceParams } from '../endpoints';
 
 // API Base URL 설정 (환경 변수에서 가져오거나 기본값 사용)
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+/**
+ * 쿠키에서 특정 이름의 값을 가져오는 헬퍼 함수
+ */
+function getCookie(name: string): string | null {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
 
 // ==========================================
 // 서비스 함수들
@@ -68,7 +88,7 @@ export const caseService = {
    */
   getPrecedentDetail: async (
     caseId: number,
-    precedentsId: number
+    precedentsId: string
   ): Promise<GetPrecedentDetailResponse> => {
     try {
       const endpoint = replaceParams(API_ENDPOINTS.cases.SUMMARY, {
@@ -90,7 +110,7 @@ export const caseService = {
    */
   getCaseDetail: async (
     caseId: number,
-    precedentsId: number
+    precedentsId: string
   ): Promise<GetCaseDetailResponse> => {
     try {
       const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, {
@@ -172,12 +192,18 @@ export const caseService = {
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
+      // CSRF 토큰 추가
+      const csrfToken = getCookie('csrftoken');
+      if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
 
       // fetch API를 사용한 SSE 스트리밍 (PATCH 요청 지원)
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify(data),
+        credentials: 'include', // 자격 증명(쿠키 포함)을 함께 보냄
       });
 
       if (!response.ok) {
