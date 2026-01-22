@@ -16,7 +16,7 @@ import {
 import { API_ENDPOINTS, replaceParams } from '../endpoints';
 
 // API Base URL 설정 (환경 변수에서 가져오거나 기본값 사용)
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 // ==========================================
 // 서비스 함수들
