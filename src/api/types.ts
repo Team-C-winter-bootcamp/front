@@ -33,12 +33,14 @@ export type GetCategoriesResponse = GetCategoriesSuccess | GetCategoriesError;
 // ==========================================
 // 2. CASES (사건 정보 등록)
 // ==========================================
-export type PostCaseInfoRequest = { // 이름 변경 제안 (INFO -> CaseInfo)
-  category: string;
-  situation: {
-    detail: string;
-    [key: string]: string; 
-  };
+// types.ts
+export type PostCaseRequest = {
+  category: string; // 카테고리
+  who: string;      // 당사자
+  when: string;     // 시기
+  what: string;     // 사건 내용 (기존 where를 what으로 변경)
+  want: string;     // 원하는 결과
+  detail: string;   // 상세 설명
 };
 
 export type CaseResult = {
@@ -49,7 +51,7 @@ export type CaseResult = {
   law_subcategory: string;
   court: string;
   judgment_date: string;
-  similarity_score: number;
+  similarity: number;
   preview: string;
 };
 

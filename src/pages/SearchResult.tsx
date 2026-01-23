@@ -36,7 +36,7 @@ const SearchResultsPage = () => {
         date: result.judgment_date,
         caseType: result.law_category,
         judgmentType: result.law_subcategory,
-        similarity: Math.round(result.similarity_score * 100),
+        similarity: Math.round(result.similarity * 100),
       }))
       setSearchResults(mappedResults)
     }
