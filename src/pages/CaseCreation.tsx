@@ -17,51 +17,51 @@ const steps: Step[] = [
   {
     id: 1,
     label: '피해자 여부',
-    question: '옵션을 이해하는 데 도움을 드릴 수 있습니다. 먼저 이 상황에서 귀하의 역할을 알려주실 수 있나요?',
+    question: '1. 현 상황에서 귀하의 역할을 알려주실 수 있나요?',
     options: [
-      '저는 피해자/청구인입니다',
-      '저는 피의자입니다',
-      '저는 증인입니다',
+      '저는 피해자/청구인입니다.',
+      '저는 피의자입니다.',
+      '저는 증인입니다.',
       '기타'
     ]
   },
   {
     id: 2,
     label: '보험여부',
-    question: '감사합니다. 최선의 안내를 위해 다음을 알려주세요: 이 사건을 보장할 수 있는 보험 정책이 있나요?',
+    question: '2. 겪고있는 사건과 연관된 보험을 가지고 있나요?',
     options: [
-      '네, 저에게 보험이 있습니다',
-      '상대방에게 보험이 있습니다',
-      '보험이 관련되지 않았습니다',
-      '확실하지 않습니다'
+      '네, 저에게 보험이 있습니다.',
+      '상대방에게 보험이 있습니다.',
+      '나와 상대방 모두 보험이 있습니다.',
+      '잘모르겠습니다.'
     ]
   },
   {
     id: 3,
     label: '부상여부',
-    question: '알겠습니다. 사건 중에 신체적 부상을 입은 사람이 있나요?',
+    question: '3. 사건 중에 신체적 부상을 입은 사람이 있나요?',
     options: [
-      '네, 심각한 부상입니다',
-      '네, 경미한 부상입니다',
-      '부상이 없습니다',
+      '네, 심각한 부상입니다.',
+      '네, 경미한 부상입니다.',
+      '부상이 없습니다.',
       '해당 없음'
     ]
   },
   {
     id: 4,
     label: '증거여부',
-    question: '알겠습니다. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
+    question: '4. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
     options: [
-      '네, 강력한 증거가 있습니다',
-      '일부 증거가 있습니다',
-      '서면 증거가 없습니다',
-      '나중에 가져올 수 있습니다'
+      '네, 강력한 증거가 있습니다.',
+      '일부 증거가 있습니다.',
+      '서면 증거가 없습니다.',
+      '나중에 가져올 수 있습니다.'
     ]
   },
   {
     id: 5,
     label: '세부사항 작성',
-    question: '세부사항을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요?',
+    question: '5. 내용을을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요?',
     options: []
   }
 ];
@@ -142,9 +142,25 @@ export function CaseCreation() {
         }
       } catch (error: any) {
         console.error('사건 등록 오류:', error);
-        const serverError = error?.detail || (typeof error === 'object' ? JSON.stringify(error, null, 2) : String(error));
-        console.error('서버 응답 상세:', serverError);
-        alert('사건 등록 중 오류가 발생했습니다. 자세한 내용은 개발자 콘솔을 확인해주세요.');
+        
+        // 서버 응답에서 에러 메시지 추출
+        let errorMessage = '사건 등록 중 오류가 발생했습니다.';
+        
+        if (error?.response?.data) {
+          const serverData = error.response.data;
+          if (serverData.message) {
+            errorMessage = serverData.message;
+            // 데이터베이스 스키마 오류인 경우 사용자 친화적인 메시지
+            if (serverData.message.includes('user_info') || serverData.message.includes('does not exist')) {
+              errorMessage = '서버 데이터베이스 설정 오류가 발생했습니다. 관리자에게 문의해주세요.';
+            }
+          }
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        
+        console.error('서버 응답 상세:', error?.response?.data || error);
+        alert(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -158,7 +174,7 @@ export function CaseCreation() {
       <div className="min-h-screen bg-white flex flex-col">
         {/* Step Indicator */}
         <div className="bg-white border-b border-gray-200 py-8">
-          <div className="max-w-5xl mx-auto px-6">
+          <div className="max-w-4xl mx-auto  pr-6">
             <div className="flex items-center w-full">
               {steps.map((step, index) => {
                 const isCompleted = index < currentStep;
@@ -166,7 +182,7 @@ export function CaseCreation() {
 
                 return (
                   <React.Fragment key={step.id}>
-                    <div className="flex flex-col items-center flex-shrink-0" style={{ width: `${100 / steps.length}%` }}>
+                    <div className="flex flex-col items-center flex-shrink-2" style={{ width: `${100 / steps.length}%` }}>
                       <div
                         className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
                           isCompleted
@@ -192,7 +208,7 @@ export function CaseCreation() {
                     </div>
                     {index < steps.length - 1 && (
                       <div
-                        className={`h-0.5 flex-1 mx-2 transition-all ${
+                        className={`h-0.5 h-fit mx-2 transition-all ${
                           isCompleted ? 'bg-[#6D5AED]' : 'bg-gray-300'
                         }`}
                       />
@@ -205,20 +221,20 @@ export function CaseCreation() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-12">
-          <div className="bg-[#F0F4F8] rounded-lg p-10 flex-1 flex flex-col min-h-[200px]">
+        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-5">
+          <div className="bg-[#F0F4F8] rounded-lg p-10 h-fit flex flex-col min-h-[200px]">
             {/* Welcome Message - 1단계에서만 표시 */}
             {currentStep === 0 && (
               <div className="mb-8">
-                <p className="text-base text-gray-700 leading-relaxed font-normal">
-                  안녕하세요. 저는 여러분의 법률 도우미입니다. 여러분의 상황을 차분하고 명확하게 이해할 수 있도록 도와드리기 위해 여기 있습니다. 여기서 공유하는 모든 내용은 비공개입니다.
-                </p>
+                <p className="text-xl font-bold text-gray-700 leading-relaxed ">
+                현재 겪고 계신 일에 대한 전반적인 상황 파악을 위한 체크리스트 입니다.<br></br> 입력하신 정보는 철저히 비밀이 보장되니, 아래 귀하의 상황에 맞는 버튼을 선택해 주세요.
+                   </p>
               </div>
             )}
 
             {/* Question */}
             <div className="mb-6">
-              <p className="text-lg text-gray-900 font-normal mb-4">
+              <p className="text-lg text-gray-900 font-bold mb-4">
                 {steps[currentStep].question}
               </p>
             </div>
