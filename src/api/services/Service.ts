@@ -100,7 +100,10 @@ export const caseService = {
         endpoint,
         fullUrl: `${BASE_URL}${endpoint}`
       });
-      const response = await apiClient.get<GetPrecedentDetailResponse>(endpoint);
+      // 타임아웃을 60초로 증가
+      const response = await apiClient.get<GetPrecedentDetailResponse>(endpoint, {
+        timeout: 60000,
+      });
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {

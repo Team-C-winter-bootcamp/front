@@ -15,7 +15,11 @@ export function AgreeDocument() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [caseId, setCaseId] = useState<number | null>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
+  const [chatHeight, setChatHeight] = useState(300);
+  const [isResizing, setIsResizing] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // location state에서 caseId 가져오기
   useEffect(() => {
@@ -65,7 +69,11 @@ export function AgreeDocument() {
   const handleSend = async () => {
     if (chatInput.trim().length < 15 || !caseId) return;
 
+    const userMessage = chatInput.trim();
+    setChatMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
+    setChatInput('');
     setIsGenerating(true);
+
     try {
       // 문서 생성 API 호출
       const response = await caseService.generateDocument(caseId, {
@@ -78,12 +86,18 @@ export function AgreeDocument() {
         setIsGenerating(false);
         setIsStreaming(true);
 
+        // AI 응답 추가
+        setChatMessages((prev) => [...prev, { 
+          role: 'ai', 
+          content: '법률문서생성 전용 AI입니다. 합의서 문서 생성을 시작하겠습니다. 추가 정보가 필요하면 알려주세요.' 
+        }]);
+
         // 문서 수정 API 호출 (SSE 스트리밍)
         await caseService.modifyDocument(
           caseId,
           {
             document_id: response.data.document_id,
-            user_answer: chatInput.trim(),
+            user_answer: userMessage,
           },
           {
             onInfo: (event: StreamEventInfo) => {
@@ -114,22 +128,54 @@ export function AgreeDocument() {
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const newHeight = window.innerHeight - e.clientY;
+      const minHeight = 200;
+      const maxHeight = window.innerHeight - 200;
+      setChatHeight(Math.max(minHeight, Math.min(maxHeight, newHeight)));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing]);
+
   const handleReset = () => {
     setChatInput('');
     setDocumentContent('');
     setIsGenerating(false);
     setIsStreaming(false);
+    setChatMessages([]);
   };
 
   return (
     <Layout>
-      <div className="min-h-screen bg-white flex flex-col">
-        {/* Header */}
-        <header className="border-b border-gray-200 bg-white">
+      <div className="h-[calc(100vh-65px)] -mt-5 bg-white flex flex-col overflow-hidden relative z-0">
+        
+        {/* Header Section */}
+        <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">합의서</h1>
-              <div className="h-px bg-gray-200 mt-2"></div>
+              {documentContent && (
+                <p className="text-sm text-gray-600 mt-1">제목 : {documentContent.match(/제목[：:]\s*(.+)/)?.[1] || '합의서'}</p>
+              )}
             </div>
             <div className="flex gap-3">
               <Button
@@ -151,16 +197,19 @@ export function AgreeDocument() {
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-auto">
+        {/* Main Content Area (Document Preview) */}
+        {/* 수정됨: flex-1을 유지하되, 채팅창이 absolute가 되면서 이 영역은 항상 전체 높이를 차지하게 됨 */}
+        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-auto min-h-0 pb-20">
           {documentContent ? (
-            <div className="w-full max-w-4xl">
-              <div ref={documentRef} className="bg-white p-12 space-y-6 text-slate-800 leading-relaxed shadow-lg rounded-lg">
-                <h2 className="text-2xl font-bold text-center mb-8">합의서</h2>
-                <div 
-                  className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: documentContent }}
-                />
+            <div className="w-full max-w-4xl h-full flex flex-col">
+              <div className="flex-1 bg-white p-12 space-y-6 text-slate-800 leading-relaxed shadow-lg rounded-lg overflow-y-auto custom-scrollbar">
+                <div ref={documentRef}>
+                  <h2 className="text-2xl font-bold text-center mb-8">합의서</h2>
+                  <div 
+                    className="whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: documentContent }}
+                  />
+                </div>
                 {isStreaming && (
                   <div className="flex justify-center gap-1 mt-4">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -171,7 +220,7 @@ export function AgreeDocument() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-2xl -mt-16">
               <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                 {isGenerating ? (
                   <>
@@ -199,13 +248,55 @@ export function AgreeDocument() {
           )}
         </div>
 
-        {/* Chat Input Section */}
-        <div className="bg-white border-t border-gray-200">
-          <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Resizable Chat Section (Independent Overlay) */}
+        {/* 수정됨: absolute position, bottom-0, w-full 적용하여 상단 컨텐츠 위에 뜸 */}
+        <div 
+          ref={chatContainerRef}
+          className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+          style={{ height: `${chatHeight}px`, maxHeight: '60vh' }}
+        >
+          {/* Resize Handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className="h-2 bg-gray-200 hover:bg-gray-300 cursor-ns-resize flex items-center justify-center flex-shrink-0"
+          >
+            <div className="w-12 h-1 bg-gray-400 rounded"></div>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            {chatMessages.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <p className="text-sm">AI와 대화를 시작하세요</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        msg.role === 'user'
+                          ? 'bg-gray-100 text-gray-800'
+                          : 'bg-purple-100 text-gray-800'
+                      }`}
+                    >
+                      {msg.role === 'ai' && (
+                        <div className="text-xs font-semibold text-purple-700 mb-1">ChatGLD</div>
+                      )}
+                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <div className="border-t border-gray-200 p-4 flex-shrink-0">
             <div className="max-w-4xl mx-auto">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                사례를 입력해 주세요. (15자 이상)
-              </label>
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -216,7 +307,7 @@ export function AgreeDocument() {
                       handleSend();
                     }
                   }}
-                  placeholder="상황을 자세히 설명해주세요..."
+                  placeholder="답변을 입력해주세요."
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 />
                 <button
@@ -231,7 +322,7 @@ export function AgreeDocument() {
                   <ArrowUp className="w-5 h-5" />
                 </button>
               </div>
-              <p className="mt-3 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-500">
                 AI가 제공하는 답변은 제출한 정보를 기반으로 하므로, 참고용으로만 사용해 주세요.
               </p>
             </div>

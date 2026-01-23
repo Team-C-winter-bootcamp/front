@@ -5,18 +5,19 @@ import { Card } from '../components/ui/Card';
 import { FileText, Mail, AlertCircle, Check, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export function Solution() {
   const navigate = useNavigate();
   const location = useLocation();
   const [caseId, setCaseId] = useState<number | null>(null);
-  const [precedentsId, setPrecedentsId] = useState<number | null>(null);
+  const [precedentsId, setPrecedentsId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [caseDetail, setCaseDetail] = useState<any>(null);
 
   // location state에서 caseId와 precedentsId 가져오기
   useEffect(() => {
-    const state = location.state as { caseId?: number; precedentsId?: number } | null;
+    const state = location.state as { caseId?: number; precedentsId?: string } | null;
     if (state?.caseId) {
       setCaseId(state.caseId);
     }
@@ -126,29 +127,235 @@ export function Solution() {
           </Card>
         </motion.div>
 
-        {/* 예상 합의금 */}
+        {/* 예상 합의금 및 재판 예상 결과 - 2단 레이아웃 (높이 일치) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
+          
+          {/* [왼쪽] 예상 합의금 카드 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="h-full"
+          >
+            <Card className="p-6 bg-gray-50 border border-gray-200 relative h-full flex flex-col">
+              {/* 배지 */}
+              <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
+                <Check size={14} />
+                <span>Data Analyzed</span>
+              </div>
+              
+              {/* 1. 제목 영역 (높이 고정) */}
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900 text-center">예상 적정 합의금</h2>
+              </div>
+              
+              {/* 2. 메인 콘텐츠 영역 (남은 공간 모두 차지하여 중앙 정렬) */}
+              <div className="flex-1 flex flex-col justify-center items-center w-full">
+                <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
+                  {estimatedAmount}
+                </div>
+                <p className="text-sm text-gray-600 mb-6">
+                  유사 사례 평균: {averageAmount}
+                </p>
+                
+                {/* 막대 그래프 */}
+                <div className="h-40 w-full max-w-xs">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart 
+                      data={[
+                        { name: '200', value: 20 },
+                        { name: '300', value: 60 },
+                        { name: '400', value: 80 },
+                        { name: '500', value: 60 },
+                        { name: '600', value: 20 }
+                      ]}
+                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                    >
+                      <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 12 }} 
+                        axisLine={false}
+                        tickLine={false}
+                        interval={0}
+                      />
+                      <YAxis hide />
+                      <Bar 
+                        dataKey="value" 
+                        fill="#6D5AED" 
+                        radius={[4, 4, 0, 0]}
+                        barSize={32}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* 3. 하단 설명 텍스트 (맨 아래 고정) */}
+              <div className="mt-4 pt-2 text-center">
+                <p className="text-xs text-gray-500">예측 범위 (300~500)</p>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* [오른쪽] 재판 예상 결과 카드 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="h-full"
+          >
+            <Card className="p-6 bg-gray-50 border border-gray-200 relative h-full flex flex-col">
+              {/* 배지 */}
+              <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
+                <Check size={14} />
+                <span>Data Analyzed</span>
+              </div>
+              
+              {/* 1. 제목 영역 */}
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900 text-center">재판 예상 결과</h2>
+              </div>
+              
+              {/* 2. 메인 콘텐츠 영역 */}
+              <div className="flex-1 flex flex-col justify-center items-center w-full">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                  
+                  {/* 파이 차트 */}
+                  <div className="relative w-56 h-56 flex-shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: '벌금형', value: 70, color: '#6D5AED' },
+                            { name: '집행유예', value: 20, color: '#9CA3AF' },
+                            { name: '무죄', value: 5, color: '#D1D5DB' },
+                            { name: '실형', value: 5, color: '#F3F4F6' }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={95}
+                          startAngle={90}
+                          endAngle={-270}
+                          dataKey="value"
+                        >
+                          {[
+                            { name: '벌금형', value: 70, color: '#6D5AED' },
+                            { name: '집행유예', value: 20, color: '#9CA3AF' },
+                            { name: '무죄', value: 5, color: '#D1D5DB' },
+                            { name: '실형', value: 5, color: '#F3F4F6' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    {/* 가운데 텍스트 */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                      <div className="text-2xl font-bold text-purple-600">70%</div>
+                      <div className="text-sm text-gray-600 whitespace-nowrap">벌금형 예상</div>
+                    </div>
+                  </div>
+
+                  {/* 범례 (색상 코드를 차트와 정확히 일치시킴) */}
+                  <div className="flex flex-col justify-center space-y-2 text-sm text-gray-700 min-w-[100px]">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#6D5AED' }}></div>
+                      <span className="font-medium">벌금형 70%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#9CA3AF' }}></div>
+                      <span>집행유예 20%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#D1D5DB' }}></div>
+                      <span>무죄 5%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#F3F4F6' }}></div>
+                      <span>실형 5%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. 하단 설명 텍스트 */}
+              <div className="mt-4 pt-2 text-center">
+                <p className="text-xs text-gray-500">유사 사건 분석 결과</p>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* 예상 소요 기간 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-8"
         >
           <Card className="p-8 bg-gray-50 border border-gray-200 relative">
             {/* Data Analyzed 배지 */}
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium">
+            <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
               <Check size={14} />
               <span>Data Analyzed</span>
             </div>
             
-            <div className="text-center">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">예상 합의금</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">예상 소요 기간</h2>
+            <div className="text-center mb-8">
               <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
-                {estimatedAmount}
+                평균 4개월 소요
               </div>
-              <p className="text-sm text-gray-600 mt-2">
-                유사 사례 평균: {averageAmount}
-              </p>
             </div>
+
+            {/* 타임라인 시각화 */}
+            <div className="mt-12"> {/* 상단 텍스트 공간 확보를 위해 mt 늘림 */}
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-sm text-gray-500 font-medium">최단 2개월</span>
+                <span className="text-sm text-gray-500 font-medium">최장 8개월</span>
+              </div>
+              
+              <div className="relative h-16">
+                {/* 1. 전체 타임라인 바 (회색 배경) */}
+                <div className="absolute top-8 left-0 w-full h-3 bg-gray-200 rounded-full"></div>
+                
+                {/* 2. 평균 구간 (보라색, 2~4개월, 전체의 1/3) */}
+                <div className="absolute top-8 left-[33.33%] w-[33.33%] h-3 bg-purple-600 rounded-full shadow-sm"></div>
+
+                {/* 3. 상단 마커 그룹 (그래프 위쪽으로 이동됨) */}
+                
+                {/* [사건 발생] - 왼쪽 33% 지점 */}
+                <div className="absolute left-[33.33%] top-8 transform -translate-x-1/2 -translate-y-full pb-2 flex flex-col items-center group">
+                   {/* 텍스트 */}
+                   <span className="text-xs text-gray-600 mb-1 whitespace-nowrap font-medium">[사건 발생]</span>
+                   {/* 점선 (위에서 아래로) */}
+                   <div className="h-4 w-px border-l border-dashed border-gray-400 group-hover:border-purple-400 transition-colors"></div>
+                </div>
+
+                {/* (평균 4개월) - 중앙 50% 지점 */}
+                <div className="absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-full pb-0 flex flex-col items-center z-10">
+                   {/* 텍스트 (강조) */}
+                   <span className="text-xs font-bold text-purple-700 mb-1 whitespace-nowrap bg-purple-50 px-2 py-0.5 rounded border border-purple-100 shadow-sm">
+                     평균 4개월
+                   </span>
+                   {/* 실선 (중앙은 강조를 위해 실선 사용) */}
+                   <div className="h-6 w-0.5 bg-gray-800"></div>
+                </div>
+
+                {/* [예상 종결] - 오른쪽 66% 지점 */}
+                <div className="absolute left-[66.66%] top-8 transform -translate-x-1/2 -translate-y-full pb-2 flex flex-col items-center group">
+                   {/* 텍스트 */}
+                   <span className="text-xs text-gray-600 mb-1 whitespace-nowrap font-medium">[예상 종결]</span>
+                   {/* 점선 */}
+                   <div className="h-4 w-px border-l border-dashed border-gray-400 group-hover:border-purple-400 transition-colors"></div>
+                </div>
+
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              유사 사례 분석 결과 (최단 2개월 ~ 최장 8개월)
+            </p>
           </Card>
         </motion.div>
 
@@ -164,7 +371,7 @@ export function Solution() {
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                 <AlertCircle className="w-5 h-5 text-gray-600" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">① 문제 해결 방안</h2>
+              <h2 className="text-lg font-bold text-gray-900">문제 해결 방안</h2>
             </div>
             
             {/* 타임라인 */}

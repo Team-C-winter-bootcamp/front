@@ -132,6 +132,7 @@ const JudgmentDetailPage = () => {
 
     try {
       const canvas = await html2canvas(contentRef.current, {
+        // @ts-ignore
         scale: 2,
         useCORS: true,
         logging: false,
@@ -346,7 +347,7 @@ const JudgmentDetailPage = () => {
           </div>
 
           <div className="w-full lg:w-80 flex-shrink-0">
-            <div className="sticky top-8 space-y-4">
+            <div className="sticky top-24 space-y-4">
               
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 <div className="flex items-center gap-3 justify-between">
