@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
 import { Button } from '../components/ui/Button'
 import { CaseResult } from '../api/types'; // Import the new type
@@ -20,7 +19,6 @@ export interface SearchResult {
 const SearchResultsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useUser()
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [caseId, setCaseId] = useState<number | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -53,7 +51,9 @@ const SearchResultsPage = () => {
   const displayedResults = searchResults
 
   const handleResultClick = (caseNo: string) => {
-    navigate(`/judgment/${caseId}/${caseNo}`);
+    // URL 파라미터에 한글이 포함될 수 있으므로 인코딩
+    const encodedCaseNo = encodeURIComponent(caseNo);
+    navigate(`/judgment/${caseId}/${encodedCaseNo}`);
   }
 
   const handleSelectClick = (e: React.MouseEvent, id: number) => {
@@ -74,27 +74,18 @@ const SearchResultsPage = () => {
         </button> 
 
         <div className="pr-[3%] flex gap-4 items-center">
-          <SignedIn>
-            <span className="text-sm text-slate-700 font-light">
-              환영합니다 {user?.firstName || user?.username}님!
-            </span>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
-
-          <SignedOut>
-            <button
-              onClick={() => navigate('/login')}
-              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
-            >
-              로그인
-            </button>
-            <button
-              onClick={() => navigate('/signup')}
-              className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
-            >
-              회원가입
-            </button>
-          </SignedOut>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
+          >
+            로그인
+          </button>
+          <button
+            onClick={() => navigate('/signup')}
+            className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
+          >
+            회원가입
+          </button>
         </div>
       </header>
 

@@ -42,9 +42,11 @@ export const API_ENDPOINTS = {
 
 /**
  * 엔드포인트에 파라미터를 동적으로 주입하는 헬퍼 함수
+ * 경로 파라미터는 URL 인코딩을 수행합니다.
  * @example
  * replaceParams(API_ENDPOINTS.SEARCH.DETAIL, { id: '123' }) // '/precedents/123'
  * replaceParams(API_ENDPOINTS.session.MODIFY_SESSION, { session_id: '456' }) // '/sessions/456'
+ * replaceParams(API_ENDPOINTS.cases.SUMMARY, { case_id: 1, precedents_id: '2001년688' }) // '/cases/1/2001%EB%85%B4688/'
  */
 export const replaceParams = (
   endpoint: string,
@@ -52,9 +54,11 @@ export const replaceParams = (
 ): string => {
   let result = endpoint
   Object.entries(params).forEach(([key, value]) => {
+    // 경로 파라미터는 URL 인코딩 필요 (한글, 특수문자 등)
+    const encodedValue = encodeURIComponent(String(value))
     // {session_id} 형식과 :id 형식 모두 지원
-    result = result.replace(`{${key}}`, String(value))
-    result = result.replace(`:${key}`, String(value))
+    result = result.replace(`{${key}}`, encodedValue)
+    result = result.replace(`:${key}`, encodedValue)
   })
   return result
 }

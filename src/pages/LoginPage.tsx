@@ -1,15 +1,22 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SignIn } from "@clerk/clerk-react"
 import logotextb from '../assets/logotextb.png'
 
 const LoginPage = () => {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: 로그인 로직 구현
+    console.log('Login:', { email, password })
+    // 임시로 홈으로 이동
+    navigate('/home')
+  }
 
   return (
-    // 배경색 및 폰트 설정
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center py-10">
-
-      {/* 메인 로고 영역 (기존 유지) */}
       <button 
         onClick={() => navigate('/')} 
         className="mb-8 hover:opacity-80 transition-opacity"
@@ -21,34 +28,58 @@ const LoginPage = () => {
         />
       </button>
 
-      {/* Clerk 로그인 컴포넌트 */}
-      <SignIn 
-        path="/login" 
-        routing="path" 
-        signUpUrl="/signup" 
+      <div className="w-full max-w-md bg-white shadow-xl border border-slate-200 rounded-xl p-8">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">로그인</h2>
         
-        appearance={{
-          variables: {
-            colorPrimary: '#6366f1', // Indigo 악센트 색상
-            colorText: '#1e293b',    // Slate 텍스트 색상
-            borderRadius: '0.75rem',
-          },
-          elements: {
-            // 카드 배경을 깔끔한 흰색 박스로 유지
-            card: "shadow-xl border border-slate-200 rounded-xl",
-            
-            // 입력창 스타일
-            formFieldInput: "border-slate-300 focus:border-indigo-500 rounded-lg shadow-sm",
-            
-            // 로그인 버튼 스타일
-            formButtonPrimary: "bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-200",
-            
-            // 하단 링크 (회원가입 등) 색상
-            footerActionLink: "text-indigo-600 hover:text-indigo-700 font-bold",
-          }
-        }}
-      />
-      
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              이메일
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+              placeholder="이메일을 입력하세요"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              비밀번호
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+              placeholder="비밀번호를 입력하세요"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold shadow-lg shadow-indigo-200 transition"
+          >
+            로그인
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <span className="text-sm text-slate-600">계정이 없으신가요? </span>
+          <button
+            onClick={() => navigate('/signup')}
+            className="text-sm font-bold text-indigo-600 hover:text-indigo-700"
+          >
+            회원가입
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

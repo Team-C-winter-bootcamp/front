@@ -94,6 +94,12 @@ export const caseService = {
         case_id: caseId,
         precedents_id: precedentsId,
       });
+      console.log('getPrecedentDetail 호출:', {
+        caseId,
+        precedentsId,
+        endpoint,
+        fullUrl: `${BASE_URL}${endpoint}`
+      });
       const response = await apiClient.get<GetPrecedentDetailResponse>(endpoint);
       return response.data;
     } catch (error: any) {
@@ -171,19 +177,8 @@ export const caseService = {
         case_id: caseId,
       });
 
-      // 토큰 가져오기 (Clerk에서 동적으로 가져오기)
-      let token: string | null = null;
-      try {
-        if (typeof window !== 'undefined' && (window as any).__clerk) {
-          const clerk = (window as any).__clerk;
-          if (clerk.session) {
-            token = await clerk.session.getToken();
-          }
-        }
-      } catch (error) {
-        console.warn('Clerk 토큰을 가져오는데 실패했습니다:', error);
-        token = localStorage.getItem('clerk-session-token');
-      }
+      // 토큰 가져오기
+      const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         Accept: 'text/event-stream',

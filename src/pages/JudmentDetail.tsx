@@ -1,6 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react';
@@ -10,12 +9,12 @@ import { GetPrecedentDetailResponse } from '../api/types';
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
   const { caseId, precedentId: precedentIdStr } = useParams<{ caseId: string; precedentId: string }>();
-
-  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('original');
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(null);
 
+  // React Router는 URL 파라미터를 자동으로 디코딩하므로, precedentIdStr는 이미 디코딩된 상태입니다.
+  // replaceParams 함수에서 API 호출 시 다시 인코딩됩니다.
   const precedentId = precedentIdStr || '';
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -32,10 +31,17 @@ const JudgmentDetailPage = () => {
       }
 
       try {
+        console.log('API 호출 파라미터:', { caseId: Number(caseId), precedentId });
         const response = await caseService.getPrecedentDetail(Number(caseId), precedentId);
         setPrecedentDetail(response);
       } catch (error: any) {
         console.error('판례 상세 조회 오류:', error);
+        console.error('에러 상세:', {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          url: error.config?.url
+        });
       }
     };
 
@@ -195,27 +201,18 @@ const JudgmentDetailPage = () => {
         </button> 
         
         <div className="pr-[3%] flex gap-4 items-center">
-          <SignedIn>
-            <span className="text-sm text-slate-700 font-light">
-              환영합니다 {user?.firstName || user?.username}님!
-            </span>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
-          
-          <SignedOut>
-            <button
-              onClick={() => navigate('/login')}
-              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
-            >
-              로그인
-            </button>
-            <button
-              onClick={() => navigate('/signup')}
-              className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
-            >
-              회원가입
-            </button>
-          </SignedOut>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
+          >
+            로그인
+          </button>
+          <button
+            onClick={() => navigate('/signup')}
+            className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
+          >
+            회원가입
+          </button>
         </div>
       </header>
 

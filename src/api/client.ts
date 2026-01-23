@@ -18,14 +18,11 @@ const apiClient: AxiosInstance = axios.create({
 // Request 인터셉터: 요청 전에 토큰 추가 등 처리
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Clerk에서 토큰 가져오기
-    try {
-      const clerkToken = await getClerkToken();
-      if (clerkToken && config.headers) {
-        config.headers.Authorization = `Bearer ${clerkToken}`;
-      }
-    } catch (error) {
-      console.warn('토큰을 가져오는데 실패했습니다:', error);
+    // TODO: 인증 토큰 추가 로직 구현
+    // localStorage나 다른 방식으로 토큰을 관리할 수 있습니다
+    const token = localStorage.getItem('auth_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -47,27 +44,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-/**
- * Clerk 토큰을 가져오는 헬퍼 함수
- * Clerk의 getToken은 React 컴포넌트 내에서만 사용 가능하므로,
- * API 클라이언트에서는 window 객체를 통해 토큰을 가져옵니다.
- */
-async function getClerkToken(): Promise<string | null> {
-  try {
-    // Clerk의 window.__clerk 객체를 통해 토큰 가져오기
-    if (typeof window !== 'undefined' && (window as any).__clerk) {
-      const clerk = (window as any).__clerk;
-      if (clerk.session) {
-        return await clerk.session.getToken();
-      }
-    }
-    // 대체 방법: localStorage에서 토큰 가져오기 (임시)
-    return localStorage.getItem('clerk-session-token');
-  } catch (error) {
-    console.warn('Clerk 토큰을 가져오는데 실패했습니다:', error);
-    return null;
-  }
-}
 
 export default apiClient;
