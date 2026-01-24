@@ -52,6 +52,7 @@ export function HomePage() {
     }
   ];
 
+  // 애니메이션 최적화: 더 가벼운 설정 사용
   const container = {
     hidden: {
       opacity: 0
@@ -59,7 +60,8 @@ export function HomePage() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.1,
+        duration: 0.3 // duration 단축
       }
     }
   };
@@ -67,11 +69,14 @@ export function HomePage() {
   const item = {
     hidden: {
       opacity: 0,
-      y: 20
+      y: 10 // y 값 감소로 더 가벼운 애니메이션
     },
     show: {
       opacity: 1,
-      y: 0
+      y: 0,
+      transition: {
+        duration: 0.3 // duration 단축
+      }
     }
   };
 
@@ -82,14 +87,14 @@ export function HomePage() {
           <motion.div
             initial={{
               opacity: 0,
-              y: 20
+              y: 10
             }}
             animate={{
               opacity: 1,
               y: 0
             }}
             transition={{
-              duration: 0.5
+              duration: 0.3 // duration 단축으로 더 빠른 로딩
             }}
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
@@ -107,9 +112,6 @@ export function HomePage() {
             >
               AI 법률 채팅 시작하기
             </Button>
-            <p className="mt-4 text-sm text-gray-400">
-              무료로 시작 • 신용카드 불필요 • 사적이고 안전함
-            </p>
           </motion.div>
         </div>
 
