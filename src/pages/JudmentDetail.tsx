@@ -8,18 +8,17 @@ import { GetPrecedentDetailResponse } from '../api/types';
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
-  const { caseId, precedentId: precedentIdStr } = useParams<{ caseId: string; precedentId: string }>();
+  const { case_No: precedentId } = useParams<{ case_No: string }>();
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('original');
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(null);
 
-  const precedentId = precedentIdStr || '';
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
       if (!precedentId) {
-        console.warn(`상세 정보를 불러올 수 없습니다: Precedent ID(${precedentId})가 유효하지 않습니다.`);
+        console.warn(`상세 정보를 불러올 수 없습니다: Precedent ID가 유효하지 않습니다.`);
         return;
       }
       try {
@@ -30,7 +29,7 @@ const JudgmentDetailPage = () => {
       }
     };
     fetchPrecedentDetail();
-  }, [caseId, precedentId]);
+  }, [precedentId]);
 
   const [isBookmarked, setIsBookmarked] = useState(() => {
     if (!precedentId) return false;

@@ -30,18 +30,22 @@ const SearchResultsPage = () => {
 
     if (state?.results) {
       console.log('--- 백엔드 원본 데이터 ---', state.results);
-      const mappedResults: SearchResult[] = state.results.map((result) => ({
-        // 백엔드 필드명(case_No, case_name 등)이 정확한지 콘솔에서 확인하세요.
-        case_No: String(result.case_No), 
-        case_name: result.case_name,
-        title: result.case_title,
-        content: result.preview,
-        court: result.court,
-        date: result.judgment_date,
-        caseType: result.law_category,
-        judgmentType: result.law_subcategory,
-        similarity: Math.round((result.similarity || 0) * 100),
-      }))
+      const mappedResults: SearchResult[] = state.results.map((result, index) => {
+        // 백엔드에서 오는 다양한 필드명 대응 (case_No, id, case_id 등)
+        const id = result.case_No || result.id || result.case_id || `temp-id-${index}`;
+        
+        return {
+          case_No: String(id), 
+          case_name: result.case_name || result.case_number || '사건번호 정보 없음',
+          title: result.case_title || result.title || '제목 정보 없음',
+          content: result.preview || result.content || '내용 요약 정보 없음',
+          court: result.court || '법원 정보 없음',
+          date: result.judgment_date || result.date || '날짜 정보 없음',
+          caseType: result.law_category || result.case_type || '분류 없음',
+          judgmentType: result.law_subcategory || result.judgment_type || '유형 없음',
+          similarity: Math.round((result.similarity || 0) * 100),
+        };
+      })
       setSearchResults(mappedResults)
     }
 
