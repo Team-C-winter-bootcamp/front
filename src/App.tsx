@@ -44,9 +44,9 @@ export function App() {
             <Route path="/case" element={<CaseCreation />} />
             <Route path="/case/new" element={<CaseCreation />} />
             <Route path="/case/:id/caselaw" element={<CaseLaw />} />
-            <Route path="/judgment/:caseId/:precedentId" element={<JudmentDetail />} />
+            <Route path="/judgment/:case_No" element={<JudmentDetail />} />
             <Route path="/search" element={<SearchResult />} />
-            <Route path="/solution" element={<Solution />} />
+            <Route path="/answer" element={<Solution />} />
             <Route path="/document/agree" element={<AgreeDocument />} />
             <Route path="/document/goso" element={<GosoDocument />} />
             <Route path="/document/proof" element={<ProofDocument />} />

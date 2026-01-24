@@ -44,8 +44,8 @@ export type PostCaseRequest = {
 };
 
 export type CaseResult = {
-  id: number;
-  case_number: string;
+  case_No: string;
+  case_name: string;
   case_title: string;
   law_category: string;
   law_subcategory: string;
@@ -60,7 +60,6 @@ export type PostCaseInfoSuccess = {
   code: number;
   message: string;
   data: {
-    case_id: number;
     total_count: number;
     results: CaseResult[];
   };

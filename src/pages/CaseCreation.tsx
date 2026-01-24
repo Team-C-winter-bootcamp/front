@@ -5,6 +5,7 @@ import { Layout } from '../components/ui/Layout';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
+import { PostCaseInfoSuccess } from '../api/types';
 
 type Step = {
   id: number;
@@ -82,38 +83,34 @@ export function CaseCreation() {
   };
 
   const handleNext = async () => {
-    // 마지막 단계에서 15자 이상 작성했을 때만 API 호출
     if (currentStep === steps.length - 1 && detailText.trim().length >= 15) {
       setIsLoading(true);
       try {
-        /**
-         * [데이터 매핑 로직]
-         * 껍데기(situation) 없이 백엔드 필드에 직접 매핑합니다.
-         */
         const requestData = {
           category: category,
-          who: selectedOptions[0] || '미지정', // 1번 질문: 역할
-          when: '사건 발생일 및 상세 내용 참조', // UI에 시기 질문이 없으므로 고정 문구
-          what: `${selectedOptions[1]} / ${selectedOptions[2]}`, // 2, 3번 질문: 보험 및 부상 여부 조합
-          want: '유사 판례 검색 및 법률 조언 요청', // 검색 목적 고정
-          detail: `[증거 상황: ${selectedOptions[3]}]\n\n${detailText.trim()}` // 4번 질문 + 사용자의 상세 서술
+          who: selectedOptions[0] || '미지정',
+          when: '사건 발생일 및 상세 내용 참조',
+          what: `${selectedOptions[1]} / ${selectedOptions[2]}`,
+          want: '유사 판례 검색 및 법률 조언 요청',
+          detail: `[증거 상황: ${selectedOptions[3]}]\n\n${detailText.trim()}`
         };
 
-        // API 호출 (백엔드 Serializer가 바로 읽을 수 있는 평탄한 구조)
-        const response = await caseService.createCase(requestData);
+        // API 호출 및 타입 캐스팅
+        const response = await caseService.createCase(requestData) as PostCaseInfoSuccess;
 
-        if (response.status === 'success' && response.data.results) {
-          const caseId = response.data.case_id || 1;
+        // response.status가 'success'이고 내부에 data 객체가 있는지 확인
+        if (response.status === 'success' && response.data) {
+          // types.ts 구조에 따라 response.data 내부에서 추출
+          const actualData = response.data;
 
           navigate('/search', { 
             state: { 
-              results: response.data.results, 
-              totalCount: response.data.total_count,
-              caseId: caseId,
+              results: actualData.results, 
+              totalCount: actualData.total_count,
             } 
           });
         } else {
-          alert('사건 등록에 실패했습니다. 다시 시도해주세요.');
+          alert('사건 등록에 실패했습니다. 데이터를 확인해주세요.');
         }
       } catch (error: any) {
         console.error('사건 등록 오류:', error);
@@ -210,20 +207,17 @@ export function CaseCreation() {
                 {detailText.length > 0 && detailText.length < 15 && (
                   <p className="text-sm text-red-500 font-medium">최소 15자 이상 작성해주세요. (현재 {detailText.length}자)</p>
                 )}
-                  {/* 예시 글 */}
-               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                 <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
+                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
                   <div className="text-sm text-gray-600 leading-relaxed font-normal whitespace-pre-line">
                     {`2024년 1월 15일 오후 2시경, 강남역 사거리 인근에서 신호 대기를 위해 정차하고 있었습니다. 정차 후 약 10초 뒤, 후방에서 오던 승용차가 제 차의 범퍼를 강하게 들이받았습니다.
-                  가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.
-                  현장 사진과 블랙박스 영상은 모두 확보해 두었으며, 상대방의 과실 100%라고 생각되지만 상대방이 말을 바꾸고 있어 법적 대응을 준비하려 합니다.`}
+가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.`}
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Navigation */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
             <span className="text-lg text-[#6D5AED] font-semibold">Step {currentStep + 1} / {steps.length}</span>
             <div className="flex gap-4">
