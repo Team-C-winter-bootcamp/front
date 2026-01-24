@@ -26,7 +26,7 @@ const UseCases = () => {
               key={idx} 
               className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:border-indigo-500 transition-colors"
             >
-              <h4 className="font-bold text-indigo-400 mb-4 text-lg">{useCase.category}</h4>
+              <h3 className="font-bold text-indigo-400 mb-4 text-lg">{useCase.category}</h3>
               <ul className="space-y-3">
                 {useCase.items.map((item, iIdx) => (
                   <li key={iIdx} className="text-slate-300 text-sm flex items-start gap-2">

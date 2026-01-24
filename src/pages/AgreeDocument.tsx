@@ -303,6 +303,7 @@ export default function AgreeDocument() {
                 <button
                   onClick={handleSend}
                   disabled={chatInput.trim().length < 15 || isGenerating || isStreaming || !caseId}
+                  aria-label="메시지 전송"
                   className={`p-3 rounded-lg transition-colors ${
                     chatInput.trim().length >= 15 && !isGenerating && !isStreaming && caseId
                       ? 'bg-blue-600 text-white hover:bg-blue-700'

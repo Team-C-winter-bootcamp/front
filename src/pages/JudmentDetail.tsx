@@ -18,13 +18,13 @@ const JudgmentDetailPage = () => {
   // 2. API 호출 로직 (경로 오류 수정 반영)
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
-      if (!case_No) {
-        console.error('❌ 사건 식별자가 URL 파라미터에 없습니다.');
+      const numericCaseId = Number(caseId);
+      if (!caseId || isNaN(numericCaseId) || !precedentId) {
+        console.warn(`상세 정보를 불러올 수 없습니다: Case ID(${caseId}) 또는 Precedent ID(${precedentId})가 유효하지 않습니다.`);
         return;
       }
       try {
-        // 백엔드 명세 api/cases/<str:precedents_id>/ 호출
-        const response = await caseService.getPrecedentDetail(case_No);
+        const response = await caseService.getPrecedentDetail(numericCaseId, precedentId);
         setPrecedentDetail(response);
       } catch (error: any) {
         console.error('🔥 판례 상세 조회 오류:', error);
@@ -87,24 +87,13 @@ const JudgmentDetailPage = () => {
     };
   }, [precedentDetail]);
 
-  // 북마크 토글
-  const handleToggleBookmark = () => {
-    if (!case_No) return;
-    const raw = localStorage.getItem('bookmarked_judgments');
-    let list: string[] = [];
-    try { list = raw ? JSON.parse(raw) : []; } catch { list = []; }
-    const next = list.includes(case_No) ? list.filter(v => v !== case_No) : [...list, case_No];
-    localStorage.setItem('bookmarked_judgments', JSON.stringify(next));
-    setIsBookmarked(!isBookmarked);
-  };
-
-  // 링크 복사
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      alert('링크가 복사되었습니다.');
-    } catch { alert('링크 복사에 실패했습니다.'); }
-  };
+  const scrollToSection = (sectionId: 'ai' | 'original') => {
+    setActiveTab(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerOffset = 180;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
   // 섹션 스크롤 이동
   const scrollToSection = (id: string) => {
@@ -128,34 +117,60 @@ const JudgmentDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* 상단 고정 헤더 */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <button onClick={() => navigate('/')} className="text-2xl font-black text-indigo-600">LAWDING</button>
+    <main className="min-h-screen bg-white">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
+        <button
+          onClick={() => navigate('/')}
+          className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
+        >
+          LAWDING
+        </button> 
+        
+        <div className="pr-[3%] flex gap-4 items-center">
+          <button
+            onClick={() => navigate('/login')}
+            className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
+          >
+            로그인
+          </button>
+          <button
+            onClick={() => navigate('/signup')}
+            className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
+          >
+            회원가입
+          </button>
+        </div>
       </header>
 
-      <div className="pt-24 max-w-6xl mx-auto px-6 py-8">
-        {/* 헤더 섹션: 사건번호 및 제목 */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="px-3 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full">
-              {judgmentData.judgment.caseNo || '사건번호 확인 중'}
+      <div className="pt-24 max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
+        <article className="mb-8">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
+              {judgmentData.judgmentType || '판결'}
+            </span>
+            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
+              {judgmentData.caseType || '형사'}
+            </span>
+            <span className="text-sm text-slate-600 ml-1 font-light">
+              {judgmentData.summary}
             </span>
             <span className="text-sm text-slate-500 font-light">{judgmentData.summary}</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 leading-tight break-keep">
             {judgmentData.title}
           </h1>
-        </div>
+        </article>
 
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* 메인 콘텐츠 영역 */}
-          <div className="flex-1" ref={contentRef}>
-            {/* 탭 네비게이션 */}
-            <div className="flex border-b border-slate-200 mb-8">
-              <button 
-                onClick={() => scrollToSection('ai')} 
-                className={`px-6 py-3 font-medium transition-all ${activeTab === 'ai' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-indigo-400'}`}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex-1 min-w-0" ref={contentRef}>
+            <nav className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl" aria-label="판례 정보 탭">
+              <button
+                onClick={() => scrollToSection('ai')}
+                className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
+                  activeTab === 'ai' 
+                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
+                }`}
               >
                 AI 분석 요약
               </button>
@@ -165,56 +180,124 @@ const JudgmentDetailPage = () => {
               >
                 판결문 전문
               </button>
-            </div>
+            </nav>
 
-            {/* AI 요약 섹션 */}
-            <div id="ai" className="scroll-mt-32 mb-12">
-              <div className="bg-slate-50 rounded-2xl p-8 border border-slate-200 shadow-sm">
-                <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-indigo-600 rounded-full"></span> AI 판결 분석
-                </h2>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-indigo-600 mb-2 uppercase tracking-wider">요약 결과</h3>
-                    {judgmentData.aiSummary.resultSummary.map((s, i) => <p key={i} className="text-slate-700 leading-relaxed text-lg font-light">{s}</p>)}
+            <div className="space-y-8">
+              <section id="ai" className="scroll-mt-32">
+                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
+                  <div className="flex items-center gap-3 mb-5 border-b border-slate-200 pb-4">
+                    <h2 className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0 py-1">
+                      AI 요약 
+                    </h2>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-indigo-600 mb-2 uppercase tracking-wider">사실관계 및 쟁점</h3>
-                    {judgmentData.aiSummary.facts.map((f, i) => <p key={i} className="text-slate-700 leading-relaxed text-lg font-light">{f}</p>)}
+
+                  <div className={`relative transition-all duration-500 ease-in-out ${!isAiExpanded ? 'max-h-[300px] overflow-hidden' : ''}`}>
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-slate-800 font-light mb-3">결과 요약</h3>
+                        <ul className="space-y-3">
+                          {judgmentData.aiSummary.resultSummary.map((item, idx) => (
+                            <li key={`summary-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-slate-800 font-light mb-3">사실관계</h3>
+                        <ul className="space-y-3">
+                          {judgmentData.aiSummary.facts.map((item, idx) => (
+                            <li key={`fact-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {!isAiExpanded && (
+                      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 flex justify-center">
+                    <button 
+                      onClick={() => setIsAiExpanded(!isAiExpanded)}
+                      className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 flex items-center gap-1 px-6 py-2 rounded-full font-light shadow-md transition-all"
+                    >
+                      {isAiExpanded ? '접기' : '더 보기'}
+                      <span className={`transform transition-transform ${isAiExpanded ? 'rotate-180' : ''}`} aria-hidden="true">
+                        ∨
+                      </span>
+                    </button>
                   </div>
                 </div>
-              </div>
-            </div>
+              </section>
 
-            {/* 판결문 전문 섹션 */}
-            <div id="original" className="scroll-mt-32">
-              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-                <h2 className="text-xl font-bold mb-6 pb-4 border-b">판결문 전문</h2>
-                <section className="mb-10">
-                  <h3 className="text-lg font-bold mb-4 text-slate-900">[주 문]</h3>
-                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 italic">
-                    {judgmentData.judgment.order.map((o, i) => <p key={i} className="mb-2 text-slate-800 font-medium">{o}</p>)}
+              <section id="original" className="scroll-mt-32">
+                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8">
+                  <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4 tracking-tight">판결문 전문</h2>
+                  
+                  <div className="space-y-8 text-slate-700 leading-8 text-justify font-light">
+                    <section>
+                      <h3 className="text-lg font-light text-slate-800 mb-4">주문</h3>
+                      <ol className="list-decimal pl-6 space-y-2 mb-6">
+                        {judgmentData.judgment.order.map((line, idx) => (
+                          <li key={`order-${idx}`} className="text-slate-700 font-light">{line}</li>
+                        ))}
+                      </ol>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-light text-slate-800 mb-4">이유</h3>
+                      <div className="whitespace-pre-wrap text-slate-700 font-light">
+                        {judgmentData.judgment.reasons}
+                      </div>
+                    </section>
                   </div>
-                </section>
-                <section>
-                  <h3 className="text-lg font-bold mb-4 text-slate-900">[이 유]</h3>
-                  <p className="whitespace-pre-wrap text-slate-700 leading-9 text-justify font-serif text-lg">
-                    {judgmentData.judgment.reasons}
-                  </p>
-                </section>
-              </div>
+                </div>
+              </section>
             </div>
           </div>
 
-          {/* 우측 사이드바 (사건 요약 정보) */}
-          <div className="w-full lg:w-80 space-y-6">
+          <aside className="w-full lg:w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-4">
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <div className="flex gap-2 mb-6">
-                  <button onClick={handleDownloadPDF} className="flex-1 flex justify-center p-3 border rounded-xl hover:bg-slate-50 transition" title="PDF 저장"><Download size={20} className="text-slate-600"/></button>
-                  <button onClick={handleCopyLink} className="flex-1 flex justify-center p-3 border rounded-xl hover:bg-slate-50 transition" title="링크복사"><Link2 size={20} className="text-slate-600"/></button>
-                  <button onClick={handleToggleBookmark} className={`flex-1 flex justify-center p-3 border rounded-xl transition ${isBookmarked ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-slate-50'}`}>
-                    {isBookmarked ? <BookmarkCheck size={20} className="text-indigo-600 fill-current"/> : <Bookmark size={20} className="text-slate-600"/>}
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
+                <div className="flex items-center gap-3 justify-between">
+                  <button 
+                    onClick={handleDownloadPDF} 
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
+                    title="PDF 다운로드"
+                    aria-label="PDF 다운로드"
+                  >
+                    <Download size={18} className="text-slate-600 hover:text-indigo-600" />
+                  </button>
+                  <button 
+                    onClick={handleCopyLink} 
+                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
+                    title="링크 복사"
+                    aria-label="링크 복사"
+                  >
+                    <Link2 size={18} className="text-slate-600 hover:text-indigo-600" />
+                  </button>
+                  <button
+                    onClick={handleToggleBookmark}
+                    className={`p-2.5 border rounded-lg transition-all duration-200 flex-1 flex justify-center shadow-sm ${
+                      isBookmarked 
+                        ? 'border-indigo-300 bg-indigo-50' 
+                        : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300'
+                    }`}
+                    title="북마크"
+                    aria-label={isBookmarked ? "북마크 해제" : "북마크 추가"}
+                  >
+                    {isBookmarked ? (
+                      <BookmarkCheck size={18} className="text-indigo-600 fill-current" />
+                    ) : (
+                      <Bookmark size={18} className="text-slate-600 hover:text-indigo-600" />
+                    )}
                   </button>
                 </div>
 
@@ -245,10 +328,10 @@ const JudgmentDetailPage = () => {
                 ← 리스트로 돌아가기
               </button>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
