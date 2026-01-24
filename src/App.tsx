@@ -41,7 +41,7 @@ export function App() {
             
             {/* Case 관련 페이지 */}
             <Route path="/home" element={<HomePage />} />
-            <Route path="/chat" element={<CaseCreation />} />
+            <Route path="/case" element={<CaseCreation />} />
             <Route path="/case/new" element={<CaseCreation />} />
             <Route path="/case/:id/caselaw" element={<CaseLaw />} />
             <Route path="/judgment/:caseId/:precedentId" element={<JudmentDetail />} />
