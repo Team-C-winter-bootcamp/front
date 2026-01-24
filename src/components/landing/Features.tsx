@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { FeatureSection } from '../../types/landing';
-import pick from '../../assets/pick.png';
-import checklist from '../../assets/checklist.png';
-import pan from '../../assets/pan.png';
+import pick from '../../assets/pick.webp';
+import checklist from '../../assets/checklist.webp';
+import pan from '../../assets/pan.webp';
 import solu from '../../assets/solu.png';
 
 
@@ -121,6 +121,8 @@ const Features = () => {
                 <img 
                   src={feature.image} 
                   alt={feature.title} 
+                  width={800}
+                  height={600}
                   className="relative rounded-[2rem] shadow-xl border border-white z-10 w-full object-cover"
                 />
               </div>

@@ -39,6 +39,8 @@ const Hero = () => {
           <img 
             src= {solu}
             alt="Dashboard Preview" 
+            width={800}
+            height={600}
             className="rounded-3xl shadow-2xl border border-slate-100 mx-auto transform -rotate-1 hover:rotate-0 transition-transform duration-700"
           />
         </div>
