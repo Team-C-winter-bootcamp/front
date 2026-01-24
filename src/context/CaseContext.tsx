@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext, ReactNode } from 'react';
+import { useState, createContext, useContext, ReactNode } from 'react';
 
 export type CaseType = 'loan' | 'lease' | 'damages' | 'other' | null;
 
