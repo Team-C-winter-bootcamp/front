@@ -18,12 +18,13 @@ const JudgmentDetailPage = () => {
 
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
-      if (!caseId || caseId === 'null' || !precedentId) {
-        console.error(`API 호출 실패: Case ID 또는 Precedent ID가 유효하지 않습니다. (caseId: ${caseId}, precedentId: ${precedentId})`);
+      const numericCaseId = Number(caseId);
+      if (!caseId || isNaN(numericCaseId) || !precedentId) {
+        console.warn(`상세 정보를 불러올 수 없습니다: Case ID(${caseId}) 또는 Precedent ID(${precedentId})가 유효하지 않습니다.`);
         return;
       }
       try {
-        const response = await caseService.getPrecedentDetail(Number(caseId), precedentId);
+        const response = await caseService.getPrecedentDetail(numericCaseId, precedentId);
         setPrecedentDetail(response);
       } catch (error: any) {
         console.error('판례 상세 조회 오류:', error);
@@ -102,7 +103,7 @@ const JudgmentDetailPage = () => {
     if (element) {
       const headerOffset = 180;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
       window.scrollTo({
         top: offsetPosition,
@@ -176,7 +177,7 @@ const JudgmentDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/')}
@@ -202,7 +203,7 @@ const JudgmentDetailPage = () => {
       </header>
 
       <div className="pt-24 max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
-        <div className="mb-8">
+        <article className="mb-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
               {judgmentData.judgmentType || '판결'}
@@ -217,11 +218,11 @@ const JudgmentDetailPage = () => {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-800 leading-tight break-keep tracking-tight">
             {judgmentData.title}
           </h1>
-        </div>
+        </article>
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="flex-1 min-w-0" ref={contentRef}>
-            <div className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl">
+            <nav className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl" aria-label="판례 정보 탭">
               <button
                 onClick={() => scrollToSection('ai')}
                 className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
@@ -242,15 +243,15 @@ const JudgmentDetailPage = () => {
               >
                 판결문 전문
               </button>
-            </div>
+            </nav>
 
             <div className="space-y-8">
-              <div id="ai" className="scroll-mt-32">
+              <section id="ai" className="scroll-mt-32">
                 <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
                   <div className="flex items-center gap-3 mb-5 border-b border-slate-200 pb-4">
-                    <div className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0">
+                    <h2 className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0 py-1">
                       AI 요약 
-                    </div>
+                    </h2>
                   </div>
 
                   <div className={`relative transition-all duration-500 ease-in-out ${!isAiExpanded ? 'max-h-[300px] overflow-hidden' : ''}`}>
@@ -259,7 +260,7 @@ const JudgmentDetailPage = () => {
                         <h3 className="text-slate-800 font-light mb-3">결과 요약</h3>
                         <ul className="space-y-3">
                           {judgmentData.aiSummary.resultSummary.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                            <li key={`summary-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
                               <span className="text-slate-400 mt-1.5 text-xs">●</span>
                               <span>{item}</span>
                             </li>
@@ -271,7 +272,7 @@ const JudgmentDetailPage = () => {
                         <h3 className="text-slate-800 font-light mb-3">사실관계</h3>
                         <ul className="space-y-3">
                           {judgmentData.aiSummary.facts.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
+                            <li key={`fact-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
                               <span className="text-slate-400 mt-1.5 text-xs">●</span>
                               <span>{item}</span>
                             </li>
@@ -291,15 +292,15 @@ const JudgmentDetailPage = () => {
                       className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 flex items-center gap-1 px-6 py-2 rounded-full font-light shadow-md transition-all"
                     >
                       {isAiExpanded ? '접기' : '더 보기'}
-                      <span className={`transform transition-transform ${isAiExpanded ? 'rotate-180' : ''}`}>
+                      <span className={`transform transition-transform ${isAiExpanded ? 'rotate-180' : ''}`} aria-hidden="true">
                         ∨
                       </span>
                     </button>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div id="original" className="scroll-mt-32">
+              <section id="original" className="scroll-mt-32">
                 <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8">
                   <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4 tracking-tight">판결문 전문</h2>
                   
@@ -308,7 +309,7 @@ const JudgmentDetailPage = () => {
                       <h3 className="text-lg font-light text-slate-800 mb-4">주문</h3>
                       <ol className="list-decimal pl-6 space-y-2 mb-6">
                         {judgmentData.judgment.order.map((line, idx) => (
-                          <li key={idx} className="text-slate-700 font-light">{line}</li>
+                          <li key={`order-${idx}`} className="text-slate-700 font-light">{line}</li>
                         ))}
                       </ol>
                     </section>
@@ -321,11 +322,11 @@ const JudgmentDetailPage = () => {
                     </section>
                   </div>
                 </div>
-              </div>
+              </section>
             </div>
           </div>
 
-          <div className="w-full lg:w-80 flex-shrink-0">
+          <aside className="w-full lg:w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-4">
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 <div className="flex items-center gap-3 justify-between">
@@ -333,6 +334,7 @@ const JudgmentDetailPage = () => {
                     onClick={handleDownloadPDF} 
                     className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
                     title="PDF 다운로드"
+                    aria-label="PDF 다운로드"
                   >
                     <Download size={18} className="text-slate-600 hover:text-indigo-600" />
                   </button>
@@ -340,6 +342,7 @@ const JudgmentDetailPage = () => {
                     onClick={handleCopyLink} 
                     className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
                     title="링크 복사"
+                    aria-label="링크 복사"
                   >
                     <Link2 size={18} className="text-slate-600 hover:text-indigo-600" />
                   </button>
@@ -351,6 +354,7 @@ const JudgmentDetailPage = () => {
                         : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300'
                     }`}
                     title="북마크"
+                    aria-label={isBookmarked ? "북마크 해제" : "북마크 추가"}
                   >
                     {isBookmarked ? (
                       <BookmarkCheck size={18} className="text-indigo-600 fill-current" />
@@ -394,10 +398,10 @@ const JudgmentDetailPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

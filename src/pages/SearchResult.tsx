@@ -61,7 +61,8 @@ const SearchResultsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <main className="min-h-screen bg-white pt-20">
+      <h1 className="sr-only">판례 검색 결과</h1>
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button
           onClick={() => navigate('/')}
@@ -87,6 +88,7 @@ const SearchResultsPage = () => {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+        <h2 className="text-xl font-bold text-slate-900 mb-6">유사 판례 검색 결과</h2>
         <div className="space-y-4">
           {displayedResults.map((result: SearchResult) => {
             const isSelected = selectedIds.includes(result.id)
@@ -186,7 +188,7 @@ const SearchResultsPage = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 

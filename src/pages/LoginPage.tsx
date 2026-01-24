@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import logotextb from '../assets/logotextb.png'
+import logotextb from '../assets/logotextb.webp'
 
 const LoginPage = () => {
   const navigate = useNavigate()
