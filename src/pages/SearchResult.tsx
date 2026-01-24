@@ -46,7 +46,7 @@ const SearchResultsPage = () => {
     }
   }, [location.state])
 
-  const displayedResults = searchResults
+  const displayedResults = searchResults.slice(0, 5);
 
   const handleResultClick = (caseNo: string) => {
     const encodedCaseNo = encodeURIComponent(caseNo)
@@ -86,9 +86,7 @@ const SearchResultsPage = () => {
         </div>
       </header>
 
-      {/* Main Container */}
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
-        {/* Search Results List */}
         <div className="space-y-4">
           {displayedResults.map((result: SearchResult) => {
             const isSelected = selectedIds.includes(result.id)
@@ -104,7 +102,6 @@ const SearchResultsPage = () => {
                 animate={isSelected ? { scale: 1.01 } : { scale: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* 상단 메타 정보 */}
                 <div className="flex items-center gap-2 mb-3 text-sm text-slate-700 flex-wrap">
                   <span className="font-medium shrink-0">{result.court}</span>
                   <span className="text-slate-300">|</span>
@@ -112,8 +109,6 @@ const SearchResultsPage = () => {
                   <span className="text-green-600 font-semibold ml-2 shrink-0">
                     유사도 {result.similarity || 85}%
                   </span>
-                  
-                  {/* 태그 영역 (우측 정렬 유지하되 공간 부족시 줄바꿈) */}
                   <div className="ml-auto flex gap-2 shrink-0">
                     <span
                       className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap ${
@@ -141,7 +136,6 @@ const SearchResultsPage = () => {
                   {result.title}
                 </h3>
 
-                {/* 본문 내용: 3줄까지 허용, 인라인 스타일 제거하여 잘림 방지 */}
                 <p className="text-sm text-slate-600 leading-relaxed mb-7 line-clamp-2 break-all">
                   {result.content}
                 </p>
@@ -164,14 +158,12 @@ const SearchResultsPage = () => {
           })}
         </div>
 
-        {/* 선택된 판례 개수 표시 */}
         {selectedIds.length > 0 && (
           <div className="mt-6 text-center text-sm text-gray-600">
             현재 {selectedIds.length}개의 유사 판례가 선택되었습니다
           </div>
         )}
 
-        {/* 다음 단계 버튼 */}
         <div className="mt-8 flex justify-center">
           <Button
             size="lg"

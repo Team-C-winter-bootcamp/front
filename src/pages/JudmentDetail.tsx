@@ -13,38 +13,22 @@ const JudgmentDetailPage = () => {
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(null);
 
-  // React Router는 URL 파라미터를 자동으로 디코딩하므로, precedentIdStr는 이미 디코딩된 상태입니다.
-  // replaceParams 함수에서 API 호출 시 다시 인코딩됩니다.
   const precedentId = precedentIdStr || '';
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
-      // CaseCreation 페이지에서 caseId를 정상적으로 받아오지 못하면, URL에 'null'이 포함될 수 있습니다.
-      // 이는 caseService.createCase API가 응답에 case_id를 포함하지 않을 경우 발생합니다.
       if (!caseId || caseId === 'null' || !precedentId) {
-        console.error(
-          `API 호출 실패: Case ID 또는 Precedent ID가 유효하지 않습니다. (caseId: ${caseId}, precedentId: ${precedentId})
-          - 백엔드의 사건 생성(POST /cases/) API가 응답 데이터에 'case_id'를 포함하는지 확인해주세요.`
-        );
+        console.error(`API 호출 실패: Case ID 또는 Precedent ID가 유효하지 않습니다. (caseId: ${caseId}, precedentId: ${precedentId})`);
         return;
       }
-
       try {
-        console.log('API 호출 파라미터:', { caseId: Number(caseId), precedentId });
         const response = await caseService.getPrecedentDetail(Number(caseId), precedentId);
         setPrecedentDetail(response);
       } catch (error: any) {
         console.error('판례 상세 조회 오류:', error);
-        console.error('에러 상세:', {
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
-          url: error.config?.url
-        });
       }
     };
-
     fetchPrecedentDetail();
   }, [caseId, precedentId]);
 
@@ -107,7 +91,7 @@ const JudgmentDetailPage = () => {
         order: [detail.holding || '주문 정보가 없습니다.'],
         reasons: detail.content || '판결 이유 정보가 없습니다.',
       },
-      caseType: '형사', // API 응답에 없으므로 임시 하드코딩
+      caseType: '형사',
       judgmentType: '판결',
     };
   }, [precedentDetail, precedentId]);
@@ -218,7 +202,6 @@ const JudgmentDetailPage = () => {
       </header>
 
       <div className="pt-24 max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
-        
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
@@ -237,9 +220,7 @@ const JudgmentDetailPage = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
           <div className="flex-1 min-w-0" ref={contentRef}>
-            
             <div className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl">
               <button
                 onClick={() => scrollToSection('ai')}
@@ -264,10 +245,8 @@ const JudgmentDetailPage = () => {
             </div>
 
             <div className="space-y-8">
-              
               <div id="ai" className="scroll-mt-32">
                 <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
-                  
                   <div className="flex items-center gap-3 mb-5 border-b border-slate-200 pb-4">
                     <div className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0">
                       AI 요약 
@@ -348,7 +327,6 @@ const JudgmentDetailPage = () => {
 
           <div className="w-full lg:w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-4">
-              
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
                 <div className="flex items-center gap-3 justify-between">
                   <button 

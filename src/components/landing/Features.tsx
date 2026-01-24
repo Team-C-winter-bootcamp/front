@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { FeatureSection } from '../../types/landing';
 import pick from '../../assets/pick.png';
 import checklist from '../../assets/checklist.png';
@@ -67,7 +66,7 @@ const features: FeatureSection[] = [
   }
 ];
 
-const Features: React.FC = () => {
+const Features = () => {
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1

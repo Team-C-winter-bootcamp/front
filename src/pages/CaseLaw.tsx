@@ -3,7 +3,7 @@ import { Button } from '../components/ui/Button';
 import { CaseLawCard } from '../components/case/CaseLawCard';
 import { ArrowLeft, Scale } from 'lucide-react';
 
-export function CaseLaw() {
+export default function CaseLaw() {
   const navigate = useNavigate();
   const { id: caseId } = useParams<{ id: string }>();
 

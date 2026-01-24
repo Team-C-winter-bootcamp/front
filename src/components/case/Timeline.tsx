@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle, Circle, Clock } from 'lucide-react';
 
 interface TimelineStep {
@@ -15,7 +14,6 @@ interface TimelineProps {
 export function Timeline({ steps }: TimelineProps) {
   return (
     <div className="w-full">
-      {/* Desktop Horizontal Timeline */}
       <div className="hidden md:flex items-center justify-between w-full relative">
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-200 -z-10" />
 
@@ -49,8 +47,6 @@ export function Timeline({ steps }: TimelineProps) {
           </div>
         ))}
       </div>
-
-      {/* Mobile Vertical Timeline */}
       <div className="md:hidden flex flex-col space-y-6 relative">
         <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 -z-10" />
 

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-export function Solution() {
+export default function Solution() {
   const navigate = useNavigate();
   const location = useLocation();
   const [caseId, setCaseId] = useState<number | null>(null);
@@ -15,7 +15,6 @@ export function Solution() {
   const [isLoading, setIsLoading] = useState(true);
   const [caseDetail, setCaseDetail] = useState<any>(null);
 
-  // location state에서 caseId와 precedentsId 가져오기
   useEffect(() => {
     const state = location.state as { caseId?: number; precedentsId?: string } | null;
     if (state?.caseId) {
@@ -47,11 +46,8 @@ export function Solution() {
     fetchCaseDetail();
   }, [caseId, precedentsId]);
 
-  // 예상 합의금 (API 응답에서 가져오거나 기본값)
   const estimatedAmount = caseDetail?.outcome_prediction?.estimated_compensation || '300만원 ~ 500만원';
   const averageAmount = '420만원';
-
-  // 타임라인 단계 (API 응답에서 가져오거나 기본값)
   const timelineSteps = caseDetail?.action_roadmap?.map((step: { step?: number; title?: string; description?: string; action?: string }, index: number) => ({
     id: step.step || index + 1,
     label: step.title || `단계 ${index + 1}`,
@@ -127,10 +123,7 @@ export function Solution() {
           </Card>
         </motion.div>
 
-        {/* 예상 합의금 및 재판 예상 결과 - 2단 레이아웃 (높이 일치) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
-          
-          {/* [왼쪽] 예상 합의금 카드 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -157,8 +150,6 @@ export function Solution() {
                 <p className="text-sm text-gray-600 mb-6">
                   유사 사례 평균: {averageAmount}
                 </p>
-                
-                {/* 막대 그래프 */}
                 <div className="h-40 w-full max-w-xs">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart 
@@ -197,7 +188,6 @@ export function Solution() {
             </Card>
           </motion.div>
 
-          {/* [오른쪽] 재판 예상 결과 카드 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -210,17 +200,11 @@ export function Solution() {
                 <Check size={14} />
                 <span>Data Analyzed</span>
               </div>
-              
-              {/* 1. 제목 영역 */}
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 text-center">재판 예상 결과</h2>
               </div>
-              
-              {/* 2. 메인 콘텐츠 영역 */}
               <div className="flex-1 flex flex-col justify-center items-center w-full">
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                  
-                  {/* 파이 차트 */}
                   <div className="relative w-56 h-56 flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -256,8 +240,6 @@ export function Solution() {
                       <div className="text-sm text-gray-600 whitespace-nowrap">벌금형 예상</div>
                     </div>
                   </div>
-
-                  {/* 범례 (색상 코드를 차트와 정확히 일치시킴) */}
                   <div className="flex flex-col justify-center space-y-2 text-sm text-gray-700 min-w-[100px]">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#6D5AED' }}></div>
@@ -287,7 +269,6 @@ export function Solution() {
           </motion.div>
         </div>
 
-        {/* 예상 소요 기간 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -300,16 +281,11 @@ export function Solution() {
               <Check size={14} />
               <span>Data Analyzed</span>
             </div>
-            
             <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">예상 소요 기간</h2>
             <div className="text-center mb-8">
-              <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
-                평균 4개월 소요
-              </div>
+              <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">평균 4개월 소요</div>
             </div>
-
-            {/* 타임라인 시각화 */}
-            <div className="mt-12"> {/* 상단 텍스트 공간 확보를 위해 mt 늘림 */}
+            <div className="mt-12">
               <div className="flex items-center justify-between mb-2 px-1">
                 <span className="text-sm text-gray-500 font-medium">최단 2개월</span>
                 <span className="text-sm text-gray-500 font-medium">최장 8개월</span>
@@ -359,7 +335,6 @@ export function Solution() {
           </Card>
         </motion.div>
 
-        {/* 문제 해결 방안 - 타임라인 UI */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -440,7 +415,6 @@ export function Solution() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* 합의서 */}
               <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
                   <FileText className="w-6 h-6 text-gray-700" />
@@ -473,8 +447,6 @@ export function Solution() {
                   작성 시작하기
                 </button>
               </div>
-
-              {/* 고소장 */}
               <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
                   <AlertCircle className="w-6 h-6 text-gray-700" />
@@ -494,7 +466,6 @@ export function Solution() {
           </Card>
         </motion.div>
 
-        {/* 면책 조항 */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

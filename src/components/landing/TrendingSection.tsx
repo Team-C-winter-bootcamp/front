@@ -1,16 +1,16 @@
 
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
 const data = [
-  { name: '교통사고', value: 920, color: '#2563eb' },       // Blue 600
-  { name: '전세 보증금 분쟁', value: 850, color: '#3b82f6' }, // Blue 500
-  { name: '이혼/상속', value: 760, color: '#60a5fa' },       // Blue 400
-  { name: '사기/보이스피싱', value: 600, color: '#93c5fd' },  // Blue 300
-  { name: '명예훼손', value: 530, color: '#bfdbfe' },        // Blue 200
-  { name: '층간소음', value: 500, color: '#dbeafe' },        // Blue 100
+  { name: '교통사고', value: 920, color: '#2563eb' },
+  { name: '전세 보증금 분쟁', value: 850, color: '#3b82f6' },
+  { name: '이혼/상속', value: 760, color: '#60a5fa' },
+  { name: '사기/보이스피싱', value: 600, color: '#93c5fd' },
+  { name: '명예훼손', value: 530, color: '#bfdbfe' },
+  { name: '층간소음', value: 500, color: '#dbeafe' },
 ];
 
-const TrendingSection: React.FC = () => {
+const TrendingSection = () => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
