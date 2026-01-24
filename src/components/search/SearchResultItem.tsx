@@ -2,13 +2,13 @@ import { SearchResult } from '../../pages/SearchResult';
 
 interface SearchResultItemProps {
   result: SearchResult;
-  onClick: (id: number) => void;
+  onClick: (case_No: string) => void;
 }
 
 export function SearchResultItem({ result, onClick }: SearchResultItemProps) {
   return (
     <div
-      onClick={() => onClick(result.id)}
+      onClick={() => onClick(result.case_No)}
       className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-indigo-300 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">

@@ -8,84 +8,93 @@ import { GetPrecedentDetailResponse } from '../api/types';
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
-  // 1. URL 파라미터에서 case_No(사건 식별자)를 가져옵니다.
-  const { case_No } = useParams<{ case_No: string }>();
-  
+  const { caseId, precedentId: precedentIdStr } = useParams<{ caseId: string; precedentId: string }>();
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('original');
+  const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(null);
+
+  const precedentId = precedentIdStr || '';
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // 2. API 호출 로직 (경로 오류 수정 반영)
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
-      const numericCaseId = Number(caseId);
-      if (!caseId || isNaN(numericCaseId) || !precedentId) {
-        console.warn(`상세 정보를 불러올 수 없습니다: Case ID(${caseId}) 또는 Precedent ID(${precedentId})가 유효하지 않습니다.`);
+      if (!precedentId) {
+        console.warn(`상세 정보를 불러올 수 없습니다: Precedent ID(${precedentId})가 유효하지 않습니다.`);
         return;
       }
       try {
-        const response = await caseService.getPrecedentDetail(numericCaseId, precedentId);
+        const response = await caseService.getPrecedentDetail(precedentId);
         setPrecedentDetail(response);
       } catch (error: any) {
-        console.error('🔥 판례 상세 조회 오류:', error);
+        console.error('판례 상세 조회 오류:', error);
       }
     };
     fetchPrecedentDetail();
-  }, [case_No]);
+  }, [caseId, precedentId]);
 
-  // 북마크 상태 관리 (case_No 기준)
   const [isBookmarked, setIsBookmarked] = useState(() => {
-    if (!case_No) return false;
+    if (!precedentId) return false;
     const raw = localStorage.getItem('bookmarked_judgments');
     if (!raw) return false;
     try {
       const list = JSON.parse(raw);
-      return Array.isArray(list) ? list.includes(case_No) : false;
-    } catch { return false; }
+      return Array.isArray(list) ? list.includes(precedentId) : false;
+    } catch {
+      return false;
+    }
   });
 
-  // 3. 데이터 가공 로직 (types.ts의 PrecedentDetailData 필드 매핑)
   const judgmentData = useMemo(() => {
     const detail = precedentDetail?.status === 'success' ? precedentDetail.data : null;
 
     if (!detail) {
       return {
+        id: precedentId,
         title: '데이터를 불러오는 중...',
         summary: '',
         aiSummary: {
-          resultSummary: ['내용을 불러오는 중...'],
-          facts: ['내용을 불러오는 중...'],
+          title: 'AI 판결 요약',
+          resultSummary: ['AI 요약 정보가 없습니다.'],
+          facts: ['사실관계 정보가 없습니다.'],
         },
         judgment: {
           court: '',
           caseNo: '',
           caseName: '',
+          plaintiff: '검사',
+          defendant: '피고인',
           judgmentDate: '',
           order: ['주문 정보를 불러오는 중...'],
           reasons: '내용을 불러오는 중...',
         },
+        caseType: '',
+        judgmentType: '판결',
       };
     }
 
     return {
+      id: detail.precedent_id,
       title: detail.case_title,
       summary: `${detail.court} ${detail.judgment_date} 선고`,
       aiSummary: {
-        // summary 필드 -> 결과 요약 / issue 필드 -> 사실관계
-        resultSummary: [detail.summary || 'AI 분석 요약 정보가 없습니다.'],
-        facts: [detail.issue || '주요 사실관계 정보가 없습니다.'],
+        title: 'AI 판결 요약',
+        resultSummary: [detail.summary || '결과 요약 정보가 없습니다.'],
+        facts: [detail.issue || '사실관계 정보가 없습니다.'],
       },
       judgment: {
         court: detail.court,
-        caseNo: detail.case_number, 
-        caseName: detail.case_name,   
+        caseNo: detail.case_number,
+        caseName: detail.case_name,
+        plaintiff: '검사',
+        defendant: '피고인',
         judgmentDate: detail.judgment_date,
-        // holding 필드 -> 주문 / content 필드 -> 판결 이유(전문)
         order: [detail.holding || '주문 정보가 없습니다.'],
-        reasons: detail.content || '전체 판결문 정보가 없습니다.',
+        reasons: detail.content || '판결 이유 정보가 없습니다.',
       },
+      caseType: '형사',
+      judgmentType: '판결',
     };
-  }, [precedentDetail]);
+  }, [precedentDetail, precedentId]);
 
   const scrollToSection = (sectionId: 'ai' | 'original') => {
     setActiveTab(sectionId);
@@ -95,25 +104,75 @@ const JudgmentDetailPage = () => {
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-  // 섹션 스크롤 이동
-  const scrollToSection = (id: string) => {
-    setActiveTab(id as 'ai' | 'original');
-    const element = document.getElementById(id);
-    if (element) {
-      window.scrollTo({ top: element.offsetTop - 100, behavior: 'smooth' });
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
     }
   };
 
-  // PDF 저장
   const handleDownloadPDF = async () => {
     if (!contentRef.current) return;
+
     try {
-      const canvas = await html2canvas(contentRef.current, { scale: 2 });
+      const canvas = await html2canvas(contentRef.current, {
+        // @ts-ignore
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
       pdf.save(`${judgmentData.title}.pdf`);
-    } catch (e) { alert('PDF 생성 중 오류가 발생했습니다.'); }
+    } catch (error) {
+      console.error('PDF 생성 실패:', error);
+      alert('PDF 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      window.alert('링크가 복사되었습니다.');
+    } catch {
+      window.prompt('Ctrl+C를 눌러 복사하세요.', window.location.href);
+    }
+  };
+
+  const handleToggleBookmark = () => {
+    if (!precedentId) return;
+    const raw = localStorage.getItem('bookmarked_judgments');
+    let list: string[] = [];
+    try {
+      const parsed = raw ? JSON.parse(raw) : [];
+      list = Array.isArray(parsed) ? parsed.filter((v) => typeof v === 'string') : [];
+    } catch {
+      list = [];
+    }
+
+    const next = list.includes(precedentId)
+      ? list.filter((v) => v !== precedentId)
+      : [...list, precedentId];
+    localStorage.setItem('bookmarked_judgments', JSON.stringify(next));
+    setIsBookmarked(!isBookmarked);
   };
 
   return (
@@ -154,9 +213,8 @@ const JudgmentDetailPage = () => {
             <span className="text-sm text-slate-600 ml-1 font-light">
               {judgmentData.summary}
             </span>
-            <span className="text-sm text-slate-500 font-light">{judgmentData.summary}</span>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 leading-tight break-keep">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-800 leading-tight break-keep tracking-tight">
             {judgmentData.title}
           </h1>
         </article>
@@ -172,11 +230,15 @@ const JudgmentDetailPage = () => {
                     : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
                 }`}
               >
-                AI 분석 요약
+                AI 요약
               </button>
-              <button 
-                onClick={() => scrollToSection('original')} 
-                className={`px-6 py-3 font-medium transition-all ${activeTab === 'original' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-indigo-400'}`}
+              <button
+                onClick={() => scrollToSection('original')}
+                className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
+                  activeTab === 'original' 
+                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
+                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
+                }`}
               >
                 판결문 전문
               </button>
@@ -300,33 +362,40 @@ const JudgmentDetailPage = () => {
                     )}
                   </button>
                 </div>
+              </div>
 
-                <h3 className="font-bold text-slate-900 mb-4">사건 상세</h3>
-                <dl className="space-y-4 text-sm">
-                  <div className="flex justify-between border-b border-slate-50 pb-2">
-                    <dt className="text-slate-500 font-light">관할 법원</dt>
-                    <dd className="font-medium text-slate-900">{judgmentData.judgment.court || '-'}</dd>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-50 pb-2">
-                    <dt className="text-slate-500 font-light">사건 번호</dt>
-                    <dd className="font-medium text-slate-900">{judgmentData.judgment.caseNo || '-'}</dd>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-50 pb-2">
-                    <dt className="text-slate-500 font-light">선고 일자</dt>
-                    <dd className="font-medium text-slate-900">{judgmentData.judgment.judgmentDate || '-'}</dd>
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
+                <h3 className="font-light text-slate-800 mb-4">사건 정보</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-light">법원</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.court}</span>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-slate-500 font-light">사건명</dt>
-                    <dd className="font-medium text-slate-900 text-right break-keep">{judgmentData.judgment.caseName || '-'}</dd>
+                    <span className="text-slate-500 font-light">사건번호</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.caseNo}</span>
                   </div>
-                </dl>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-light">사건명</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.caseName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-light">선고일</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.judgmentDate}</span>
+                  </div>
+                </div>
               </div>
-              <button 
-                onClick={() => navigate(-1)} 
-                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
-              >
-                ← 리스트로 돌아가기
-              </button>
+
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 w-full font-medium px-4 py-2 rounded-lg transition-all shadow-sm text-slate-700 hover:text-indigo-600"
+                  >
+                    ← 뒤로가기
+                  </button>
+                </div>
+              </div>
             </div>
           </aside>
         </div>
