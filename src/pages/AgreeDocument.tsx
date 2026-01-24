@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 import { caseService } from '../api';
 import type { StreamEventInfo, StreamEventChunk, StreamEventComplete } from '../api/types';
 
-export function AgreeDocument() {
+export default function AgreeDocument() {
   const location = useLocation();
   const [chatInput, setChatInput] = useState('');
   const [documentContent, setDocumentContent] = useState('');
@@ -21,7 +21,6 @@ export function AgreeDocument() {
   const documentRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // location state에서 caseId 가져오기
   useEffect(() => {
     const state = location.state as { caseId?: number } | null;
     if (state?.caseId) {
@@ -85,8 +84,6 @@ export function AgreeDocument() {
         setDocumentContent(response.data.content);
         setIsGenerating(false);
         setIsStreaming(true);
-
-        // AI 응답 추가
         setChatMessages((prev) => [...prev, { 
           role: 'ai', 
           content: '법률문서생성 전용 AI입니다. 합의서 문서 생성을 시작하겠습니다. 추가 정보가 필요하면 알려주세요.' 
@@ -167,8 +164,6 @@ export function AgreeDocument() {
   return (
     <Layout>
       <div className="h-[calc(100vh-65px)] -mt-5 bg-white flex flex-col overflow-hidden relative z-0">
-        
-        {/* Header Section */}
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
@@ -248,14 +243,11 @@ export function AgreeDocument() {
           )}
         </div>
 
-        {/* Resizable Chat Section (Independent Overlay) */}
-        {/* 수정됨: absolute position, bottom-0, w-full 적용하여 상단 컨텐츠 위에 뜸 */}
         <div 
           ref={chatContainerRef}
           className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
           style={{ height: `${chatHeight}px`, maxHeight: '60vh' }}
         >
-          {/* Resize Handle */}
           <div
             onMouseDown={handleMouseDown}
             className="h-2 bg-gray-200 hover:bg-gray-300 cursor-ns-resize flex items-center justify-center flex-shrink-0"
@@ -293,8 +285,6 @@ export function AgreeDocument() {
               </div>
             )}
           </div>
-
-          {/* Chat Input */}
           <div className="border-t border-gray-200 p-4 flex-shrink-0">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center gap-3">

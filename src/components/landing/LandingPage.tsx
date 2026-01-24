@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Hero from './Hero';
@@ -7,7 +7,7 @@ import Features from './Features';
 import UseCases from './UseCases';
 import Footer from './Footer';
 
-const LandingPage: React.FC = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -45,8 +45,6 @@ const LandingPage: React.FC = () => {
         <Features />
         
         <UseCases />
-        
-        {/* Final CTA Section */}
         <section className="py-32 bg-indigo-600 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">

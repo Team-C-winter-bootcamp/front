@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { UseCase } from '../../types/landing';
 
 const useCases: UseCase[] = [
@@ -13,7 +11,7 @@ const useCases: UseCase[] = [
   { category: '문서 파일', items: ['사실 관계 정리', '증거 사진 분석', '문서 스캐닝'] },
 ];
 
-const UseCases: React.FC = () => {
+const UseCases = () => {
   return (
     <section className="py-24 bg-slate-900 text-white">
       <div className="max-w-7xl mx-auto px-6">

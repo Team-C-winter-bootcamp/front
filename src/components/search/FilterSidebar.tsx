@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface FilterSidebarProps {
   selectedCaseTypes: string[];
   selectedCourts: string[];

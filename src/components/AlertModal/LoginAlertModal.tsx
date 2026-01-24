@@ -1,11 +1,11 @@
 interface LoginAlertModalProps {
-  isOpen: boolean;        // 창이 열렸는지 여부
-  onClose: () => void;    // 취소 눌렀을 때 (닫기)
-  onConfirm: () => void;  // 확인 눌렀을 때 (로그인 페이지로 이동)
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
 }
 
 const LoginAlertModal = ({ isOpen, onConfirm }: LoginAlertModalProps) => {
-  if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
+  if (!isOpen) return null;
 
   return ( 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-minimal-charcoal bg-opacity-30 backdrop-blur-sm font-serif">

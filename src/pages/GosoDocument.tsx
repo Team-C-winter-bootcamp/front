@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 import { caseService } from '../api';
 import type { StreamEventInfo, StreamEventChunk, StreamEventComplete } from '../api/types';
 
-export function GosoDocument() {
+export default function GosoDocument() {
   const location = useLocation();
   const [chatInput, setChatInput] = useState('');
   const [documentContent, setDocumentContent] = useState('');
@@ -83,8 +83,6 @@ export function GosoDocument() {
         setDocumentContent(response.data.content);
         setIsGenerating(false);
         setIsStreaming(true);
-
-        // AI 응답 추가
         setChatMessages((prev) => [...prev, { 
           role: 'ai', 
           content: '법률문서생성 전용 AI입니다. 고소장 문서 생성을 시작하겠습니다. 추가 정보가 필요하면 알려주세요.' 
@@ -194,8 +192,6 @@ export function GosoDocument() {
           </div>
         </header>
 
-        {/* Main Content Area */}
-        {/* 수정됨: 채팅창이 overlay 되므로 pb-20을 추가하여 하단 스크롤 공간 확보 */}
         <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-auto min-h-0 pb-20">
           {documentContent ? (
             <div className="w-full max-w-4xl h-full flex flex-col">
@@ -290,8 +286,6 @@ export function GosoDocument() {
               </div>
             )}
           </div>
-
-          {/* Chat Input */}
           <div className="border-t border-gray-200 p-4 flex-shrink-0">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center gap-3">
