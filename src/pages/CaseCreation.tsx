@@ -4,6 +4,7 @@ import { Layout } from '../components/ui/Layout';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
+import { PostCaseInfoSuccess } from '../api/types';
 
 type Step = {
   id: number;
@@ -82,26 +83,30 @@ export default function CaseCreation() {
       setIsLoading(true);
       try {
         const requestData = {
-          category,
+          category: category,
           who: selectedOptions[0] || '미지정',
           when: '사건 발생일 및 상세 내용 참조',
-          what: `${selectedOptions[1] || ''} / ${selectedOptions[2] || ''}`,
+          what: `${selectedOptions[1]} / ${selectedOptions[2]}`,
           want: '유사 판례 검색 및 법률 조언 요청',
-          detail: `[증거 상황: ${selectedOptions[3] || '미지정'}]\n\n${detailText.trim()}`
+          detail: `[증거 상황: ${selectedOptions[3]}]\n\n${detailText.trim()}`
         };
-        const response = await caseService.createCase(requestData);
 
-        if (response.status === 'success' && 'data' in response && response.data.results) {
-          navigate('/search', {
-            state: {
-              results: response.data.results,
-              totalCount: response.data.total_count,
-              caseId: response.data.case_id || 1,
-            }
+        // API 호출 및 타입 캐스팅
+        const response = await caseService.createCase(requestData) as PostCaseInfoSuccess;
+
+        // response.status가 'success'이고 내부에 data 객체가 있는지 확인
+        if (response.status === 'success' && response.data) {
+          // types.ts 구조에 따라 response.data 내부에서 추출
+          const actualData = response.data;
+
+          navigate('/search', { 
+            state: { 
+              results: actualData.results, 
+              totalCount: actualData.total_count,
+            } 
           });
         } else {
-          const errorMessage = 'message' in response ? response.message : '사건 등록에 실패했습니다. 다시 시도해주세요.';
-          alert(errorMessage);
+          alert('사건 등록에 실패했습니다. 데이터를 확인해주세요.');
         }
       } catch (error: any) {
         console.error('사건 등록 오류:', error);
