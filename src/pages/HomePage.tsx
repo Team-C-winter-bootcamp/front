@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function HomePage() {
+export default function HomePage() {
   const navigate = useNavigate();
   const categories = [
     {
@@ -52,32 +52,13 @@ export function HomePage() {
     }
   ];
 
-  // 애니메이션 최적화: 더 가벼운 설정 사용
   const container = {
-    hidden: {
-      opacity: 0
-    },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        duration: 0.3 // duration 단축
-      }
-    }
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1, duration: 0.3 } }
   };
-
   const item = {
-    hidden: {
-      opacity: 0,
-      y: 10 // y 값 감소로 더 가벼운 애니메이션
-    },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3 // duration 단축
-      }
-    }
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
 
   return (
@@ -132,7 +113,6 @@ export function HomePage() {
             </motion.div>
           ))}
 
-          {/* "Other" Card */}
           <motion.div variants={item}>
             <CategoryCard
               title="기타"

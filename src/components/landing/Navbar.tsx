@@ -1,7 +1,6 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const navigate = useNavigate();
 
   return (

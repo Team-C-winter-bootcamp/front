@@ -1,11 +1,11 @@
 interface LogoutAlertModalProps {
-  isOpen: boolean;        // 창이 열렸는지 여부
-  onClose: () => void;    // 취소 눌렀을 때 (닫기)
-  onConfirm: () => void;  // 확인 눌렀을 때 (로그아웃 실행)
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
 }
 
 const LogoutAlertModal = ({ isOpen, onClose, onConfirm }: LogoutAlertModalProps) => {
-  if (!isOpen) return null; // 닫혀있으면 아무것도 안 그림
+  if (!isOpen) return null;
 
   return (
     <div  

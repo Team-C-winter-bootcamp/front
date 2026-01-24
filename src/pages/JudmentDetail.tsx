@@ -22,7 +22,6 @@ const JudgmentDetailPage = () => {
         console.error('❌ 사건 식별자가 URL 파라미터에 없습니다.');
         return;
       }
-
       try {
         // 백엔드 명세 api/cases/<str:precedents_id>/ 호출
         const response = await caseService.getPrecedentDetail(case_No);
@@ -31,7 +30,6 @@ const JudgmentDetailPage = () => {
         console.error('🔥 판례 상세 조회 오류:', error);
       }
     };
-
     fetchPrecedentDetail();
   }, [case_No]);
 

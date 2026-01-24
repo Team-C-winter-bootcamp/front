@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import React from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Check } from 'lucide-react';
@@ -47,7 +46,7 @@ const steps: Step[] = [
   }
 ];
 
-export function CaseCreation() {
+export default function CaseCreation() {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
@@ -64,11 +63,8 @@ export function CaseCreation() {
 
   const handleOptionClick = (option: string) => {
     setSelectedOptions((prev) => [...prev, option]);
-    
     if (currentStep < steps.length - 1) {
-      setTimeout(() => {
-        setCurrentStep((prev) => prev + 1);
-      }, 300);
+      setTimeout(() => setCurrentStep((prev) => prev + 1), 300);
     }
   };
 
@@ -115,7 +111,9 @@ export function CaseCreation() {
       } catch (error: any) {
         console.error('사건 등록 오류:', error);
         let errorMessage = '사건 등록 중 오류가 발생했습니다.';
-        if (error?.response?.data?.message) {
+        if (error?.message) {
+          errorMessage = error.message;
+        } else if (error?.response?.data?.message) {
           errorMessage = error.response.data.message;
         }
         alert(errorMessage);
@@ -130,7 +128,6 @@ export function CaseCreation() {
   return (
     <Layout>
       <div className="min-h-screen bg-white flex flex-col">
-        {/* Step Indicator */}
         <div className="bg-white border-b border-gray-200 py-8">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center w-full">
@@ -139,7 +136,7 @@ export function CaseCreation() {
                 const isActive = index === currentStep;
 
                 return (
-                  <React.Fragment key={step.id}>
+                  <Fragment key={step.id}>
                     <div className="flex flex-col items-center flex-1">
                       <div
                         className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
@@ -159,14 +156,12 @@ export function CaseCreation() {
                     {index < steps.length - 1 && (
                       <div className={`flex-1 h-0.5 mx-2 ${isCompleted ? 'bg-[#6D5AED]' : 'bg-gray-300'}`} />
                     )}
-                  </React.Fragment>
+                  </Fragment>
                 );
               })}
             </div>
           </div>
         </div>
-
-        {/* Main Content */}
         <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-10">
           <div className="bg-[#F0F4F8] rounded-2xl p-10 flex flex-col min-h-[400px] shadow-sm">
             {currentStep === 0 && (
@@ -207,11 +202,12 @@ export function CaseCreation() {
                 {detailText.length > 0 && detailText.length < 15 && (
                   <p className="text-sm text-red-500 font-medium">최소 15자 이상 작성해주세요. (현재 {detailText.length}자)</p>
                 )}
-                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
+               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                 <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
                   <div className="text-sm text-gray-600 leading-relaxed font-normal whitespace-pre-line">
                     {`2024년 1월 15일 오후 2시경, 강남역 사거리 인근에서 신호 대기를 위해 정차하고 있었습니다. 정차 후 약 10초 뒤, 후방에서 오던 승용차가 제 차의 범퍼를 강하게 들이받았습니다.
-가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.`}
+가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.
+현장 사진과 블랙박스 영상은 모두 확보해 두었으며, 상대방의 과실 100%라고 생각되지만 상대방이 말을 바꾸고 있어 법적 대응을 준비하려 합니다.`}
                   </div>
                 </div>
               </div>
