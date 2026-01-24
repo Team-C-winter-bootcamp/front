@@ -49,10 +49,26 @@ export const caseService = {
       throw error.response?.data || error;
     }
   },
-  getPrecedentDetail: async (caseId: number, precedentsId: string): Promise<GetPrecedentDetailResponse> => {
+
+  /**
+   * 판례 상세 및 AI 분석 조회 (GET)
+   */
+  getPrecedentDetail: async (
+    precedentsId: string
+  ): Promise<GetPrecedentDetailResponse> => {
     try {
-      const endpoint = replaceParams(API_ENDPOINTS.cases.SUMMARY, { case_id: caseId, precedents_id: precedentsId });
-      const response = await apiClient.get<GetPrecedentDetailResponse>(endpoint, { timeout: 60000 });
+      const endpoint = replaceParams(API_ENDPOINTS.cases.SUMMARY, {
+        precedents_id: precedentsId,
+      });
+      console.log('getPrecedentDetail 호출:', {
+        precedentsId,
+        endpoint,
+        fullUrl: `${BASE_URL}${endpoint}`
+      });
+      // 타임아웃을 60초로 증가
+      const response = await apiClient.get<GetPrecedentDetailResponse>(endpoint, {
+        timeout: 60000,
+      });
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;

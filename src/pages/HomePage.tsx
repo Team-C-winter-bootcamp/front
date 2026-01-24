@@ -88,7 +88,7 @@ export default function HomePage() {
 </p>
             <Button
               size="lg"
-              onClick={() => navigate('/chat')}
+              onClick={() => navigate('/case')}
               className="shadow-lg shadow-blue-500/20"
             >
               AI 법률 채팅 시작하기
@@ -108,7 +108,7 @@ export default function HomePage() {
                 title={cat.title}
                 description={cat.description}
                 icon={cat.icon}
-                onClick={() => navigate('/chat', { state: { category: cat.title } })}
+                onClick={() => navigate('/case', { state: { category: cat.title } })}
               />
             </motion.div>
           ))}
@@ -118,7 +118,7 @@ export default function HomePage() {
               title="기타"
               description="사건이 어디에 해당하는지 확실하지 않나요? 직접 상황을 설명해 주세요."
               icon={<Sparkles size={24} />}
-              onClick={() => navigate('/chat', { state: { category: '기타' } })}
+              onClick={() => navigate('case', { state: { category: '기타' } })}
             />
           </motion.div>
         </motion.div>
