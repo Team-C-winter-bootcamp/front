@@ -53,16 +53,15 @@ const JudgmentDetailPage = () => {
         summary: '',
         aiSummary: {
           title: 'AI 판결 요약',
-          resultSummary: ['AI 요약 정보가 없습니다.'],
-          facts: ['사실관계 정보가 없습니다.'],
+          resultSummary: ['AI 요약 정보를 불러오는중...'],
         },
         judgment: {
           court: '',
-          caseNo: '',
-          caseName: '',
+          case_no: '',
+          case_name: '',
           plaintiff: '검사',
           defendant: '피고인',
-          judgmentDate: '',
+          judgment_date: '',
           order: ['주문 정보를 불러오는 중...'],
           reasons: '내용을 불러오는 중...',
         },
@@ -78,17 +77,15 @@ const JudgmentDetailPage = () => {
       aiSummary: {
         title: 'AI 판결 요약',
         resultSummary: [detail.summary || '결과 요약 정보가 없습니다.'],
-        facts: [detail.issue || '사실관계 정보가 없습니다.'],
       },
       judgment: {
         court: detail.court,
-        caseNo: detail.case_number,
-        caseName: detail.case_name,
+        case_no: detail.case_no,
+        case_name: detail.case_name,
         plaintiff: '검사',
         defendant: '피고인',
-        judgmentDate: detail.judgment_date,
-        order: [detail.holding || '주문 정보가 없습니다.'],
-        reasons: detail.content || '판결 이유 정보가 없습니다.',
+        judgment_date: detail.judgment_date,
+        reasons: detail.content || '판결 정보가 없습니다.',
       },
       caseType: '형사',
       judgmentType: '판결',
@@ -255,28 +252,19 @@ const JudgmentDetailPage = () => {
                   <div className={`relative transition-all duration-500 ease-in-out ${!isAiExpanded ? 'max-h-[300px] overflow-hidden' : ''}`}>
                     <div className="space-y-8">
                       <div>
-                        <h3 className="text-slate-800 font-light mb-3">결과 요약</h3>
-                        <ul className="space-y-3">
-                          {judgmentData.aiSummary.resultSummary.map((item, idx) => (
-                            <li key={`summary-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
-                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                        <h3 className="text-slate-800 font-semibold mb-4 text-lg">판례 분석</h3>
+                          <ul className="space-y-4">
+                            {judgmentData.aiSummary.resultSummary.map((item, idx) => (
+                              <li key={`summary-${idx}`} className="flex items-start gap-3 text-slate-700 text-base font-light">
+                                {/* 기존의 커다란 ● 대신 세련된 파란색 작은 점 적용 */}
+                                  <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                                {/* whitespace-pre-wrap을 유지하여 들여쓰기를 살리되, 불필요한 줄바꿈 방지 */}
+                            <span className="whitespace-pre-wrap leading-snug">{item}</span>
+                          </li>
+                                ))}
+                              </ul>
+                            </div>
 
-                      <div>
-                        <h3 className="text-slate-800 font-light mb-3">사실관계</h3>
-                        <ul className="space-y-3">
-                          {judgmentData.aiSummary.facts.map((item, idx) => (
-                            <li key={`fact-${idx}`} className="flex items-start gap-2 text-slate-700 leading-relaxed text-base font-light">
-                              <span className="text-slate-400 mt-1.5 text-xs">●</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
                     </div>
 
                     {!isAiExpanded && (
@@ -303,17 +291,8 @@ const JudgmentDetailPage = () => {
                   <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4 tracking-tight">판결문 전문</h2>
                   
                   <div className="space-y-8 text-slate-700 leading-8 text-justify font-light">
-                    <section>
-                      <h3 className="text-lg font-light text-slate-800 mb-4">주문</h3>
-                      <ol className="list-decimal pl-6 space-y-2 mb-6">
-                        {judgmentData.judgment.order.map((line, idx) => (
-                          <li key={`order-${idx}`} className="text-slate-700 font-light">{line}</li>
-                        ))}
-                      </ol>
-                    </section>
 
                     <section>
-                      <h3 className="text-lg font-light text-slate-800 mb-4">이유</h3>
                       <div className="whitespace-pre-wrap text-slate-700 font-light">
                         {judgmentData.judgment.reasons}
                       </div>
@@ -372,15 +351,15 @@ const JudgmentDetailPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-light">사건번호</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.caseNo}</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.case_no}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-light">사건명</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.caseName}</span>
+                    <span className="font-light text-slate-700">{judgmentData.judgment.case_name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500 font-light">선고일</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.judgmentDate}</span>
+                    <span className="text-slate-500 font-light">선고일</span> 
+                    <span className="font-light text-slate-700">{judgmentData.judgment.judgment_date}</span>
                   </div>
                 </div>
               </div>

@@ -90,7 +90,7 @@ export type PostCaseInfoResponse =
 // 3. SUMMARY (판례 상세 및 AI 분석)
 // ==========================================
 export type PrecedentDetailData = {
-  case_number: string;
+  case_no: string;
   case_title: string;
   case_name: string;
   court: string;

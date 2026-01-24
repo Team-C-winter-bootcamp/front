@@ -13,7 +13,6 @@ export const API_ENDPOINTS = {
   users: {
     ME: 'users/me', // 현재 사용자 정보 조회(GET)
   },
-  users: { ME: 'users/me' },
   session: {
     NEWCHAT: 'sessions',
     GETLIST: 'sessions',
