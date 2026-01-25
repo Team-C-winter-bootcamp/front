@@ -1,7 +1,7 @@
 import apiClient from '../client';
 import {
   GetCategoriesResponse,
-  PostCaseInfoRequest,
+  PostCaseRequest,
   PostCaseInfoResponse,
   GetPrecedentDetailResponse,
   GetCaseDetailResponse,
@@ -41,7 +41,7 @@ export const initService = {
 };
 
 export const caseService = {
-  createCase: async (data: PostCaseInfoRequest): Promise<PostCaseInfoResponse> => {
+  createCase: async (data: PostCaseRequest): Promise<PostCaseInfoResponse> => {
     try {
       const response = await apiClient.post<PostCaseInfoResponse>(API_ENDPOINTS.cases.INFO, data);
       return response.data;
