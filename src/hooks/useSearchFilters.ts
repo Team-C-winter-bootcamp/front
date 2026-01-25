@@ -4,7 +4,7 @@ import { SearchResult } from '../pages/SearchResult';
 export function useSearchFilters(
   results: SearchResult[],
   query: string,
-  activeTab: 'expert' | 'all'
+  _activeTab: 'expert' | 'all'
 ) {
   const [selectedCaseTypes, setSelectedCaseTypes] = useState<string[]>([]);
   const [selectedCourts, setSelectedCourts] = useState<string[]>([]);

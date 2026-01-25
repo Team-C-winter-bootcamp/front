@@ -17,7 +17,7 @@ export function Timeline({ steps }: TimelineProps) {
       <div className="hidden md:flex items-center justify-between w-full relative">
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-200 -z-10" />
 
-        {steps.map((step, index) => (
+        {steps.map((step) => (
           <div
             key={step.id}
             className="flex flex-col items-center bg-slate-50 px-2"
