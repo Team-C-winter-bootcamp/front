@@ -21,7 +21,7 @@ export function SearchResultItem({ result, onClick }: SearchResultItemProps) {
           <span className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded">
             {result.caseType}
           </span>
-          <span className="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded">
+          <span className="px-2 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 rounded">
             {result.judgmentType}
           </span>
         </div>

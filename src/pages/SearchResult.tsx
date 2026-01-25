@@ -176,7 +176,7 @@ const SearchResultsPage = () => {
                 state: { caseId: caseId },
               });
             }}
-            className="group relative bg-slate-900 hover:bg-indigo-600 text-white px-10 py-7 rounded-2xl font-black text-xl shadow-2xl transition-all hover:-translate-y-1"
+            className="group relative bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-7 rounded-2xl font-black text-xl shadow-2xl transition-all hover:-translate-y-1"
           >
             내 사건 결과 예측하기
             <ChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
