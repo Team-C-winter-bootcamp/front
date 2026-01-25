@@ -174,7 +174,7 @@ export default function ProofDocument() {
               <Button
                 onClick={handleDownloadPDF}
                 leftIcon={<Download className="w-4 h-4" />}
-                className="bg-blue-600 text-white hover:bg-blue-700"
+                className="bg-indigo-600 text-white hover:bg-indigo-700"
               >
                 PDF 다운로드
               </Button>
@@ -269,12 +269,12 @@ export default function ProofDocument() {
                     <div
                       className={`max-w-[80%] rounded-lg p-3 ${
                         msg.role === 'user'
-                          ? 'bg-gray-100 text-gray-800'
-                          : 'bg-purple-100 text-gray-800'
+                          ? 'bg-slate-100 text-slate-800'
+                          : 'bg-indigo-50 text-indigo-800'
                       }`}
                     >
                       {msg.role === 'ai' && (
-                        <div className="text-xs font-semibold text-purple-700 mb-1">ChatGLD</div>
+                        <div className="text-xs font-semibold text-indigo-700 mb-1">LAWDING AI</div>
                       )}
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                     </div>
@@ -296,7 +296,7 @@ export default function ProofDocument() {
                     }
                   }}
                   placeholder="답변을 입력해주세요."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
                 />
                 <button
                   onClick={handleSend}
@@ -304,7 +304,7 @@ export default function ProofDocument() {
                   aria-label="메시지 전송"
                   className={`p-3 rounded-lg transition-colors ${
                     chatInput.trim().length >= 15 && !isGenerating && !isStreaming && caseId
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >

@@ -54,7 +54,7 @@ export default function CaseLaw() {
             편집기로 돌아가기
           </Button>
           <div className="flex items-center space-x-2">
-            <Scale className="w-5 h-5 text-blue-600" />
+            <Scale className="w-5 h-5 text-indigo-600" />
             <span className="font-semibold text-gray-900">판례 추천</span>
           </div>
         </div>

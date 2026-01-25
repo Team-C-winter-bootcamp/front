@@ -76,7 +76,7 @@ export default function Solution() {
 
   const compensationTrendData = useMemo(() => {
     const rawData = caseDetail?.outcome_prediction?.compensation_distribution || [];
-    const colors = ['#7DD3FC', '#38BDF8', '#0EA5E9', '#0369A1'];
+    const colors = ['#e0e7ff', '#c7d2fe', '#a5b4fc', '#818cf8']; // Indigo shades for background bars
     return rawData.map((item, index) => ({
       ...item,
       count: Number(item.count) || 0,
@@ -108,7 +108,7 @@ export default function Solution() {
     <Layout><div className="py-24 text-center"><AlertCircle className="mx-auto text-red-500 mb-4" size={48} /><h2 className="text-xl font-bold text-slate-800">데이터 로드 실패</h2></div></Layout>
   );
 
-  const pieColors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981'];
+  const pieColors = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#c084fc', '#818cf8'];
 
   return (
     <Layout>
@@ -188,7 +188,7 @@ export default function Solution() {
               </ResponsiveContainer>
             </div>
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
               <div className="relative bg-indigo-600 rounded-3xl p-8 text-white text-center shadow-2xl">
                 <span className="inline-block px-3 py-1 bg-indigo-500/50 rounded-full text-[10px] font-bold uppercase mb-4">AI 권고 합의금</span>
                 <div className="text-3xl font-black leading-tight mb-2">{caseDetail.outcome_prediction.expected_compensation}</div>
@@ -265,7 +265,7 @@ export default function Solution() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { type: 'agreement', title: '합의서', icon: Check, color: 'bg-emerald-50 text-emerald-600', reason: '원만한 합의 가능성이 높을 때' },
-              { type: 'notice', title: '내용증명서', icon: Mail, color: 'bg-blue-50 text-blue-600', reason: '상대방에게 경고가 필요할 때' },
+              { type: 'notice', title: '내용증명서', icon: Mail, color: 'bg-indigo-50 text-indigo-600', reason: '상대방에게 경고가 필요할 때' },
               { type: 'complaint', title: '고소장/탄원서', icon: FileText, color: 'bg-rose-50 text-rose-600', reason: '강력한 법적 처벌을 원할 때' }
             ].map((doc) => {
               const isRec = recommendedDocument === doc.type;

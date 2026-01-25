@@ -16,11 +16,11 @@ export function CategoryCard({
 }: CategoryCardProps) {
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-[#4A90E2]"
+      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-indigo-600"
       onClick={onClick}
     >
       <div className="flex items-start space-x-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#E8F0F7] flex items-center justify-center text-[#4A90E2]">
+        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
           {icon}
         </div>
         <div className="flex-1">
