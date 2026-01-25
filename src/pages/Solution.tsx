@@ -1,481 +1,259 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Card } from '../components/ui/Card';
-import { FileText, Mail, AlertCircle, Check, ArrowRight } from 'lucide-react';
+import { 
+  Scale, Gavel, TrendingDown, AlertCircle, 
+  FileText, Mail, Check, ArrowRight, Star, Loader2
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { 
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, 
+  RadarChart, PolarGrid, PolarAngleAxis, Radar, Tooltip, Cell as ReCell
+} from 'recharts';
+
+// 1. 데이터 인터페이스
+export interface AnalysisData {
+  outcome_prediction: {
+    probability: string;
+    expected_result: string;
+    expected_compensation: string;
+    estimated_duration: string;
+    sentence_distribution: Array<{ name: string; value: number | string }>;
+    radar_data: Array<{ subject: string; A: number; B: number; fullMark: number }>;
+    compensation_distribution: Array<{ range: string; count: number; is_target?: boolean }>;
+  };
+  action_roadmap: Array<{ title: string; description: string }>;
+  legal_foundation: {
+    logic: string;
+    relevant_precedents: Array<{ case_number: string; key_points: string[] }>;
+  };
+}
 
 export default function Solution() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [caseId, setCaseId] = useState<number | null>(null);
-  const [precedentsId, setPrecedentsId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const { precedentsId } = useParams<{ precedentsId: string }>();
+  
+  const caseIdFromQuery = searchParams.get('case_id');
+  const caseId = (location.state as any)?.caseId || (caseIdFromQuery ? parseInt(caseIdFromQuery) : null);
+
+  const [caseDetail, setCaseDetail] = useState<AnalysisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [caseDetail, setCaseDetail] = useState<any>(null);
+  const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    const state = location.state as { caseId?: number; precedentsId?: string } | null;
-    if (state?.caseId) {
-      setCaseId(state.caseId);
-    }
-    if (state?.precedentsId) {
-      setPrecedentsId(state.precedentsId);
-    }
-  }, [location]);
-
-  // 사건 분석 결과 조회
   useEffect(() => {
     const fetchCaseDetail = async () => {
       if (caseId && precedentsId) {
         setIsLoading(true);
         try {
-          const response = await caseService.getCaseDetail(precedentsId);
-          if (response.status === 'success' && 'data' in response) {
-            setCaseDetail(response.data);
-          }
-        } catch (error: any) {
-          console.error('사건 분석 결과 조회 오류:', error);
+          const response = await caseService.getCaseDetail(precedentsId, caseId);
+          const fetchedData = (response as any).data || response;
+          setCaseDetail(fetchedData);
+        } catch (error) {
+          console.error('API 호출 실패:', error);
+          setIsError(true);
         } finally {
           setIsLoading(false);
         }
       }
     };
-
     fetchCaseDetail();
   }, [caseId, precedentsId]);
 
-  const estimatedAmount = caseDetail?.outcome_prediction?.estimated_compensation || '300만원 ~ 500만원';
-  const averageAmount = '420만원';
-  const timelineSteps = caseDetail?.action_roadmap?.map((step: { step?: number; title?: string; description?: string; action?: string }, index: number) => ({
-    id: step.step || index + 1,
-    label: step.title || `단계 ${index + 1}`,
-    status: index === 0 ? 'current' : index === 1 ? 'next' : 'final',
-    description: step.description || step.action || '',
-  })) || [
-    {
-      id: 1,
-      label: '합의 시도',
-      status: 'current' as const,
-      description: '합의 시도를 분석하니 이 사건은 합의의 촉진을 주로 한 해결이 가장 효과적입니다.'
-    },
-    {
-      id: 2,
-      label: '내용증명 발송',
-      status: 'next' as const,
-      description: '내용증명 발송을 잘 보관하시고, 가능하면 서면적으로 모든 내용을 기록합니다.'
-    },
-    {
-      id: 3,
-      label: '소송 진행',
-      status: 'final' as const,
-      description: '소송 진행 데이터를 확보하고, 유사 사례를 바탕으로 주장을 강화합니다.'
-    }
-  ];
+  // 데이터 가공
+  const radarData = useMemo(() => caseDetail?.outcome_prediction?.radar_data || [], [caseDetail]);
+
+  const pieData = useMemo(() => {
+    const rawData = caseDetail?.outcome_prediction?.sentence_distribution || [];
+    return rawData.map(item => ({
+      name: item.name,
+      value: typeof item.value === 'string' ? parseInt(item.value.replace(/[^0-9]/g, '')) : item.value
+    })).filter(item => item.value > 0);
+  }, [caseDetail]);
+
+  const compensationTrendData = useMemo(() => {
+    const rawData = caseDetail?.outcome_prediction?.compensation_distribution || [];
+    const colors = ['#7DD3FC', '#38BDF8', '#0EA5E9', '#0369A1'];
+    return rawData.map((item, index) => ({
+      ...item,
+      fill: item.is_target ? '#6366f1' : colors[index % colors.length]
+    }));
+  }, [caseDetail]);
+
+  const recommendedDocument = useMemo(() => {
+    if (!caseDetail) return null;
+    const prob = parseInt(caseDetail.outcome_prediction.probability) || 0;
+    const radar = caseDetail.outcome_prediction.radar_data;
+    const settlementScore = radar.find((d) => d.subject === '합의여부')?.A || 0;
+
+    if (prob >= 80) return 'complaint';
+    if (settlementScore >= 60) return 'agreement';
+    return 'notice';
+  }, [caseDetail]);
 
   const handleDocumentSelect = (type: 'agreement' | 'notice' | 'complaint') => {
-    switch (type) {
-      case 'agreement':
-        navigate('/document/agree', { state: { caseId } });
-        break;
-      case 'notice':
-        navigate('/document/proof', { state: { caseId } });
-        break;
-      case 'complaint':
-        navigate('/document/goso', { state: { caseId } });
-        break;
-      default:
-        break;
-    }
+    const pathMap = { agreement: '/document/agree', notice: '/document/proof', complaint: '/document/goso' };
+    navigate(pathMap[type], { state: { caseId } });
   };
+
+  if (isLoading) return (
+    <Layout><div className="py-48 text-center"><Loader2 className="mx-auto animate-spin text-indigo-500 mb-4" size={48} /><p className="font-black text-slate-600">데이터 분석 중...</p></div></Layout>
+  );
+
+  if (isError || !caseDetail) return (
+    <Layout><div className="py-24 text-center"><AlertCircle className="mx-auto text-red-500 mb-4" size={48} /><h2 className="text-xl font-bold text-slate-800">데이터 로드 실패</h2></div></Layout>
+  );
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-        {/* 분석 요약 섹션 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <Card className="p-6 bg-gray-50 border border-gray-200">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-gray-600" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">분석 요약</h2>
+      <div className="max-w-6xl mx-auto px-6 py-12 font-sans">
+        <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight italic underline decoration-indigo-500 underline-offset-8">AI 법률 심층 분석 보고서</h1>
+          <p className="text-slate-500 mt-6 text-sm font-medium tracking-wide">사건번호 {precedentsId} 기반 정밀 솔루션</p>
+        </motion.header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* 레이더 차트 */}
+          <Card className="lg:col-span-2 p-8 bg-white border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-6"><Scale className="text-indigo-600" /> <h2 className="font-bold text-lg text-slate-800">사건 성격 대조 분석</h2></div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fontWeight: 800, fill: '#1e293b' }} />
+                  <Radar name="내 사건" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
+                  <Radar name="유사 판례" dataKey="B" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.2} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-base text-gray-700 leading-relaxed">
-              {isLoading ? (
-                '분석 중...'
-              ) : caseDetail ? (
-                <>
-                  귀하의 사건은 <span className="font-semibold">{caseDetail.legal_foundation?.logic || '[분석 중]'}</span> 유형에 속하며, 
-                  예상 결과는 <span className="font-semibold">{caseDetail.outcome_prediction?.expected_result || '[분석 중]'}</span>입니다. 
-                  이에 따른 예상 솔루션은 다음과 같습니다.
-                </>
-              ) : (
-                '사건 정보를 불러오는 중입니다...'
-              )}
-            </p>
           </Card>
-        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="h-full"
-          >
-            <Card className="p-6 bg-gray-50 border border-gray-200 relative h-full flex flex-col">
-              {/* 배지 */}
-              <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
-                <Check size={14} />
-                <span>Data Analyzed</span>
-              </div>
-              
-              {/* 1. 제목 영역 (높이 고정) */}
-              <div className="mb-4">
-                <h2 className="text-xl font-bold text-gray-900 text-center">예상 적정 합의금</h2>
-              </div>
-              
-              {/* 2. 메인 콘텐츠 영역 (남은 공간 모두 차지하여 중앙 정렬) */}
-              <div className="flex-1 flex flex-col justify-center items-center w-full">
-                <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
-                  {estimatedAmount}
-                </div>
-                <p className="text-sm text-gray-600 mb-6">
-                  유사 사례 평균: {averageAmount}
-                </p>
-                <div className="h-40 w-full max-w-xs">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart 
-                      data={[
-                        { name: '200', value: 20 },
-                        { name: '300', value: 60 },
-                        { name: '400', value: 80 },
-                        { name: '500', value: 60 },
-                        { name: '600', value: 20 }
-                      ]}
-                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                    >
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 12 }} 
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                      />
-                      <YAxis hide />
-                      <Bar 
-                        dataKey="value" 
-                        fill="#6D5AED" 
-                        radius={[4, 4, 0, 0]}
-                        barSize={32}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* 3. 하단 설명 텍스트 (맨 아래 고정) */}
-              <div className="mt-4 pt-2 text-center">
-                <p className="text-xs text-gray-500">예측 범위 (300~500)</p>
-              </div>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="h-full"
-          >
-            <Card className="p-6 bg-gray-50 border border-gray-200 relative h-full flex flex-col">
-              {/* 배지 */}
-              <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
-                <Check size={14} />
-                <span>Data Analyzed</span>
-              </div>
-              <div className="mb-4">
-                <h2 className="text-xl font-bold text-gray-900 text-center">재판 예상 결과</h2>
-              </div>
-              <div className="flex-1 flex flex-col justify-center items-center w-full">
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                  <div className="relative w-56 h-56 flex-shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: '벌금형', value: 70, color: '#6D5AED' },
-                            { name: '집행유예', value: 20, color: '#9CA3AF' },
-                            { name: '무죄', value: 5, color: '#D1D5DB' },
-                            { name: '실형', value: 5, color: '#F3F4F6' }
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={70}
-                          outerRadius={95}
-                          startAngle={90}
-                          endAngle={-270}
-                          dataKey="value"
-                        >
-                          {[
-                            { name: '벌금형', value: 70, color: '#6D5AED' },
-                            { name: '집행유예', value: 20, color: '#9CA3AF' },
-                            { name: '무죄', value: 5, color: '#D1D5DB' },
-                            { name: '실형', value: 5, color: '#F3F4F6' }
-                          ].map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    {/* 가운데 텍스트 */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                      <div className="text-2xl font-bold text-purple-600">70%</div>
-                      <div className="text-sm text-gray-600 whitespace-nowrap">벌금형 예상</div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col justify-center space-y-2 text-sm text-gray-700 min-w-[100px]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#6D5AED' }}></div>
-                      <span className="font-medium">벌금형 70%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#9CA3AF' }}></div>
-                      <span>집행유예 20%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#D1D5DB' }}></div>
-                      <span>무죄 5%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: '#F3F4F6' }}></div>
-                      <span>실형 5%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. 하단 설명 텍스트 */}
-              <div className="mt-4 pt-2 text-center">
-                <p className="text-xs text-gray-500">유사 사건 분석 결과</p>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8"
-        >
-          <Card className="p-8 bg-gray-50 border border-gray-200 relative">
-            {/* Data Analyzed 배지 */}
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium z-10">
-              <Check size={14} />
-              <span>Data Analyzed</span>
+          {/* 원형 차트 (수정된 섹션) */}
+          <Card className="p-8 bg-white border border-slate-200 shadow-sm flex flex-col">
+            <div className="flex items-center gap-2 mb-6 text-slate-800">
+              <Gavel className="text-indigo-500" /> 
+              <h2 className="font-bold text-lg">예상 형량 분포</h2>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">예상 소요 기간</h2>
-            <div className="text-center mb-8">
-              <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">평균 4개월 소요</div>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={pieData} 
+                    innerRadius={65} 
+                    outerRadius={85} 
+                    paddingAngle={8} 
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={`cell-${i}`} fill={['#8b5cf6', '#6366f1', '#f43f5e'][i % 3]} />
+                    ))}
+                  </Pie>
+                  {/* 마우스 오버 시 툴팁 스타일 수정: 연한 배경색 */}
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.96)', 
+                      borderRadius: '10px', 
+                      border: '1px solid #f1f5f9',
+                      padding: '8px 12px',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                    }} 
+                    itemStyle={{ color: '#0f172a', fontWeight: 'bold' }} // 남색 글씨
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-            <div className="mt-12">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-sm text-gray-500 font-medium">최단 2개월</span>
-                <span className="text-sm text-gray-500 font-medium">최장 8개월</span>
-              </div>
-              
-              <div className="relative h-16">
-                {/* 1. 전체 타임라인 바 (회색 배경) */}
-                <div className="absolute top-8 left-0 w-full h-3 bg-gray-200 rounded-full"></div>
-                
-                {/* 2. 평균 구간 (보라색, 2~4개월, 전체의 1/3) */}
-                <div className="absolute top-8 left-[33.33%] w-[33.33%] h-3 bg-purple-600 rounded-full shadow-sm"></div>
-
-                {/* 3. 상단 마커 그룹 (그래프 위쪽으로 이동됨) */}
-                
-                {/* [사건 발생] - 왼쪽 33% 지점 */}
-                <div className="absolute left-[33.33%] top-8 transform -translate-x-1/2 -translate-y-full pb-2 flex flex-col items-center group">
-                   {/* 텍스트 */}
-                   <span className="text-xs text-gray-600 mb-1 whitespace-nowrap font-medium">[사건 발생]</span>
-                   {/* 점선 (위에서 아래로) */}
-                   <div className="h-4 w-px border-l border-dashed border-gray-400 group-hover:border-purple-400 transition-colors"></div>
-                </div>
-
-                {/* (평균 4개월) - 중앙 50% 지점 */}
-                <div className="absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-full pb-0 flex flex-col items-center z-10">
-                   {/* 텍스트 (강조) */}
-                   <span className="text-xs font-bold text-purple-700 mb-1 whitespace-nowrap bg-purple-50 px-2 py-0.5 rounded border border-purple-100 shadow-sm">
-                     평균 4개월
-                   </span>
-                   {/* 실선 (중앙은 강조를 위해 실선 사용) */}
-                   <div className="h-6 w-0.5 bg-gray-800"></div>
-                </div>
-
-                {/* [예상 종결] - 오른쪽 66% 지점 */}
-                <div className="absolute left-[66.66%] top-8 transform -translate-x-1/2 -translate-y-full pb-2 flex flex-col items-center group">
-                   {/* 텍스트 */}
-                   <span className="text-xs text-gray-600 mb-1 whitespace-nowrap font-medium">[예상 종결]</span>
-                   {/* 점선 */}
-                   <div className="h-4 w-px border-l border-dashed border-gray-400 group-hover:border-purple-400 transition-colors"></div>
-                </div>
-
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 mt-2 text-center">
-              유사 사례 분석 결과 (최단 2개월 ~ 최장 8개월)
-            </p>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8"
-        >
-          <Card className="p-8 bg-gray-50 border border-gray-200">
-            <div className="flex items-start gap-3 mb-6">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="w-5 h-5 text-gray-600" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">문제 해결 방안</h2>
-            </div>
-            
-            {/* 타임라인 */}
-            <div className="flex items-start justify-between gap-4 md:gap-8 relative">
-              {timelineSteps.map((step: { id: number; label: string; status: 'current' | 'next' | 'final'; description: string }, index: number) => (
-                <div key={step.id} className="flex-1 flex flex-col items-center relative">
-                  {/* 단계 레이블 */}
-                  <div className="mb-2">
-                    <span className="text-xs text-gray-500">
-                      {step.status === 'current' && '[현재 단계]'}
-                      {step.status === 'next' && '[다음 단계]'}
-                      {step.status === 'final' && '[최종]'}
-                    </span>
-                  </div>
-                  
-                  {/* 단계 제목 */}
-                  <h3 className="text-base font-bold text-gray-900 mb-3 text-center">
-                    {step.label}
-                  </h3>
-                  
-                  {/* 원형 인디케이터 */}
-                  <div className="relative mb-4">
-                    <div
-                      className={`w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all ${
-                        step.status === 'current'
-                          ? 'bg-purple-600 border-purple-600 shadow-lg shadow-purple-200'
-                          : 'bg-white border-purple-600'
-                      }`}
-                    >
-                      {step.status === 'current' && (
-                        <Check size={24} className="text-white" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* 설명 텍스트 */}
-                  <p className="text-sm text-gray-700 leading-relaxed text-center">
-                    {step.description}
-                  </p>
-                  
-                  {/* 화살표 (마지막 단계 제외) */}
-                  {index < timelineSteps.length - 1 && (
-                    <div className="absolute left-full top-1/2 transform -translate-y-1/2 translate-x-2 hidden md:block z-10">
-                      <ArrowRight className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
+            {/* 하단 텍스트 목록 스타일 수정: 남색 계열 텍스트 */}
+            <div className="mt-auto space-y-4">
+              {pieData.map((item, i) => (
+                <div key={i} className="flex justify-between items-center px-2">
+                  <span className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#8b5cf6', '#6366f1', '#f43f5e'][i % 3] }} />
+                    <span className="font-bold text-sm text-slate-900 uppercase tracking-tight">{item.name}</span>
+                  </span>
+                  <span className="font-black text-lg text-slate-800">{item.value}%</span>
                 </div>
               ))}
             </div>
           </Card>
-        </motion.div>
+        </div>
 
-        {/* 문서 작성하기 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-8"
-        >
-          <Card className="p-8 bg-gray-50 border border-gray-200">
-            <h2 className="text-lg font-bold text-gray-900 mb-2 text-center">
-              문서 작성하기
-            </h2>
-            <p className="text-base text-gray-700 mb-8 text-center">
-              상황에 맞는 문서를 선택하여 작성하세요
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6 text-gray-700" />
-                </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">합의서</h3>
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                  상대방과 합의할 때 사용하는 문서입니다. 합의 내용과 조건을 명확히 기록합니다.
-                </p>
-                <button
-                  onClick={() => handleDocumentSelect('agreement')}
-                  className="w-full bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-                >
-                  작성 시작하기
-                </button>
-              </div>
-
-              {/* 내용증명서 */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
-                  <Mail className="w-6 h-6 text-gray-700" />
-                </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">내용증명서</h3>
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                  상대방에게 법적 내용을 공식적으로 전달할 때 사용합니다. 법적 효력이 있습니다.
-                </p>
-                <button
-                  onClick={() => handleDocumentSelect('notice')}
-                  className="w-full bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-                >
-                  작성 시작하기
-                </button>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
-                  <AlertCircle className="w-6 h-6 text-gray-700" />
-                </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">고소장</h3>
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                  법적 절차를 진행하기 위해 작성하는 공식 문서입니다. 신중하게 작성해야 합니다.
-                </p>
-                <button
-                  onClick={() => handleDocumentSelect('complaint')}
-                  className="w-full bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-                >
-                  작성 시작하기
-                </button>
+        {/* 합의금 섹션 */}
+        <Card className="p-10 bg-white border-slate-200 mb-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+            <div className="md:col-span-2 h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={compensationTrendData}>
+                  <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 12, fontWeight: 600 }} />
+                  <YAxis hide />
+                  <Tooltip cursor={{ fill: '#f8fafc' }} />
+                  <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={55}>
+                    {compensationTrendData.map((entry, index) => (
+                      <ReCell key={`cell-${index}`} fill={entry.fill} fillOpacity={entry.is_target ? 1 : 0.6} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="relative bg-indigo-600 rounded-3xl p-8 text-white text-center shadow-2xl">
+                <span className="inline-block px-3 py-1 bg-indigo-500/50 rounded-full text-[10px] font-bold uppercase mb-4">AI 권고 합의금</span>
+                <div className="text-3xl font-black leading-tight mb-2">{caseDetail.outcome_prediction.expected_compensation}</div>
+                <div className="text-base font-medium opacity-80 mb-6 italic">{caseDetail.outcome_prediction.expected_result}</div>
               </div>
             </div>
-          </Card>
-        </motion.div>
+          </div>
+        </Card>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center text-sm text-gray-600"
-        >
-          <p>
-            본 결과는 법적 효력이 없는 참고용 시뮬레이션 결과입니다. 법적 효력이 필요한 경우 변호사와 상담하시기 바랍니다.
-          </p>
-        </motion.div>
+        {/* 로드맵 */}
+        <Card className="p-8 bg-gray-50 border-slate-200 mb-8 shadow-inner">
+          <div className="flex items-center gap-3 mb-10"><AlertCircle className="text-indigo-600" /><h2 className="text-xl font-bold text-slate-800">해결 로드맵</h2></div>
+          <div className="flex flex-col md:flex-row justify-between gap-12 relative">
+            {caseDetail.action_roadmap.map((step, i) => (
+              <div key={i} className="flex-1 text-center relative group">
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4 font-black text-lg group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                  {i + 1}
+                </div>
+                <h4 className="font-bold text-slate-900 mb-2">{step.title}</h4>
+                <p className="text-xs text-slate-500 px-2 leading-relaxed">{step.description}</p>
+                {i < caseDetail.action_roadmap.length - 1 && <ArrowRight className="absolute -right-6 top-6 hidden md:block text-slate-300" size={20} />}
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* 문서 추천 */}
+        <Card className="p-10 bg-white border-slate-200 mb-12 shadow-sm">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-black text-slate-900 mb-2 underline decoration-indigo-500 underline-offset-8">필요 문서 즉시 작성</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { type: 'agreement', title: '합의서', icon: Check, color: 'bg-emerald-50 text-emerald-600', reason: '원만한 합의 가능성이 높을 때' },
+              { type: 'notice', title: '내용증명서', icon: Mail, color: 'bg-blue-50 text-blue-600', reason: '상대방에게 경고가 필요할 때' },
+              { type: 'complaint', title: '고소장/탄원서', icon: FileText, color: 'bg-rose-50 text-rose-600', reason: '강력한 법적 처벌을 원할 때' }
+            ].map((doc) => {
+              const isRec = recommendedDocument === doc.type;
+              return (
+                <div key={doc.type} className={`relative rounded-3xl p-8 border transition-all flex flex-col ${isRec ? 'border-indigo-500 bg-white shadow-xl ring-2 ring-indigo-500/10' : 'border-slate-100 bg-slate-50 opacity-80'}`}>
+                  {isRec && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg"><Star size={12} fill="white" /> AI 추천</div>}
+                  <div className={`w-14 h-14 ${doc.color} rounded-2xl flex items-center justify-center mb-6`}>{<doc.icon size={28} />}</div>
+                  <h3 className="text-lg font-black text-slate-900 mb-2">{doc.title}</h3>
+                  {isRec && <div className="mb-8 p-3 bg-indigo-50 rounded-xl border border-indigo-100 text-[11px] text-indigo-700 font-bold italic">💡 추천 이유: {doc.reason}</div>}
+                  <button onClick={() => handleDocumentSelect(doc.type as any)} className={`mt-auto w-full py-4 rounded-2xl text-sm font-black transition-all ${isRec ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'}`}>작성 시작하기</button>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
       </div>
     </Layout>
   );

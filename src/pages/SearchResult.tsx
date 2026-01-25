@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Button } from '../components/ui/Button'
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '../components/ui/Button';
+import { ChevronRight, Landmark, Calendar, Search, CheckCircle2 } from 'lucide-react';
 
-// 1. 인터페이스 수정 (id 대신 case_No 사용)
 export interface SearchResult {
-  case_No: string;  
-  case_name: string; 
-  title: string;     
+  case_No: string;
+  case_name: string;
+  title: string;
   content: string;
   court: string;
   date: string;
@@ -17,130 +17,174 @@ export interface SearchResult {
 }
 
 const SearchResultsPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  
-  // 2. 선택 상태 타입을 string[]으로 변경
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [caseId, setCaseId] = useState<number | null>(null)
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [caseId, setCaseId] = useState<number | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
-    const state = location.state as {  case_id: number;results: any[] } 
+    const state = location.state as { case_id: number; results: any[] };
 
-    if (state.results) {
-      console.log('--- 백엔드 원본 데이터 ---', state.case_id,state.results); 
-      const mappedResults: SearchResult[] = state.results.map((result) => {
-        
-        return {
-          case_No: result.case_No, 
-          case_name: result.case_name || result.case_number || '사건번호 정보 없음',
-          title: result.case_title || result.title || '제목 정보 없음',
-          content: result.preview || result.content || '내용 요약 정보 없음',
-          court: result.court || '법원 정보 없음',
-          date: result.judgment_date || result.date || '날짜 정보 없음',
-          caseType: result.law_category || result.case_type || '분류 없음',
-          judgmentType: result.law_subcategory || result.judgment_type || '유형 없음',
-          similarity: Math.round((result.similarity || 0) * 100),
-        };
-      })
-      setSearchResults(mappedResults)
+    if (state?.results) {
+      const mappedResults: SearchResult[] = state.results.map((result) => ({
+        case_No: result.case_No,
+        case_name: result.case_name || result.case_number || '사건번호 없음',
+        title: result.case_title || result.title || '제목 정보 없음',
+        content: result.preview || result.content || '내용 요약 정보 없음',
+        court: result.court || '법원 미정',
+        date: result.judgment_date || result.date || '날짜 미상',
+        caseType: result.law_category || result.case_type || '분류 없음',
+        judgmentType: result.law_subcategory || result.judgment_type || '유형 없음',
+        similarity: Math.round((result.similarity || 0) * 100),
+      }));
+      setSearchResults(mappedResults);
     }
 
     if (state?.case_id) {
-      setCaseId(state.case_id)
+      setCaseId(state.case_id);
     }
-  }, [location.state])
+  }, [location.state]);
 
-  // 3. 클릭 시 이동 경로 수정
   const handleResultClick = (case_No: string) => {
-  // URL 이동과 함께 현재 진행 중인 사건의 ID(caseId)를 넘겨줍니다.
-    navigate(`/judgment/${case_No}`, {
-      state: {
-        caseId: caseId // useEffect에서 설정된 현재 사용자 사건 ID
-      }
-    });
+    navigate(`/judgment/${case_No}`, { state: { caseId } });
   };
 
   const handleSelectClick = (e: React.MouseEvent, case_No: string) => {
-    e.stopPropagation()
+    e.stopPropagation();
     setSelectedIds((prev) =>
       prev.includes(case_No) ? prev.filter((id) => id !== case_No) : [...prev, case_No]
-    )
-  }
+    );
+  };
 
   return (
-    <main className="min-h-screen bg-white pt-20">
-      <h1 className="sr-only">판례 검색 결과</h1>
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
-        <button onClick={() => navigate('/')} className="text-2xl font-black tracking-tighter text-indigo-600">LAWDING</button>
+    <main className="min-h-screen bg-slate-50/50 pt-24 pb-20">
+      {/* 고정 헤더 */}
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/70 backdrop-blur-lg shadow-sm">
+        <button 
+          onClick={() => navigate('/')} 
+          className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-80 transition-opacity"
+        >
+          LAWDING
+        </button>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">유사 판례 검색 결과</h2>
-        <div className="space-y-4">
-          {searchResults.map((result: SearchResult) => {
-            // 4. 고유 식별자를 case_No로 변경
-            const isSelected = selectedIds.includes(result.case_No)
+      <div className="max-w-3xl mx-auto px-4">
+        <header className="mb-10 text-center md:text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold mb-3">
+            <Search size={14} />
+            <span>AI 맞춤 분석 완료</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+            유사 판례 검색 결과
+          </h2>
+          <p className="text-slate-500 mt-2 text-sm">
+            입력하신 사례와 가장 유사한 {searchResults.length}개의 판례를 찾았습니다.
+          </p>
+        </header>
+
+        <section className="space-y-5">
+          {searchResults.map((result, index) => {
+            const isSelected = selectedIds.includes(result.case_No);
             
             return (
               <motion.div
-                key={result.case_No} // key값 수정
+                key={result.case_No}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
                 onClick={() => handleResultClick(result.case_No)}
-                className={`relative rounded-lg p-5 hover:shadow-lg transition-all cursor-pointer flex flex-col ${
-                  isSelected ? 'bg-purple-50 border-2 border-purple-300 shadow-md' : 'bg-white border border-slate-200 shadow-sm'
+                className={`group relative rounded-2xl p-6 transition-all cursor-pointer border-2 ${
+                  isSelected 
+                    ? 'bg-white border-indigo-500 shadow-indigo-100 shadow-xl' 
+                    : 'bg-white border-transparent shadow-sm hover:shadow-md hover:border-slate-200'
                 }`}
-                animate={isSelected ? { scale: 1.01 } : { scale: 1 }}
               >
-                <div className="flex items-center gap-2 mb-3 text-sm text-slate-700 flex-wrap">
-                  <span className="font-bold text-indigo-600">{result.case_name}</span> {/* 실제 사건번호 출력 */}
-                  <span className="text-slate-300">|</span>
-                  <span className="font-medium">{result.court}</span>
-                  <span className="text-slate-300">|</span>
-                  <span>{result.date}</span>
-                  <span className="text-green-600 font-semibold ml-2">유사도 {result.similarity}%</span>
+                {/* 상단 메타 정보 */}
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">
+                    {result.case_name}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <Landmark size={14} />
+                    <span>{result.court}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <Calendar size={14} />
+                    <span>{result.date}</span>
+                  </div>
+                  
+                  {/* 유사도 배지 */}
+                  <div className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+                    result.similarity && result.similarity > 80 
+                      ? 'bg-emerald-50 text-emerald-600' 
+                      : 'bg-amber-50 text-amber-600'
+                  }`}>
+                    유사도 {result.similarity}%
+                  </div>
                 </div>
 
-                <h3 className="text-base font-semibold text-slate-900 mb-1 leading-snug line-clamp-2">{result.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed mb-7 line-clamp-2">{result.content}</p>
+                {/* 제목 및 내용 */}
+                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors flex items-center gap-2">
+                  {result.title}
+                  <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mb-4">
+                  {result.content}
+                </p>
 
-                <div className="absolute bottom-4 right-4">
+                {/* 하단 버튼 영역 */}
+                <div className="flex items-center justify-between mt-auto">
+                  <div className="flex gap-2">
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-50 text-slate-400 border border-slate-100">
+                      {result.caseType}
+                    </span>
+                  </div>
                   <button
-                    onClick={(e) => handleSelectClick(e, result.case_No)} // 파라미터 수정
-                    className={`text-xs px-4 py-1.5 rounded-lg transition-all font-medium ${
-                      isSelected ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-500'
+                    onClick={(e) => handleSelectClick(e, result.case_No)}
+                    className={`flex items-center gap-1.5 text-xs px-5 py-2 rounded-full transition-all font-bold ${
+                      isSelected 
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
+                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}
                   >
-                    {isSelected ? '선택됨' : '선택'}
+                    {isSelected && <CheckCircle2 size={14} />}
+                    {isSelected ? '선택됨' : '선택하기'}
                   </button>
                 </div>
               </motion.div>
-            )
+            );
           })}
-        </div>
+        </section>
 
-        <div className="mt-8 flex justify-center">
+        {/* 하단 고정 액션 가이드 */}
+        <div className="mt-12 flex flex-col items-center gap-4">
+          <p className="text-xs text-slate-400">
+            가장 유사하다고 판단되는 판례들을 선택하여 심층 분석을 진행하세요.
+          </p>
           <Button
             size="lg"
             onClick={() => {
-              // 5. 다음 단계 버튼 로직 수정
-              const selectedCaseNo = selectedIds.length > 0 ? selectedIds[0] : searchResults[0]?.case_No
-              
-              navigate('/answer', {
-                state: {
-
-                  precedentsId: selectedCaseNo, // string 형태의 case_No 전달
-                },
-              })
+              const lastSelected = selectedIds[selectedIds.length - 1];
+              const targetCaseNo = lastSelected || searchResults[0]?.case_No;
+              if (!targetCaseNo) {
+                alert("분석할 판례를 선택해주세요.");
+                return;
+              }
+              navigate(`/answer/${encodeURIComponent(targetCaseNo)}`, {
+                state: { caseId: caseId },
+              });
             }}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl"
+            className="group relative bg-slate-900 hover:bg-indigo-600 text-white px-10 py-7 rounded-2xl font-black text-xl shadow-2xl transition-all hover:-translate-y-1"
           >
-            내 사건 예상 결과 확인하기
+            내 사건 결과 예측하기
+            <ChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default SearchResultsPage
+export default SearchResultsPage;

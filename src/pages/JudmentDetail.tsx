@@ -2,25 +2,21 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Download, Link2, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Download, Link2, Bookmark, BookmarkCheck, ChevronLeft, Scale, FileText, Info, ChevronDown, Sparkles, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { GetPrecedentDetailResponse } from '../api/types';
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
   const { case_No: precedentId } = useParams<{ case_No: string }>();
-  const [activeTab, setActiveTab] = useState<'ai' | 'original'>('original');
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(null);
-
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPrecedentDetail = async () => {
-      if (!precedentId) {
-        console.warn(`상세 정보를 불러올 수 없습니다: Precedent ID가 유효하지 않습니다.`);
-        return;
-      }
+      if (!precedentId) return;
       try {
         const response = await caseService.getPrecedentDetail(precedentId);
         setPrecedentDetail(response);
@@ -32,348 +28,205 @@ const JudgmentDetailPage = () => {
   }, [precedentId]);
 
   const [isBookmarked, setIsBookmarked] = useState(() => {
-    if (!precedentId) return false;
-    const raw = localStorage.getItem('bookmarked_judgments');
-    if (!raw) return false;
-    try {
-      const list = JSON.parse(raw);
-      return Array.isArray(list) ? list.includes(precedentId) : false;
-    } catch {
-      return false;
-    }
+    const list = JSON.parse(localStorage.getItem('bookmarked_judgments') || '[]');
+    return Array.isArray(list) && precedentId ? list.includes(precedentId) : false;
   });
 
   const judgmentData = useMemo(() => {
     const detail = precedentDetail?.status === 'success' ? precedentDetail.data : null;
-
     if (!detail) {
       return {
-        id: precedentId,
-        title: '데이터를 불러오는 중...',
-        summary: '',
-        aiSummary: {
-          title: 'AI 판결 요약',
-          resultSummary: ['AI 요약 정보를 불러오는중...'],
-        },
-        judgment: {
-          court: '',
-          case_no: '',
-          case_name: '',
-          plaintiff: '검사',
-          defendant: '피고인',
-          judgment_date: '',
-          order: ['주문 정보를 불러오는 중...'],
-          reasons: '내용을 불러오는 중...',
-        },
-        caseType: '',
-        judgmentType: '판결',
+        title: '데이터 로딩 중...',
+        summary: '로딩 중',
+        judgment: { court: '-', case_no: '-', case_name: '-', judgment_date: '-', reasons: '데이터를 불러오는 중입니다...' },
+        aiSummary: { resultSummary: ['AI 분석 데이터를 생성 중입니다...'] },
+        judgmentType: '판결'
       };
     }
 
+    const court = detail.court || '정보 없음';
+    const date = detail.judgment_date || '날짜 미상';
+
     return {
       id: detail.precedent_id,
-      title: detail.case_title,
-      summary: `${detail.court} ${detail.judgment_date} 선고`,
-      aiSummary: {
-        title: 'AI 판결 요약',
-        resultSummary: [detail.summary || '결과 요약 정보가 없습니다.'],
-      },
+      title: detail.case_title || detail.case_name || '제목 정보 없음',
+      summary: `${court} ${date} 선고`,
+      aiSummary: { resultSummary: [detail.summary || 'AI 요약 결과가 존재하지 않습니다.'] },
       judgment: {
-        court: detail.court,
-        case_no: detail.case_no,
-        case_name: detail.case_name,
-        plaintiff: '검사',
-        defendant: '피고인',
-        judgment_date: detail.judgment_date,
-        reasons: detail.content || '판결 정보가 없습니다.',
+        court: court,
+        case_no: detail.case_no || '-',
+        case_name: detail.case_name || '-',
+        judgment_date: date,
+        reasons: detail.content || '판결문 전문이 존재하지 않습니다.',
       },
-      caseType: '형사',
       judgmentType: '판결',
     };
-  }, [precedentDetail, precedentId]);
-
-  const scrollToSection = (sectionId: 'ai' | 'original') => {
-    setActiveTab(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerOffset = 180;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    }
-  };
+  }, [precedentDetail]);
 
   const handleDownloadPDF = async () => {
     if (!contentRef.current) return;
-
-    try {
-      const canvas = await html2canvas(contentRef.current, {
-        // @ts-ignore
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(`${judgmentData.title}.pdf`);
-    } catch (error) {
-      console.error('PDF 생성 실패:', error);
-      alert('PDF 저장 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      window.alert('링크가 복사되었습니다.');
-    } catch {
-      window.prompt('Ctrl+C를 눌러 복사하세요.', window.location.href);
-    }
+    const canvas = await html2canvas(contentRef.current, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+    pdf.save(`${judgmentData.title}.pdf`);
   };
 
   const handleToggleBookmark = () => {
     if (!precedentId) return;
-    const raw = localStorage.getItem('bookmarked_judgments');
-    let list: string[] = [];
-    try {
-      const parsed = raw ? JSON.parse(raw) : [];
-      list = Array.isArray(parsed) ? parsed.filter((v) => typeof v === 'string') : [];
-    } catch {
-      list = [];
-    }
-
-    const next = list.includes(precedentId)
-      ? list.filter((v) => v !== precedentId)
-      : [...list, precedentId];
+    const list = JSON.parse(localStorage.getItem('bookmarked_judgments') || '[]');
+    const next = list.includes(precedentId) ? list.filter((v: any) => v !== precedentId) : [...list, precedentId];
     localStorage.setItem('bookmarked_judgments', JSON.stringify(next));
     setIsBookmarked(!isBookmarked);
   };
 
+  const handleGoToSimulation = () => {
+    if (precedentId) {
+      navigate(`/answer/${precedentId}`);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-white">
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
-        <button
-          onClick={() => navigate('/')}
-          className="text-2xl font-black tracking-tighter text-indigo-600 hover:opacity-70 transition-opacity"
-        >
-          LAWDING
-        </button> 
-        
-        <div className="pr-[3%] flex gap-4 items-center">
-          <button
-            onClick={() => navigate('/login')}
-            className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
-          >
-            로그인
-          </button>
-          <button
-            onClick={() => navigate('/signup')}
-            className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition active:scale-95"
-          >
-            회원가입
-          </button>
-        </div>
+    <main className="min-h-screen bg-[#F8FAFC] font-sans selection:bg-indigo-100">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
+        <button onClick={() => navigate('/')} className="text-2xl font-black tracking-tighter text-indigo-600">LAWDING</button>
+        <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"><ChevronLeft size={24} /></button>
       </header>
 
-      <div className="pt-24 max-w-[1600px] mx-auto px-4 md:px-6 py-8 lg:ml-[5%]">
-        <article className="mb-8">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
-              {judgmentData.judgmentType || '판결'}
-            </span>
-            <span className="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
-              {judgmentData.caseType || '형사'}
-            </span>
-            <span className="text-sm text-slate-600 ml-1 font-light">
-              {judgmentData.summary}
-            </span>
+      <div className="pt-28 max-w-6xl mx-auto px-4 md:px-8 pb-20 font-sans">
+        <header className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.1em]">{judgmentData.judgmentType}</span>
+            <span className="text-slate-400 text-sm font-semibold tracking-tight">{judgmentData.summary}</span>
           </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-800 leading-tight break-keep tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 leading-[1.2] tracking-tighter break-keep">
             {judgmentData.title}
           </h1>
-        </article>
+        </header>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 min-w-0" ref={contentRef}>
-            <nav className="flex border-b border-slate-200 mb-6 bg-white pt-2 rounded-t-xl" aria-label="판례 정보 탭">
-              <button
-                onClick={() => scrollToSection('ai')}
-                className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
-                  activeTab === 'ai' 
-                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
-                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
-                }`}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="lg:col-span-8 space-y-10" ref={contentRef}>
+            
+            {/* 1. AI 요약 섹션 */}
+            <section id="ai-summary">
+              <motion.div 
+                layout
+                className="bg-gradient-to-br from-indigo-100 via-white to-blue-100 rounded-[2.5rem] shadow-xl shadow-indigo-200/40 p-8 md:p-12 text-slate-800 relative overflow-hidden border border-indigo-200"
               >
-                AI 요약
-              </button>
-              <button
-                onClick={() => scrollToSection('original')}
-                className={`px-6 py-3 text-sm border-b-2 transition-all duration-200 ${
-                  activeTab === 'original' 
-                    ? 'border-indigo-600 text-indigo-600 font-semibold' 
-                    : 'border-transparent text-slate-600 hover:text-indigo-600 font-normal'
-                }`}
-              >
-                판결문 전문
-              </button>
-            </nav>
-
-            <div className="space-y-8">
-              <section id="ai" className="scroll-mt-32">
-                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 relative">
-                  <div className="flex items-center gap-3 mb-5 border-b border-slate-200 pb-4">
-                    <h2 className="w-[90px] h-auto rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 font-bold text-lg flex-shrink-0 py-1">
-                      AI 요약 
-                    </h2>
-                  </div>
-
-                  <div className={`relative transition-all duration-500 ease-in-out ${!isAiExpanded ? 'max-h-[300px] overflow-hidden' : ''}`}>
-                    <div className="space-y-8">
-                      <div>
-                        <h3 className="text-slate-800 font-semibold mb-4 text-lg">판례 분석</h3>
-                          <ul className="space-y-4">
-                            {judgmentData.aiSummary.resultSummary.map((item, idx) => (
-                              <li key={`summary-${idx}`} className="flex items-start gap-3 text-slate-700 text-base font-light">
-                                {/* 기존의 커다란 ● 대신 세련된 파란색 작은 점 적용 */}
-                                  <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-                                {/* whitespace-pre-wrap을 유지하여 들여쓰기를 살리되, 불필요한 줄바꿈 방지 */}
-                            <span className="whitespace-pre-wrap leading-snug">{item}</span>
-                          </li>
-                                ))}
-                              </ul>
-                            </div>
-
+                <div className="absolute -top-12 -right-12 opacity-[0.08] rotate-12 text-indigo-700">
+                  <Scale size={280} />
+                </div>
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-300 text-white">
+                      <Sparkles size={24} />
                     </div>
-
-                    {!isAiExpanded && (
-                      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
-                    )}
+                    <div>
+                      <h2 className="text-2xl font-bold tracking-tight text-slate-900">AI 판례 정밀 분석</h2>
+                      <p className="text-xs text-indigo-600 font-extrabold uppercase tracking-widest font-sans">AI Case Insights</p>
+                    </div>
                   </div>
-
-                  <div className="mt-6 flex justify-center">
-                    <button 
-                      onClick={() => setIsAiExpanded(!isAiExpanded)}
-                      className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 flex items-center gap-1 px-6 py-2 rounded-full font-light shadow-md transition-all"
-                    >
-                      {isAiExpanded ? '접기' : '더 보기'}
-                      <span className={`transform transition-transform ${isAiExpanded ? 'rotate-180' : ''}`} aria-hidden="true">
-                        ∨
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              <section id="original" className="scroll-mt-32">
-                <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4 tracking-tight">판결문 전문</h2>
                   
-                  <div className="space-y-8 text-slate-700 leading-8 text-justify font-light">
+                  <motion.div animate={{ height: isAiExpanded ? 'auto' : '160px' }} className="overflow-hidden relative">
+                    <div className="space-y-6">
+                      {judgmentData.aiSummary.resultSummary.map((item, idx) => (
+                        <div key={idx} className="flex gap-6">
+                          <div className="w-1.5 h-auto bg-indigo-500/30 rounded-full flex-shrink-0" />
+                          <p className="text-slate-700 leading-[2] text-[1.1rem] font-semibold break-keep tracking-tight">
+                            {item}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {!isAiExpanded && <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />}
+                  </motion.div>
 
-                    <section>
-                      <div className="whitespace-pre-wrap text-slate-700 font-light">
-                        {judgmentData.judgment.reasons}
-                      </div>
-                    </section>
+                  <button 
+                    onClick={() => setIsAiExpanded(!isAiExpanded)}
+                    className="mt-8 text-indigo-700 font-bold text-sm flex items-center gap-1.5 hover:text-indigo-900 transition-colors bg-white/50 px-4 py-2 rounded-full border border-indigo-100 w-fit"
+                  >
+                    {isAiExpanded ? '분석 내용 접기' : '분석 내용 전체 보기'}
+                    <motion.div animate={{ rotate: isAiExpanded ? 180 : 0 }}><ChevronDown size={16} /></motion.div>
+                  </button>
+                </div>
+              </motion.div>
+            </section>
+
+            {/* 2. 시뮬레이션 이동 섹션 */}
+            <section id="simulation-cta">
+              <button 
+                onClick={handleGoToSimulation}
+                className="w-full bg-slate-900 hover:bg-indigo-600 text-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl transition-all group relative overflow-hidden"
+              >
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="text-center md:text-left">
+                    <h3 className="text-2xl md:text-3xl font-bold mb-3 flex items-center justify-center md:justify-start gap-3 tracking-tighter">
+                      내 사건 결과 예측하기 <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                    </h3>
+                    <p className="text-slate-400 text-sm md:text-base group-hover:text-indigo-50 transition-colors tracking-tight">
+                      이 판례를 바탕으로 나의 승소 확률과 적정 합의금을 시뮬레이션 합니다.
+                    </p>
+                  </div>
+                  <div className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-black group-hover:bg-white group-hover:text-indigo-600 transition-all shadow-xl shadow-indigo-900/40 border border-white/10">
+                    분석 시작하기
                   </div>
                 </div>
-              </section>
-            </div>
+                <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-400/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-indigo-300/20 transition-all" />
+              </button>
+            </section>
+
+            {/* 3. 판결문 전문 (폰트 고딕 통일 및 행간 최적화) */}
+            <section id="original-content">
+              <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-10 md:p-16">
+                <div className="flex items-center gap-2 mb-12 text-slate-300 font-bold tracking-[0.2em] text-[10px] border-b border-slate-100 pb-4 uppercase font-sans">
+                  <FileText size={14} />
+                  <span>Full Court Transcript</span>
+                </div>
+                {/* font-sans로 통일하되 leading-[2.3]으로 행간을 대폭 늘려 가독성 확보 */}
+                <div className="font-sans whitespace-pre-wrap text-slate-800 leading-[2.3] text-lg md:text-xl tracking-tight text-justify selection:bg-indigo-50">
+                  {judgmentData.judgment.reasons}
+                </div>
+              </div>
+            </section>
           </div>
 
-          <aside className="w-full lg:w-80 flex-shrink-0">
-            <div className="sticky top-24 space-y-4">
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
-                <div className="flex items-center gap-3 justify-between">
-                  <button 
-                    onClick={handleDownloadPDF} 
-                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
-                    title="PDF 다운로드"
-                    aria-label="PDF 다운로드"
-                  >
-                    <Download size={18} className="text-slate-600 hover:text-indigo-600" />
+          {/* 사이드바 */}
+          <aside className="lg:col-span-4 space-y-6 sticky top-24">
+            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-6">
+              <div className="grid grid-cols-3 gap-3 mb-8 font-sans">
+                {[
+                  { icon: Download, label: 'PDF', action: handleDownloadPDF },
+                  { icon: Link2, label: '링크', action: () => { navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다.'); } },
+                  { icon: isBookmarked ? BookmarkCheck : Bookmark, label: '저장', action: handleToggleBookmark, active: isBookmarked }
+                ].map((item, i) => (
+                  <button key={i} onClick={item.action} className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all border ${item.active ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-slate-50 border-transparent'} group`}>
+                    <item.icon size={22} className={item.active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-600'} />
+                    <span className={`text-[10px] font-bold ${item.active ? 'text-indigo-600' : 'text-slate-500'}`}>{item.label}</span>
                   </button>
-                  <button 
-                    onClick={handleCopyLink} 
-                    className="bg-white hover:bg-slate-50 border border-slate-200 p-2.5 flex-1 flex justify-center rounded-lg transition-all shadow-sm hover:border-indigo-300"
-                    title="링크 복사"
-                    aria-label="링크 복사"
-                  >
-                    <Link2 size={18} className="text-slate-600 hover:text-indigo-600" />
-                  </button>
-                  <button
-                    onClick={handleToggleBookmark}
-                    className={`p-2.5 border rounded-lg transition-all duration-200 flex-1 flex justify-center shadow-sm ${
-                      isBookmarked 
-                        ? 'border-indigo-300 bg-indigo-50' 
-                        : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300'
-                    }`}
-                    title="북마크"
-                    aria-label={isBookmarked ? "북마크 해제" : "북마크 추가"}
-                  >
-                    {isBookmarked ? (
-                      <BookmarkCheck size={18} className="text-indigo-600 fill-current" />
-                    ) : (
-                      <Bookmark size={18} className="text-slate-600 hover:text-indigo-600" />
-                    )}
-                  </button>
-                </div>
+                ))}
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
-                <h3 className="font-light text-slate-800 mb-4">사건 정보</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-light">법원</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.court}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-light">사건번호</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.case_no}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-light">사건명</span>
-                    <span className="font-light text-slate-700">{judgmentData.judgment.case_name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-light">선고일</span> 
-                    <span className="font-light text-slate-700">{judgmentData.judgment.judgment_date}</span>
-                  </div>
+              <div className="space-y-6 pt-2 font-sans">
+                <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm border-b border-slate-50 pb-2">
+                  <Info size={16} className="text-indigo-600" /> 사건 상세 정보
                 </div>
+                {[
+                  { label: '담당 법원', value: judgmentData.judgment.court },
+                  { label: '사건 번호', value: judgmentData.judgment.case_no },
+                  { label: '선고 날짜', value: judgmentData.judgment.judgment_date },
+                ].map((info, i) => (
+                  <div key={i} className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{info.label}</span>
+                    <span className="text-sm font-semibold text-slate-700">{info.value}</span>
+                  </div>
+                ))}
               </div>
-
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5">
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => navigate(-1)}
-                    className="bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 w-full font-medium px-4 py-2 rounded-lg transition-all shadow-sm text-slate-700 hover:text-indigo-600"
-                  >
-                    ← 뒤로가기
-                  </button>
-                </div>
-              </div>
+            </div>
+            <div className="p-6 bg-indigo-50 rounded-3xl border border-indigo-100 font-sans">
+               <p className="text-[11px] text-indigo-600 font-bold leading-relaxed tracking-tight">
+                 본 AI 요약 서비스는 판례 전문의 법리적 흐름을 분석하여 제공하며, 실제 법적 효력을 보장하지 않습니다. 자세한 상담은 변호사와 진행하세요.
+               </p>
             </div>
           </aside>
         </div>

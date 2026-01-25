@@ -75,20 +75,23 @@ export const caseService = {
     } catch (error: any) {
       throw error.response?.data || error;
     }
-  },
-  getCaseDetail: async ( precedentsId: string): Promise<GetCaseDetailResponse> => {
-    try {
-      const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, {precedents_id: precedentsId });
-      const response = await apiClient.get<GetCaseDetailResponse>(endpoint);
-      return response.data;
-    } catch (error: any) {
-      throw error.response?.data || error;
-    }
-  },
+  },  
+// api/index.ts 내 관련 함수 예시
+getCaseDetail: async (precedentsId: string, userCaseId: number): Promise<GetCaseDetailResponse> => {
+  try {
+    // 백엔드: api/cases/answer/<str:precedents_id>/ 
+    const endpoint = `cases/answer/${precedentsId}/`; 
+    const response = await apiClient.post<GetCaseDetailResponse>(endpoint, {
+      case_id: userCaseId
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error;
+  }
+},
 
 
 
-  
   generateDocument: async (caseId: number, data: GenerateDocumentRequest): Promise<GenerateDocumentResponse> => {
     try {
       const endpoint = replaceParams(API_ENDPOINTS.cases.CREATEFILE, { case_id: caseId });

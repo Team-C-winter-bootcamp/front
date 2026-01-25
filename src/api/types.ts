@@ -134,69 +134,34 @@ export type GetPrecedentDetailResponse =
 // ==========================================
 // 4. ANSWER (사건 분석 결과)
 // ==========================================
-export type OutcomePrediction = {
-  probability: string;
-  expected_result: string;
-  estimated_compensation: string;
-  estimated_duration: string;
-};
-
-export type ActionStep = {
-  step: number;
-  title: string;
-  action: string;
-  description: string;
-};
-
-export type EvidenceChecklistItem = {
-  item: string;
-  status: 'REQUIRED' | 'RECOMMENDED' | string;
-  tip: string;
-};
-
-export type EvidenceStrategy = {
-  status: string;
-  checklist: EvidenceChecklistItem[];
-};
-
-export type LegalFoundation = {
-  logic: string;
-  precedent_ref: string;
-};
-
-export type CaseDetailData = {
-  case_id: string;
-  outcome_prediction: OutcomePrediction;
-  action_roadmap: ActionStep[];
-  evidence_strategy: EvidenceStrategy;
-  legal_foundation: LegalFoundation;
-};
-
-export type GetCaseDetailSuccess = {
-  status: 'success';
-  data: CaseDetailData;
-};
-
-export type GetCaseDetailBadRequest = {
-  status: 'error';
-  code: 400;
-  message: string;
-  error: {
-    detail: string;
+export interface AnalysisData {
+  outcome_prediction: {
+    probability: string;
+    expected_result: string;
+    expected_compensation: string;
+    estimated_duration: string;
+    sentence_distribution: Array<{ name: string; value: number }>;
+    radar_data: Array<{ subject: string; A: number; B: number; fullMark: number }>;
   };
-};
+  action_roadmap: Array<{ title: string; description: string }>;
+  legal_foundation: {
+    logic: string;
+    relevant_precedents: Array<{ case_number: string; key_points: string[] }>;
+  };
+}
 
-export type GetCaseDetailNotFound = {
+export interface GetCaseDetailSuccess {
+  status: 'success';
+  data: AnalysisData;
+}
+
+export interface GetCaseDetailBadRequest {
   status: 'error';
-  code: 404;
   message: string;
-};
+}
 
-export type GetCaseDetailResponse = 
-  | GetCaseDetailSuccess 
-  | GetCaseDetailBadRequest 
-  | GetCaseDetailNotFound;
-
+// 두 타입을 결합한 유니온 타입
+export type GetCaseDetailResponse = GetCaseDetailSuccess | GetCaseDetailBadRequest;
 
 // ==========================================
 // 5. CREATEFILE (문서 생성 - POST)
