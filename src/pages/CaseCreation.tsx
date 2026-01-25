@@ -101,6 +101,7 @@ export default function CaseCreation() {
 
           navigate('/search', { 
             state: { 
+              case_id: actualData.case_id,
               results: actualData.results, 
               totalCount: actualData.total_count,
             } 

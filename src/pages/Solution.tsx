@@ -31,7 +31,7 @@ export default function Solution() {
       if (caseId && precedentsId) {
         setIsLoading(true);
         try {
-          const response = await caseService.getCaseDetail(caseId, precedentsId);
+          const response = await caseService.getCaseDetail(precedentsId);
           if (response.status === 'success' && 'data' in response) {
             setCaseDetail(response.data);
           }
