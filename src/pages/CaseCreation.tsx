@@ -142,9 +142,9 @@ export default function CaseCreation() {
                       <div
                         className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
                           isCompleted
-                            ? 'bg-[#6D5AED] border-[#6D5AED] text-white'
+                            ? 'bg-indigo-600 border-indigo-600 text-white'
                             : isActive
-                            ? 'bg-white border-[#6D5AED] text-[#6D5AED]'
+                            ? 'bg-white border-indigo-600 text-indigo-600'
                             : 'bg-white border-gray-300 text-gray-400'
                         }`}
                       >
@@ -155,7 +155,7 @@ export default function CaseCreation() {
                       </span>
                     </div>
                     {index < steps.length - 1 && (
-                      <div className={`flex-1 h-0.5 mx-2 ${isCompleted ? 'bg-[#6D5AED]' : 'bg-gray-300'}`} />
+                      <div className={`flex-1 h-0.5 mx-2 ${isCompleted ? 'bg-indigo-600' : 'bg-gray-300'}`} />
                     )}
                   </Fragment>
                 );
@@ -164,7 +164,7 @@ export default function CaseCreation() {
           </div>
         </div>
         <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-10">
-          <div className="bg-[#F0F4F8] rounded-2xl p-10 flex flex-col min-h-[400px] shadow-sm">
+          <div className="bg-slate-50 rounded-2xl p-10 flex flex-col min-h-[400px] shadow-sm border border-slate-100">
             {currentStep === 0 && (
               <div className="mb-8">
                 <p className="text-xl font-bold text-gray-800 leading-relaxed">
@@ -186,7 +186,7 @@ export default function CaseCreation() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleOptionClick(option)}
-                    className="p-6 text-left text-lg font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#6D5AED] hover:bg-purple-50 hover:text-[#6D5AED] transition-all shadow-sm"
+                    className="p-6 text-left text-lg font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm"
                   >
                     {option}
                   </motion.button>
@@ -198,12 +198,12 @@ export default function CaseCreation() {
                   value={detailText}
                   onChange={(e) => setDetailText(e.target.value)}
                   placeholder="상황에 대해 자세히 설명해 주세요. (15자 이상)"
-                  className="w-full px-4 py-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6D5AED] focus:outline-none min-h-[200px] resize-none text-lg"
+                  className="w-full px-4 py-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:outline-none min-h-[200px] resize-none text-lg"
                 />
                 {detailText.length > 0 && detailText.length < 15 && (
                   <p className="text-sm text-red-500 font-medium">최소 15자 이상 작성해주세요. (현재 {detailText.length}자)</p>
                 )}
-               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+               <div className="mt-6 p-4 bg-white border border-gray-100 rounded-lg shadow-sm">
                  <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
                   <div className="text-sm text-gray-600 leading-relaxed font-normal whitespace-pre-line">
                     {`2024년 1월 15일 오후 2시경, 강남역 사거리 인근에서 신호 대기를 위해 정차하고 있었습니다. 정차 후 약 10초 뒤, 후방에서 오던 승용차가 제 차의 범퍼를 강하게 들이받았습니다.
@@ -216,13 +216,13 @@ export default function CaseCreation() {
           </div>
 
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-            <span className="text-lg text-[#6D5AED] font-semibold">Step {currentStep + 1} / {steps.length}</span>
+            <span className="text-lg text-indigo-600 font-semibold">Step {currentStep + 1} / {steps.length}</span>
             <div className="flex gap-4">
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
                 className={`px-8 py-3 rounded-xl text-lg font-medium transition-all ${
-                  currentStep === 0 ? 'bg-gray-100 text-gray-400' : 'bg-[#D3DDF4] text-[#6D5AED] hover:bg-[#C4D0EB]'
+                  currentStep === 0 ? 'bg-gray-100 text-gray-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
                 Previous
@@ -232,7 +232,7 @@ export default function CaseCreation() {
                   onClick={handleNext}
                   disabled={isNextDisabled || isLoading}
                   className={`px-10 py-3 rounded-xl text-lg font-medium text-white transition-all ${
-                    isNextDisabled || isLoading ? 'bg-gray-300' : 'bg-[#6D5AED] hover:bg-[#5D4AD9]'
+                    isNextDisabled || isLoading ? 'bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-700'
                   }`}
                 >
                   {isLoading ? '검색 중...' : 'Next'}

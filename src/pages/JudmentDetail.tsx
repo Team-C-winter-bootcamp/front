@@ -87,7 +87,7 @@ const JudgmentDetailPage = () => {
         <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"><ChevronLeft size={24} /></button>
       </header>
 
-      <div className="pt-28 max-w-6xl mx-auto px-4 md:px-8 pb-20 font-sans">
+      <div className="bg-gradient-to-br pt-28 max-w-6xl mx-auto px-4 md:px-8 pb-20 font-sans">
         <header className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span className="bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.1em]">{judgmentData.judgmentType}</span>
@@ -105,7 +105,7 @@ const JudgmentDetailPage = () => {
             <section id="ai-summary">
               <motion.div 
                 layout
-                className="bg-gradient-to-br from-indigo-100 via-white to-blue-100 rounded-[2.5rem] shadow-xl shadow-indigo-200/40 p-8 md:p-12 text-slate-800 relative overflow-hidden border border-indigo-200"
+                className="bg-gradient-to-br from-indigo-100 via-white to-blue-100 rounded-[2.5rem] shadow-xl shadow-indigo-200/40 md:p-12 text-slate-800 relative overflow-hidden border border-indigo-200"
               >
                 <div className="absolute -top-12 -right-12 opacity-[0.08] rotate-12 text-indigo-700">
                   <Scale size={280} />

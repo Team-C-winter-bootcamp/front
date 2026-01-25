@@ -7,17 +7,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Minimalism Modern 색상 팔레트
-        minimal: {
-          white: '#FFFFFF',
-          'off-white': '#FAFAFA',
-          cream: '#F5F5F0',
-          'light-gray': '#F3F4F6',
-          gray: '#E5E5E5',
-          'medium-gray': '#9CA3AF',
-          'dark-gray': '#424242',
-          charcoal: '#212121',
-          concrete: '#757575',
+        // 프리미엄 모드 라이트 색상 팔레트
+        brand: {
+          primary: '#6366f1', // 메인 인디고
+          secondary: '#8b5cf6', // 포인트 퍼플
+          background: '#ffffff', // 메인 배경
+          surface: '#f8fafc', // 카드 및 섹션 배경
+          text: {
+            main: '#0f172a', // 주요 텍스트 (Slate 900)
+            sub: '#475569', // 부가 설명 (Slate 600)
+            muted: '#94a3b8', // 비활성/캡션 (Slate 400)
+          },
+          border: '#e2e8f0', // 경계선
         },
       },
       fontFamily: {

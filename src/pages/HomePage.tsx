@@ -89,7 +89,7 @@ export default function HomePage() {
             <Button
               size="lg"
               onClick={() => navigate('/case')}
-              className="shadow-lg shadow-blue-500/20"
+              className="shadow-lg shadow-indigo-500/20"
             >
               AI 법률 채팅 시작하기
             </Button>
