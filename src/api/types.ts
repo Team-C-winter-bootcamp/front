@@ -98,9 +98,7 @@ export type PrecedentDetailData = {
   judgment_date: string;
   precedent_id: number;
   issue: string;
-  holding: string;
   content: string;
-  summary: string;
 };
 
 export type GetPrecedentDetailSuccess = {
