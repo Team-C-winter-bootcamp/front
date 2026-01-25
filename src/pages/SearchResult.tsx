@@ -5,9 +5,9 @@ import { Button } from '../components/ui/Button'
 
 // 1. 인터페이스 수정 (id 대신 case_No 사용)
 export interface SearchResult {
-  case_No: string;   // 이제 고유 ID 역할을 합니다.
-  case_name: string; // 실제 사건 번호 형식이 담긴 이름
-  title: string;     // 사건 제목
+  case_No: string;  
+  case_name: string; 
+  title: string;     
   content: string;
   court: string;
   date: string;
@@ -26,16 +26,14 @@ const SearchResultsPage = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
 
   useEffect(() => {
-    const state = location.state as { results?: any[]; caseId?: number } | null
+    const state = location.state as {  case_id: number;results: any[] } 
 
-    if (state?.results) {
-      console.log('--- 백엔드 원본 데이터 ---', state.results);
-      const mappedResults: SearchResult[] = state.results.map((result, index) => {
-        // 백엔드에서 오는 다양한 필드명 대응 (case_No, id, case_id 등)
-        const id = result.case_No || result.id || result.case_id || `temp-id-${index}`;
+    if (state.results) {
+      console.log('--- 백엔드 원본 데이터 ---', state.case_id,state.results); 
+      const mappedResults: SearchResult[] = state.results.map((result) => {
         
         return {
-          case_No: String(id), 
+          case_No: result.case_No, 
           case_name: result.case_name || result.case_number || '사건번호 정보 없음',
           title: result.case_title || result.title || '제목 정보 없음',
           content: result.preview || result.content || '내용 요약 정보 없음',
@@ -49,8 +47,8 @@ const SearchResultsPage = () => {
       setSearchResults(mappedResults)
     }
 
-    if (state?.caseId) {
-      setCaseId(state.caseId)
+    if (state?.case_id) {
+      setCaseId(state.case_id)
     }
   }, [location.state])
 
@@ -130,7 +128,7 @@ const SearchResultsPage = () => {
               
               navigate('/answer', {
                 state: {
-                  caseId,
+
                   precedentsId: selectedCaseNo, // string 형태의 case_No 전달
                 },
               })

@@ -1,8 +1,7 @@
 import apiClient from '../client';
 import {
   GetCategoriesResponse,
-  PostCaseInfoRequest,
-  PostCaseInfoResponse,
+  PostCaseRequest,
   GetPrecedentDetailResponse,
   GetCaseDetailResponse,
   GenerateDocumentRequest,
@@ -12,6 +11,7 @@ import {
   StreamEventChunk,
   StreamEventComplete,
   PatchDocumentErrorResponse,
+  PostCaseInfoSuccess,
 } from '../types';
 import { API_ENDPOINTS, replaceParams } from '../endpoints';
 
@@ -41,10 +41,12 @@ export const initService = {
 };
 
 export const caseService = {
-  createCase: async (data: PostCaseInfoRequest): Promise<PostCaseInfoResponse> => {
+  // 인자 타입을 'PostCaseRequest'로 변경해야 합니다.
+  createCase: async (data: PostCaseRequest): Promise<PostCaseInfoSuccess> => {
     try {
-      const response = await apiClient.post<PostCaseInfoResponse>(API_ENDPOINTS.cases.INFO, data);
-      return response.data;
+      // apiClient.post의 첫 번째 제네릭은 응답 타입입니다.
+      const response = await apiClient.post<PostCaseInfoSuccess>(API_ENDPOINTS.cases.INFO, data);
+      return response.data; 
     } catch (error: any) {
       throw error.response?.data || error;
     }
@@ -74,15 +76,19 @@ export const caseService = {
       throw error.response?.data || error;
     }
   },
-  getCaseDetail: async (caseId: number, precedentsId: string): Promise<GetCaseDetailResponse> => {
+  getCaseDetail: async ( precedentsId: string): Promise<GetCaseDetailResponse> => {
     try {
-      const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, { case_id: caseId, precedents_id: precedentsId });
+      const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, {precedents_id: precedentsId });
       const response = await apiClient.get<GetCaseDetailResponse>(endpoint);
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
     }
   },
+
+
+
+  
   generateDocument: async (caseId: number, data: GenerateDocumentRequest): Promise<GenerateDocumentResponse> => {
     try {
       const endpoint = replaceParams(API_ENDPOINTS.cases.CREATEFILE, { case_id: caseId });
@@ -156,6 +162,9 @@ export const caseService = {
     }
   },
 };
+
+
+
 
 export const userService = {
   getMe: async (): Promise<any> => {

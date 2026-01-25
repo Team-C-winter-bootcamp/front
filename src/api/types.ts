@@ -60,6 +60,7 @@ export type PostCaseInfoSuccess = {
   code: number;
   message: string;
   data: {
+    case_id: number;
     total_count: number;
     results: CaseResult[];
   };
