@@ -4,7 +4,7 @@ import { Layout } from '../components/ui/Layout';
 import { Card } from '../components/ui/Card';
 import { 
   Scale, Gavel, TrendingDown, AlertCircle, 
-  FileText, Mail, Check, ArrowRight, Star, Loader2
+  FileText, Mail, Check, ArrowRight, Star, Loader2, Info
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
@@ -13,7 +13,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Tooltip, Cell
 } from 'recharts';
 
-// 1. 데이터 인터페이스
+// 1. 데이터 인터페이스 정의
 export interface AnalysisData {
   outcome_prediction: {
     probability: string;
@@ -79,7 +79,6 @@ export default function Solution() {
     const colors = ['#7DD3FC', '#38BDF8', '#0EA5E9', '#0369A1'];
     return rawData.map((item, index) => ({
       ...item,
-      // 숫자가 문자열로 들어올 경우를 대비해 Number 처리
       count: Number(item.count) || 0,
       fill: item.is_target ? '#6366f1' : colors[index % colors.length]
     }));
@@ -112,13 +111,14 @@ export default function Solution() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-6 py-12 font-sans">
+        {/* 헤더 */}
         <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight italic underline decoration-indigo-500 underline-offset-8">AI 법률 심층 분석 보고서</h1>
           <p className="text-slate-500 mt-6 text-sm font-medium tracking-wide">사건번호 {precedentsId} 기반 정밀 솔루션</p>
         </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* 1. 레이더 차트 */}
+          {/* 1. 레이더 차트 (성격 분석) */}
           <Card className="lg:col-span-2 p-8 bg-white border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 mb-6"><Scale className="text-indigo-600" /> <h2 className="font-bold text-lg text-slate-800">사건 성격 대조 분석</h2></div>
             <div className="h-72">
@@ -128,9 +128,7 @@ export default function Solution() {
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fontWeight: 800, fill: '#1e293b' }} />
                   <Radar name="내 사건" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
                   <Radar name="유사 판례" dataKey="B" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.2} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0' }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -145,28 +143,12 @@ export default function Solution() {
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie 
-                    data={pieData} 
-                    innerRadius={65} 
-                    outerRadius={85} 
-                    paddingAngle={8} 
-                    dataKey="value"
-                    stroke="none"
-                  >
+                  <Pie data={pieData} innerRadius={65} outerRadius={85} paddingAngle={8} dataKey="value" stroke="none">
                     {pieData.map((_, i) => (
                       <Cell key={`pie-cell-${i}`} fill={['#8b5cf6', '#6366f1', '#f43f5e'][i % 3]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.96)', 
-                      borderRadius: '10px', 
-                      border: '1px solid #f1f5f9',
-                      padding: '8px 12px',
-                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
-                    }} 
-                    itemStyle={{ color: '#0f172a', fontWeight: 'bold' }}
-                  />
+                  <Tooltip itemStyle={{ color: '#0f172a', fontWeight: 'bold' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -175,7 +157,7 @@ export default function Solution() {
                 <div key={i} className="flex justify-between items-center px-2">
                   <span className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#8b5cf6', '#6366f1', '#f43f5e'][i % 3] }} />
-                    <span className="font-bold text-sm text-slate-900 uppercase tracking-tight">{item.name}</span>
+                    <span className="font-bold text-sm text-slate-900">{item.name}</span>
                   </span>
                   <span className="font-black text-lg text-slate-800">{item.value}%</span>
                 </div>
@@ -184,36 +166,19 @@ export default function Solution() {
           </Card>
         </div>
 
-        {/* 3. 막대그래프 (합의금 섹션) */}
+        {/* 3. 막대그래프 (합의금 산출 근거) */}
         <Card className="p-10 bg-white border-slate-200 mb-8 shadow-sm">
           <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
             <div className="md:col-span-2 h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={compensationTrendData}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <XAxis 
-                    dataKey="range" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#475569', fontSize: 12, fontWeight: 600 }} 
-                  />
+                <BarChart data={compensationTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 12, fontWeight: 600 }} />
                   <YAxis hide domain={[0, 'dataMax + 2']} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} />
-                  <Bar 
-                    dataKey="count" 
-                    radius={[10, 10, 0, 0]} 
-                    barSize={55}
-                    animationDuration={1000}
-                  >
+                  <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={55}>
                     {compensationTrendData.map((entry, index) => (
-                      <Cell 
-                        key={`bar-cell-${index}`} 
-                        fill={entry.fill} 
-                        fillOpacity={entry.is_target ? 1 : 0.6} 
-                      />
+                      <Cell key={`bar-cell-${index}`} fill={entry.fill} fillOpacity={entry.is_target ? 1 : 0.6} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -230,7 +195,49 @@ export default function Solution() {
           </div>
         </Card>
 
-        {/* 4. 로드맵 */}
+        {/* 4. 법리 기반 및 참조 판례 (Foundation & Logic 데이터 사용) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* AI 법리 판단 (logic) */}
+          <Card className="p-8 bg-white border-slate-200 shadow-sm border-l-4 border-l-indigo-500 h-full">
+            <div className="flex items-center gap-2 mb-6 text-slate-800">
+              <Info className="text-indigo-500" size={20} />
+              <h2 className="font-bold text-lg">AI 핵심 법리 판단</h2>
+            </div>
+            <div className="bg-slate-50 p-6 rounded-2xl h-[calc(100%-4rem)] overflow-auto">
+              <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-wrap font-medium">
+                {caseDetail.legal_foundation.logic}
+              </p>
+            </div>
+          </Card>
+
+          {/* 유사 판례 근거 (relevant_precedents) */}
+          <Card className="p-8 bg-white border-slate-200 shadow-sm h-full">
+            <div className="flex items-center gap-2 mb-6 text-slate-800">
+              <FileText className="text-indigo-500" size={20} />
+              <h2 className="font-bold text-lg">참조 판례 정보</h2>
+            </div>
+            <div className="space-y-4">
+              {caseDetail.legal_foundation.relevant_precedents.map((prec, idx) => (
+                <div key={idx} className="border border-slate-100 rounded-2xl p-4 hover:border-indigo-200 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-bold text-indigo-600 text-sm">{prec.case_number}</span>
+                    <span className="text-[10px] font-black text-slate-400">PRECEDENT</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {prec.key_points.map((point, pIdx) => (
+                      <li key={pIdx} className="flex gap-2 text-xs text-slate-500 leading-snug">
+                        <span className="text-indigo-400 font-bold">•</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* 5. 해결 로드맵 */}
         <Card className="p-8 bg-gray-50 border-slate-200 mb-8 shadow-inner">
           <div className="flex items-center gap-3 mb-10"><AlertCircle className="text-indigo-600" /><h2 className="text-xl font-bold text-slate-800">해결 로드맵</h2></div>
           <div className="flex flex-col md:flex-row justify-between gap-12 relative">
@@ -247,7 +254,7 @@ export default function Solution() {
           </div>
         </Card>
 
-        {/* 5. 문서 추천 섹션 */}
+        {/* 6. 문서 추천 섹션 */}
         <Card className="p-10 bg-white border-slate-200 mb-12 shadow-sm">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-black text-slate-900 mb-2 underline decoration-indigo-500 underline-offset-8">필요 문서 즉시 작성</h2>
