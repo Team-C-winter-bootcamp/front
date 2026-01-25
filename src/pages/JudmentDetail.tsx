@@ -2,7 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Download, Link2, Bookmark, BookmarkCheck, ChevronLeft, Scale, FileText, Info, ChevronDown, Sparkles, ArrowRight } from 'lucide-react';
+import { Download, Link2, Bookmark, BookmarkCheck, ChevronLeft, Scale, FileText, Info, ChevronDown, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { GetPrecedentDetailResponse } from '../api/types';
@@ -80,12 +80,6 @@ const JudgmentDetailPage = () => {
     setIsBookmarked(!isBookmarked);
   };
 
-  const handleGoToSimulation = () => {
-    if (precedentId) {
-      navigate(`/answer/${precedentId}`);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-[#F8FAFC] font-sans selection:bg-indigo-100">
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
@@ -153,33 +147,10 @@ const JudgmentDetailPage = () => {
               </motion.div>
             </section>
 
-            {/* 2. 시뮬레이션 이동 섹션 */}
-            <section id="simulation-cta">
-              <button 
-                onClick={handleGoToSimulation}
-                className="w-full bg-slate-900 hover:bg-indigo-600 text-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl transition-all group relative overflow-hidden"
-              >
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="text-center md:text-left">
-                    <h3 className="text-2xl md:text-3xl font-bold mb-3 flex items-center justify-center md:justify-start gap-3 tracking-tighter">
-                      내 사건 결과 예측하기 <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-                    </h3>
-                    <p className="text-slate-400 text-sm md:text-base group-hover:text-indigo-50 transition-colors tracking-tight">
-                      이 판례를 바탕으로 나의 승소 확률과 적정 합의금을 시뮬레이션 합니다.
-                    </p>
-                  </div>
-                  <div className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-black group-hover:bg-white group-hover:text-indigo-600 transition-all shadow-xl shadow-indigo-900/40 border border-white/10">
-                    분석 시작하기
-                  </div>
-                </div>
-                <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-400/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-indigo-300/20 transition-all" />
-              </button>
-            </section>
-
-            {/* 3. 판결문 전문 (폰트 고딕 통일 및 행간 최적화) */}
+            {/* 2. 판결문 전문 (폰트 고딕 통일 및 행간 최적화) */}
             <section id="original-content">
-              <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-10 md:p-16">
-                <div className="flex items-center gap-2 mb-12 text-slate-300 font-bold tracking-[0.2em] text-[10px] border-b border-slate-100 pb-4 uppercase font-sans">
+              <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 md:p-7">
+                <div className="flex items-center gap-2 mb-2 text-slate-300 font-bold tracking-[0.2em] text-[10px] border-b border-slate-100 pb-4 uppercase font-sans">
                   <FileText size={14} />
                   <span>Full Court Transcript</span>
                 </div>
