@@ -4,16 +4,17 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { ChevronRight, Landmark, Calendar, Search, CheckCircle2 } from 'lucide-react';
 
+// API 응답 데이터 구조와 일치하도록 인터페이스 정의
 export interface SearchResult {
-  case_No: string;
-  case_name: string;
-  title: string;
-  content: string;
-  court: string;
-  date: string;
-  caseType: string;
-  judgmentType: string;
-  similarity?: number;
+  case_No: string;      // API의 "id" (예: "99다38613")
+  case_name: string;    // API의 "case_number" (예: "해임처분취소")
+  title: string;        // API의 "case_title"
+  content: string;      // API의 "preview"
+  court: string;        // API의 "court"
+  date: string;         // API의 "judgment_date"
+  caseType: string;     // API의 "law_category"
+  judgmentType: string; // API의 "law_subcategory"
+  similarity?: number;  // API의 "similarity" (* 100)
 }
 
 const SearchResultsPage = () => {
@@ -25,18 +26,20 @@ const SearchResultsPage = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
+    // location.state에서 데이터 추출
     const state = location.state as { case_id: number; results: any[] };
 
     if (state?.results) {
+      // API 데이터(result)를 프론트엔드 UI용 객체(SearchResult)로 변환
       const mappedResults: SearchResult[] = state.results.map((result) => ({
-        case_No: result.case_No,
-        case_name: result.case_name || result.case_number || '사건번호 없음',
-        title: result.case_title || result.title || '제목 정보 없음',
-        content: result.preview || result.content || '내용 요약 정보 없음',
+        case_No: result.id, // API의 'id' 키를 사용 (중요!)
+        case_name: result.case_number || '사건번호 없음',
+        title: result.case_title || '제목 정보 없음',
+        content: result.preview || '내용 요약 정보 없음',
         court: result.court || '법원 미정',
-        date: result.judgment_date || result.date || '날짜 미상',
-        caseType: result.law_category || result.case_type || '분류 없음',
-        judgmentType: result.law_subcategory || result.judgment_type || '유형 없음',
+        date: result.judgment_date || '날짜 미상',
+        caseType: result.law_category || '분류 없음',
+        judgmentType: result.law_subcategory || '유형 없음',
         similarity: Math.round((result.similarity || 0) * 100),
       }));
       setSearchResults(mappedResults);
@@ -48,11 +51,15 @@ const SearchResultsPage = () => {
   }, [location.state]);
 
   const handleResultClick = (case_No: string) => {
-    navigate(`/judgment/${case_No}`, { state: { caseId } });
+    // 사건번호가 정상적으로 넘어오는지 확인
+    if (!case_No) return;
+    navigate(`/judgment/${encodeURIComponent(case_No)}`, { state: { caseId } });
   };
 
   const handleSelectClick = (e: React.MouseEvent, case_No: string) => {
-    e.stopPropagation();
+    e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
+    if (!case_No) return;
+    
     setSelectedIds((prev) =>
       prev.includes(case_No) ? prev.filter((id) => id !== case_No) : [...prev, case_No]
     );
@@ -90,7 +97,7 @@ const SearchResultsPage = () => {
             
             return (
               <motion.div
-                key={result.case_No}
+                key={result.case_No || index}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -168,10 +175,12 @@ const SearchResultsPage = () => {
             onClick={() => {
               const lastSelected = selectedIds[selectedIds.length - 1];
               const targetCaseNo = lastSelected || searchResults[0]?.case_No;
+              
               if (!targetCaseNo) {
                 alert("분석할 판례를 선택해주세요.");
                 return; 
               }
+              
               navigate(`/answer/${encodeURIComponent(targetCaseNo)}`, {
                 state: { caseId: caseId },
               });

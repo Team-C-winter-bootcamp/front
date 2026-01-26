@@ -48,7 +48,6 @@ const JudgmentDetailPage = () => {
     const date = detail.judgment_date || '날짜 미상';
 
     return {
-      id: detail.precedent_id,
       title: detail.case_title || detail.case_name || '제목 정보 없음',
       summary: `${court} ${date} 선고`,
       aiSummary: { resultSummary: [detail.summary || 'AI 요약 결과가 존재하지 않습니다.'] },
