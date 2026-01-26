@@ -2,10 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Card } from '../components/ui/Card';
-import { 
-  Scale, Gavel, TrendingDown, AlertCircle, 
-  FileText, Mail, Check, ArrowRight, Star, Loader2, Info
-} from 'lucide-react';
+import { Scale, Gavel, TrendingDown, AlertCircle, FileText, Mail, Check, Star, Loader2, Info} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { 
