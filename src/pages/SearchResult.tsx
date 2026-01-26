@@ -145,7 +145,7 @@ const SearchResultsPage = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">{result.case_name}</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">{result.case_No}</span>
                     <div className="flex items-center gap-1 text-xs text-slate-400"><Landmark size={14} /><span>{result.court}</span></div>
                     <div className="flex items-center gap-1 text-xs text-slate-400"><Calendar size={14} /><span>{result.date}</span></div>
                     <div className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${result.similarity! > 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
