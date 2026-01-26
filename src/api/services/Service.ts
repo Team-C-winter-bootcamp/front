@@ -9,8 +9,6 @@ import {
 } from '../types';
 import { API_ENDPOINTS, replaceParams } from '../endpoints';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
 // 문서 타입 정의
 export type DocType = 'complaint' | 'notice' | 'agreement';
 
