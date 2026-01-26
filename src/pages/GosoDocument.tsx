@@ -1,146 +1,101 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
-import { Download, ArrowUp, RotateCcw } from 'lucide-react';
+import { Download, ArrowUp, RotateCcw, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { caseService } from '../api';
-import type { StreamEventInfo, StreamEventChunk, StreamEventComplete } from '../api/types';
+import ReactMarkdown from 'react-markdown';
 
 export default function GosoDocument() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [chatInput, setChatInput] = useState('');
   const [documentContent, setDocumentContent] = useState('');
+  const [documentId, setDocumentId] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [caseId, setCaseId] = useState<number | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
   const [chatHeight, setChatHeight] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
+
   const documentRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  const { case_id, precedent_id } = (location.state as any) || {};
+
   useEffect(() => {
-    const state = location.state as { caseId?: number } | null;
-    if (state?.caseId) {
-      setCaseId(state.caseId);
+    const initDocument = async () => {
+      if (!case_id || !precedent_id) {
+        alert("사건 정보가 부족합니다. 분석 결과 페이지에서 다시 시도해주세요.");
+        navigate(-1);
+        return;
+      }
+      setIsGenerating(true);
+      try {
+        const response = await caseService.generateDocument('complaint', {
+          case_id: Number(case_id),
+          precedent: String(precedent_id),
+        });
+        if (response && response.document_id) {
+          setDocumentId(response.document_id);
+          setDocumentContent(response.content);
+          setChatMessages([{ role: 'ai', content: '분석된 법리를 바탕으로 고소장 초안을 작성했습니다. 수정 사항을 말씀해주세요!' }]);
+        }
+      } catch (error) {
+        alert('고소장 초안 생성 중 오류가 발생했습니다.');
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+    initDocument();
+  }, [case_id, precedent_id, navigate]);
+
+  const handleSend = async () => {
+    if (chatInput.trim().length < 5 || !documentId) return;
+    const userMessage = chatInput.trim();
+    setChatMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
+    setChatInput('');
+    setIsStreaming(true);
+    try {
+      const response = await caseService.updateDocument('complaint', {
+        document_id: documentId,
+        user_request: userMessage,
+      });
+      if (response && response.content) {
+        setDocumentContent(response.content);
+        setChatMessages((prev) => [...prev, { role: 'ai', content: '요청하신 내용을 반영하여 고소장을 수정했습니다.' }]);
+      }
+    } catch (error) {
+      alert('문서 수정 중 오류가 발생했습니다.');
+    } finally {
+      setIsStreaming(false);
     }
-  }, [location]);
+  };
 
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
-
     try {
-      const canvas = await html2canvas(documentRef.current, {
-        // @ts-ignore
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-
+      const canvas = await html2canvas(documentRef.current, { scale: 2, useCORS: true });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save('고소장.pdf');
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+      pdf.save(`고소장_${case_id}.pdf`);
     } catch (error) {
-      console.error('PDF 생성 실패:', error);
       alert('PDF 저장 중 오류가 발생했습니다.');
     }
   };
 
-  const handleSend = async () => {
-    if (chatInput.trim().length < 15 || !caseId) return;
-
-    const userMessage = chatInput.trim();
-    setChatMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
-    setChatInput('');
-    setIsGenerating(true);
-
-    try {
-      const response = await caseService.generateDocument(caseId, {
-        document_type: '고소장',
-        case_id: caseId,
-      });
-
-      if (response.status === 'success' && 'data' in response) {
-        setDocumentContent(response.data.content);
-        setIsGenerating(false);
-        setIsStreaming(true);
-        setChatMessages((prev) => [...prev, { 
-          role: 'ai', 
-          content: '법률문서생성 전용 AI입니다. 고소장 문서 생성을 시작하겠습니다. 추가 정보가 필요하면 알려주세요.' 
-        }]);
-
-        await caseService.modifyDocument(
-          caseId,
-          {
-            document_id: response.data.document_id,
-            user_answer: userMessage,
-          },
-          {
-            onInfo: (event: StreamEventInfo) => {
-              console.log('추출된 필드:', event.extracted_fields);
-            },
-            onChunk: (event: StreamEventChunk) => {
-              setDocumentContent((prev) => prev + event.text);
-            },
-            onComplete: (event: StreamEventComplete) => {
-              setIsStreaming(false);
-              console.log('문서 수정 완료:', event);
-            },
-            onError: (error) => {
-              setIsStreaming(false);
-              console.error('문서 수정 오류:', error);
-              alert('문서 생성 중 오류가 발생했습니다.');
-            },
-          }
-        );
-      } else {
-        alert('문서 생성에 실패했습니다.');
-        setIsGenerating(false);
-      }
-    } catch (error: any) {
-      console.error('문서 생성 오류:', error);
-      alert(error.message || '문서 생성 중 오류가 발생했습니다.');
-      setIsGenerating(false);
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
+  const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
       const newHeight = window.innerHeight - e.clientY;
-      const minHeight = 200;
-      const maxHeight = window.innerHeight - 200;
-      setChatHeight(Math.max(minHeight, Math.min(maxHeight, newHeight)));
+      setChatHeight(Math.max(200, Math.min(window.innerHeight - 100, newHeight)));
     };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
+    const handleMouseUp = () => setIsResizing(false);
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -151,172 +106,60 @@ export default function GosoDocument() {
     }
   }, [isResizing]);
 
-  const handleReset = () => {
-    setChatInput('');
-    setDocumentContent('');
-    setIsGenerating(false);
-    setIsStreaming(false);
-    setChatMessages([]);
-  };
-
   return (
     <Layout>
-      <div className="h-[calc(100vh-65px)] -mt-5 bg-white flex flex-col overflow-hidden relative z-0">
-        
-        {/* Header */}
+      <div className="h-[calc(100vh-65px)] -mt-5 bg-white flex flex-col overflow-hidden relative">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">고소장</h1>
-              {documentContent && (
-                <p className="text-sm text-gray-600 mt-1">제목 : {documentContent.match(/제목[：:]\s*(.+)/)?.[1] || '고소장'}</p>
-              )}
+              <h1 className="text-xl font-bold text-gray-900">고소장 작성</h1>
+              <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
             </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDownloadPDF}
-                leftIcon={<Download className="w-4 h-4" />}
-                className="bg-indigo-600 text-white hover:bg-indigo-700"
-              >
-                PDF 다운로드
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700">
+                <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
-              <Button
-                onClick={handleReset}
-                leftIcon={<RotateCcw className="w-4 h-4" />}
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                다시 하기
+              <Button onClick={() => window.location.reload()} size="sm" variant="outline">
+                <RotateCcw className="w-4 h-4 mr-2" /> 초기화
               </Button>
             </div>
           </div>
         </header>
 
-        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-auto min-h-0 pb-20">
-          {documentContent ? (
-            <div className="w-full max-w-4xl h-full flex flex-col">
-              <div className="flex-1 bg-white p-12 space-y-6 text-slate-800 leading-relaxed shadow-lg rounded-lg overflow-y-auto custom-scrollbar">
-                <div ref={documentRef}>
-                  <h2 className="text-2xl font-bold text-center mb-8">고소장</h2>
-                  <div 
-                    className="whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: documentContent }}
-                  />
-                </div>
-                {isStreaming && (
-                  <div className="flex justify-center gap-1 mt-4">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                )}
-              </div>
+        <div className="flex-1 bg-slate-100 p-8 overflow-auto pb-40">
+          {isGenerating ? (
+            <div className="h-full flex flex-col items-center justify-center">
+              <Loader2 className="animate-spin text-indigo-500 mb-4" size={48} />
+              <p className="font-bold text-slate-600 text-lg">AI가 고소장을 작성 중입니다...</p>
             </div>
           ) : (
-            <div className="w-full max-w-2xl -mt-16">
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                {isGenerating ? (
-                  <>
-                    <p className="text-gray-700 text-lg mb-4">문서를 생성하고 있습니다...</p>
-                    <div className="flex justify-center gap-1 mt-4">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-gray-700 text-lg">
-                      채팅창에 상황을 입력하시면 문서가 자동으로 생성이 됩니다!
-                    </p>
-                    <div className="flex justify-center gap-1 mt-4">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                  </>
-                )}
+            <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
+              <div className="font-serif text-slate-900 text-[11pt] leading-[1.8] whitespace-pre-wrap">
+                <ReactMarkdown>{documentContent}</ReactMarkdown>
               </div>
             </div>
           )}
         </div>
 
-        {/* Resizable Chat Section (Independent Overlay) */}
-        {/* 수정됨: absolute position, bottom-0, w-full 적용하여 상단 컨텐츠 위에 뜸 */}
-        <div 
-          ref={chatContainerRef}
-          className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
-          style={{ height: `${chatHeight}px`, maxHeight: '60vh' }}
-        >
-          {/* Resize Handle */}
-          <div
-            onMouseDown={handleMouseDown}
-            className="h-2 bg-gray-200 hover:bg-gray-300 cursor-ns-resize flex items-center justify-center flex-shrink-0"
-          >
-            <div className="w-12 h-1 bg-gray-400 rounded"></div>
+        <div ref={chatContainerRef} className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-lg" style={{ height: `${chatHeight}px` }}>
+          <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
+             <div className="w-10 h-1 bg-gray-300 rounded-full" />
           </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            {chatMessages.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <p className="text-sm">AI와 대화를 시작하세요</p>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                   {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
+                   <p className="whitespace-pre-wrap">{msg.content}</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {chatMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        msg.role === 'user'
-                          ? 'bg-slate-100 text-slate-800'
-                          : 'bg-indigo-50 text-indigo-800'
-                      }`}
-                    >
-                      {msg.role === 'ai' && (
-                        <div className="text-xs font-semibold text-indigo-700 mb-1">LAWDING AI</div>
-                      )}
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            ))}
+            {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
           </div>
-          <div className="border-t border-gray-200 p-4 flex-shrink-0">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && chatInput.trim().length >= 15) {
-                      handleSend();
-                    }
-                  }}
-                  placeholder="답변을 입력해주세요."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={chatInput.trim().length < 15 || isGenerating || isStreaming || !caseId}
-                  aria-label="메시지 전송"
-                  className={`p-3 rounded-lg transition-colors ${
-                    chatInput.trim().length >= 15 && !isGenerating && !isStreaming && caseId
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  <ArrowUp className="w-5 h-5" />
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                AI가 제공하는 답변은 제출한 정보를 기반으로 하므로, 참고용으로만 사용해 주세요.
-              </p>
+          <div className="p-4 border-t bg-white">
+            <div className="max-w-4xl mx-auto flex gap-2">
+              <input className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="수정하고 싶은 내용을 입력하세요..." />
+              <button onClick={handleSend} disabled={isStreaming || chatInput.trim().length < 5} className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm"><ArrowUp size={20} /></button>
             </div>
           </div>
         </div>

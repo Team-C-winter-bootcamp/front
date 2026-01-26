@@ -11,9 +11,9 @@ const JudmentDetail = lazy(() => import('./pages/JudmentDetail'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
-const AgreeDocument = lazy(() => import('./pages/AgreeDocument'));
-const GosoDocument = lazy(() => import('./pages/GosoDocument'));
-const ProofDocument = lazy(() => import('./pages/ProofDocument'));
+const AgreementDocument = lazy(() => import('./pages/AgreeDocument'));
+const ComplaintDocument = lazy(() => import('./pages/GosoDocument'));
+const NoticeDocument = lazy(() => import('./pages/ProofDocument'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -40,9 +40,9 @@ export function App() {
             <Route path="/judgment/:case_No" element={<JudmentDetail />} />
             <Route path="/search" element={<SearchResult />} />
             <Route path="/answer/:precedentsId" element={<Solution />} />
-            <Route path="/document/agree" element={<AgreeDocument />} />
-            <Route path="/document/goso" element={<GosoDocument />} />
-            <Route path="/document/proof" element={<ProofDocument />} />
+            <Route path="/document/agree" element={<AgreementDocument />} />
+            <Route path="/document/goso" element={<ComplaintDocument />} />
+            <Route path="/document/proof" element={<NoticeDocument />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

@@ -96,7 +96,6 @@ export type PrecedentDetailData = {
   case_name: string;
   court: string;
   judgment_date: string;
-  precedent_id: number;
   issue: string;
   content: string;
   summary : string;
@@ -159,59 +158,45 @@ export interface GetCaseDetailBadRequest {
   message: string;
 }
 
-// 두 타입을 결합한 유니온 타입
 export type GetCaseDetailResponse = GetCaseDetailSuccess | GetCaseDetailBadRequest;
 
 // ==========================================
-// 5. CREATEFILE (문서 생성 - POST)
+// 5. 법률 문서 생성 (POST)
 // ==========================================
+
 export type GenerateDocumentRequest = {
-  document_type: '내용증명' | string; 
   case_id: number;
+  precedent: string; // 참고 판례 원문 또는 ID
 };
 
 export type DocumentData = {
   document_id: number;
-  case_id: number;
-  title: string;
+  type: 'complaint' | 'notice' | 'agreement'; // 백엔드 Choice 필드와 일치
   content: string;
+  created_at?: string;
 };
 
-export type GenerateDocumentSuccess = {
-  status: 'success';
-  data: DocumentData;
+export type GenerateDocumentResponse = {
+  document_id: number;
+  type: string;
+  content: string;
+  created_at?: string;
+  data?: DocumentData; // 응답이 data 객체로 감싸져 올 경우 대비
 };
-
-export type GenerateDocumentBadRequest = {
-  status: 'error';
-  code: 400;
-  message: string;
-  error: {
-    additional_request: null | string; 
-  };
-};
-
-export type GenerateDocumentNotFound = {
-  status: 'error';
-  code: 404;
-  message: string;
-};
-
-export type GenerateDocumentResponse = 
-  | GenerateDocumentSuccess 
-  | GenerateDocumentBadRequest 
-  | GenerateDocumentNotFound;
-
 
 // ==========================================
-// 6. MODIFYFILE (문서 수정 - PATCH Streaming)
+// 6. 법률 문서 수정 (PATCH)
 // ==========================================
+
+
 export type PatchDocumentRequest = {
   document_id: number;
-  user_answer: string;
+  user_request: string; // 기존 user_answer에서 변경
 };
 
-// SSE Event Types
+export type PatchDocumentResponse = GenerateDocumentResponse;
+
+// (참고) 만약 나중에 SSE를 다시 도입할 경우를 대비한 정의
 export type StreamEventInfo = {
   status: 'processing';
   extracted_fields: string[];
@@ -224,9 +209,8 @@ export type StreamEventChunk = {
 
 export type StreamEventComplete = {
   document_id: number;
-  case_id: number;
-  updated_at: string;
   status: 'success';
+  content: string;
 };
 
 // HTTP Errors (Connection phase)
