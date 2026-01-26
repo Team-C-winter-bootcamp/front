@@ -99,6 +99,7 @@ export type PrecedentDetailData = {
   precedent_id: number;
   issue: string;
   content: string;
+  summary : string;
 };
 
 export type GetPrecedentDetailSuccess = {

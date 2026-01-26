@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { ChevronRight, Landmark, Calendar, Search, CheckCircle2 } from 'lucide-react';
 
@@ -170,7 +170,7 @@ const SearchResultsPage = () => {
               const targetCaseNo = lastSelected || searchResults[0]?.case_No;
               if (!targetCaseNo) {
                 alert("분석할 판례를 선택해주세요.");
-                return;
+                return; 
               }
               navigate(`/answer/${encodeURIComponent(targetCaseNo)}`, {
                 state: { caseId: caseId },
