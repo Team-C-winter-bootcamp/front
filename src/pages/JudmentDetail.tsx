@@ -2,11 +2,10 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Download, Link2, Bookmark, BookmarkCheck, ChevronLeft, Scale, FileText, Info, ChevronDown, Sparkles, Loader2 } from 'lucide-react';
+import { Download, Link2, Bookmark, BookmarkCheck, ChevronLeft, FileText, Info, ChevronDown, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { GetPrecedentDetailResponse } from '../api/types';
-import { Layout } from '../components/ui/Layout'; // Layout 컴포넌트가 있다면 사용
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
@@ -122,9 +121,8 @@ const JudgmentDetailPage = () => {
   return (
     <main className="min-h-screen bg-[#F8FAFC] font-sans selection:bg-indigo-100">
       {/* 헤더 및 컨텐츠 레이아웃 기존과 동일 */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-start items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
         <button onClick={() => navigate('/')} className="text-2xl font-black tracking-tighter text-indigo-600">LAWDING</button>
-        <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"><ChevronLeft size={24} /></button>
       </header>
 
       <div className="bg-gradient-to-br pt-28 max-w-6xl mx-auto px-4 md:px-8 pb-20">
@@ -133,9 +131,19 @@ const JudgmentDetailPage = () => {
             <span className="bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.1em]">{judgmentData.judgmentType}</span>
             <span className="text-slate-400 text-sm font-semibold tracking-tight">{judgmentData.summary}</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 leading-[1.2] tracking-tighter break-keep">
-            {judgmentData.title}
-          </h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+              aria-label="이전 페이지로 돌아가기"
+              title="이전 페이지로 돌아가기"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 leading-[1.2] tracking-tighter break-keep">
+              {judgmentData.title}
+            </h1>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -145,16 +153,16 @@ const JudgmentDetailPage = () => {
             <section id="ai-summary">
               <motion.div 
                 layout
-                className="bg-gradient-to-br from-indigo-100 via-white to-blue-100 rounded-[2.5rem] shadow-xl md:p-12 text-slate-800 relative overflow-hidden border border-indigo-200"
+                className="bg-gradient-to-br rounded-[2.5rem] shadow-xl md:p-12 text-slate-800 relative overflow-hidden border border-indigo-200"
               >
                 <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg text-white">
+                    <div className="p-3 bg-indigo-400 rounded-2xl shadow-lg text-white">
                       <Sparkles size={24} />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold tracking-tight text-slate-900">AI 판례 정밀 분석</h2>
-                      <p className="text-xs text-indigo-600 font-extrabold uppercase tracking-widest">AI Case Insights</p>
+                      <p className="text-xs text-indigo-200 font-extrabold uppercase tracking-widest">AI Case Insights</p>
                     </div>
                   </div>
                   

@@ -76,13 +76,42 @@ export default function GosoDocument() {
 
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
+
     try {
-      const canvas = await html2canvas(documentRef.current, { scale: 2, useCORS: true });
+      // 문서 전체 캡처
+      const canvas = await html2canvas(documentRef.current, { 
+        scale: 2, 
+        useCORS: true,
+        backgroundColor: "#ffffff" // 배경 흰색 고정
+      });
+      
       const imgData = canvas.toDataURL('image/png');
+      
+      // A4 크기 기준 계산 (mm)
+      const imgWidth = 210; // A4 너비
+      const pageHeight = 297; // A4 높이
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // 비율에 맞춘 전체 이미지 높이
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
       const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-      pdf.save(`고소장_${case_id}.pdf`);
+
+      // 첫 페이지 출력
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // 내용이 남았다면 페이지 추가 루프
+      while (heightLeft > 0) {
+        position -= pageHeight; // 이미지를 위로 올림
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`고소장_${case_id || 'draft'}.pdf`);
     } catch (error) {
+      console.error(error);
       alert('PDF 저장 중 오류가 발생했습니다.');
     }
   };
@@ -145,17 +174,23 @@ export default function GosoDocument() {
           <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
              <div className="w-10 h-1 bg-gray-300 rounded-full" />
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-            {chatMessages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
-                   {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
-                   <p className="whitespace-pre-wrap">{msg.content}</p>
+          
+          {/* --- 수정된 채팅 영역 --- */}
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div className="max-w-4xl mx-auto space-y-4">
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                    {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
+              ))}
+              {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
+            </div>
           </div>
+          {/* ---------------------- */}
+
           <div className="p-4 border-t bg-white">
             <div className="max-w-4xl mx-auto flex gap-2">
               <input className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="수정하고 싶은 내용을 입력하세요..." />

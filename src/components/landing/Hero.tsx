@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'; 
-import solu from '../../assets/solu.png';
+import main from '../../assets/main.webp';
 
 const Hero = () => {
   const navigate = useNavigate(); 
@@ -37,7 +37,7 @@ const Hero = () => {
         </div>
         <div className="mt-20 relative reveal active">
           <img 
-            src= {solu}
+            src= {main}
             alt="Dashboard Preview" 
             width={800}
             height={600}

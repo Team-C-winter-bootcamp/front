@@ -128,8 +128,8 @@ export default function CaseCreation() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="bg-white border-b border-gray-200 py-8">
+      <div className="bg-white">
+        <div className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center w-full">
               {steps.map((step, index) => {
@@ -163,10 +163,10 @@ export default function CaseCreation() {
             </div>
           </div>
         </div>
-        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6 py-10">
-          <div className="bg-slate-50 rounded-2xl p-10 flex flex-col min-h-[400px] shadow-sm border border-slate-100">
+        <div className="flex flex-col max-w-5xl mx-auto w-full px-6 py-2">
+          <div className="bg-slate-50 rounded-2xl p-6 flex flex-col shadow-sm border border-slate-100">
             {currentStep === 0 && (
-              <div className="mb-8">
+              <div className="mb-4">
                 <p className="text-xl font-bold text-gray-800 leading-relaxed">
                   현재 겪고 계신 일에 대한 상황 파악을 위한 체크리스트입니다.<br />
                   입력하신 정보는 철저히 비밀이 보장되니, 상황에 맞는 버튼을 선택해 주세요.
@@ -174,7 +174,7 @@ export default function CaseCreation() {
               </div>
             )}
 
-            <div className="mb-8">
+            <div className="mb-4">
               <p className="text-2xl text-gray-900 font-bold">{steps[currentStep].question}</p>
             </div>
 
@@ -215,7 +215,7 @@ export default function CaseCreation() {
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
             <span className="text-lg text-indigo-600 font-semibold">Step {currentStep + 1} / {steps.length}</span>
             <div className="flex gap-4">
               <button

@@ -74,18 +74,49 @@ export default function AgreeDocument() {
     }
   };
 
+  // --- [수정된 부분] PDF 다중 페이지 저장 로직 ---
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
+
     try {
-      const canvas = await html2canvas(documentRef.current, { scale: 2, useCORS: true });
+      // 1. html2canvas로 전체 내용을 캡처
+      const canvas = await html2canvas(documentRef.current, { 
+        scale: 2, 
+        useCORS: true,
+        backgroundColor: "#ffffff" // 배경 흰색 고정
+      });
+      
       const imgData = canvas.toDataURL('image/png');
+      
+      // 2. A4 크기 기준 계산 (mm)
+      const imgWidth = 210; 
+      const pageHeight = 297; 
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
       const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-      pdf.save(`합의서_${case_id}.pdf`);
+
+      // 3. 첫 페이지 출력
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // 4. 내용이 남았다면 페이지 추가 루프
+      while (heightLeft > 0) {
+        position -= pageHeight; // 이미지를 위로 올림
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`합의서_${case_id || 'draft'}.pdf`);
     } catch (error) {
+      console.error(error);
       alert('PDF 저장 중 오류가 발생했습니다.');
     }
   };
+  // ---------------------------------------------
 
   const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
 

@@ -8,9 +8,9 @@ interface LayoutProps {
 
 export function Layout({ children, showNav = true }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {showNav && <Navbar />}
-      <main className={showNav ? 'pt-24' : ''}>{children}</main>
+      <main className={showNav ? 'pt-[80px]' : ''}>{children}</main>
     </div>
   );
 }

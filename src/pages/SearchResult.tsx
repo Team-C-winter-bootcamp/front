@@ -107,7 +107,7 @@ const SearchResultsPage = () => {
 
   return (
     <Layout>
-      <main className="min-h-screen bg-slate-50/50 pt-24 pb-20">
+      <main className="min-h-screen bg-slate-50/50 pt-[20px] pb-20">
         <div className="max-w-3xl mx-auto px-4">
           <header className="mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold mb-3">
@@ -126,16 +126,25 @@ const SearchResultsPage = () => {
                 <motion.div
                   key={result.case_No}
                   initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: isSelected ? -8 : 0,
+                    scale: isSelected ? 1.01 : 1
+                  }}
+                  whileHover={{ y: -4 }}
+                  transition={{ 
+                    y: { type: "spring", stiffness: 400, damping: 25 },
+                    scale: { type: "spring", stiffness: 400, damping: 25 },
+                    opacity: { duration: 0.2, delay: index * 0.05 }
+                  }}
                   onClick={() => handleResultClick(result.case_No)}
-                  className={`group relative rounded-2xl p-6 transition-all cursor-pointer border-2 ${
+                  className={`group relative rounded-2xl p-4 transition-all duration-300 cursor-pointer border-2 ${
                     isSelected 
-                      ? 'bg-white border-indigo-500 shadow-xl' 
-                      : 'bg-white border-transparent shadow-sm hover:border-slate-200'
+                      ? 'bg-indigo-50/80 border-indigo-500 shadow-xl z-10' 
+                      : 'bg-white border-gray-200 shadow-sm hover:border-slate-200'
                   }`}
                 >
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-2">
                     <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">{result.case_name}</span>
                     <div className="flex items-center gap-1 text-xs text-slate-400"><Landmark size={14} /><span>{result.court}</span></div>
                     <div className="flex items-center gap-1 text-xs text-slate-400"><Calendar size={14} /><span>{result.date}</span></div>
@@ -156,7 +165,7 @@ const SearchResultsPage = () => {
                       type="button"
                       onClick={(e) => handleSelectClick(e, result.case_No)}
                       className={`flex items-center gap-1.5 text-xs px-5 py-2 rounded-full transition-all font-bold ${
-                        isSelected ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        isSelected ? 'bg-indigo-600 text-white shadow-lg' : 'bg-indigo-100 text-slate-500 hover:bg-slate-200'
                       }`}
                     >
                       {isSelected ? <CheckCircle2 size={14} /> : null}

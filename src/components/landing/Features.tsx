@@ -3,66 +3,77 @@ import { FeatureSection } from '../../types/landing';
 import pick from '../../assets/pick.webp';
 import checklist from '../../assets/checklist.webp';
 import pan from '../../assets/pan.webp';
-import solu from '../../assets/solu.png';
-
+import solu from '../../assets/solu.webp';
+import detail from '../../assets/detail.webp';
 
 const features: FeatureSection[] = [
   {
     id: 'select',
-    title: '1. 사건 종류 선택',
-    description: '못받은 돈, 근로/알바 계약서, 부동산/임대차 등 사건 유형을 간단히 선택하세요.',
+    title: '분야별 맞춤 법률 가이드',
+    description: '어떤 법률 고민을 안고 계신가요? 못 받은 돈부터 임대차 문제까지, 해결이 필요한 분야를 선택해주세요.',
     details: [
-      '6가지 주요 사건 카테고리 제공',
-      '명확한 사건 분류로 빠른 시작',
-      '기타 사건도 직접 설명 가능'
+      '6가지 법률 분야 완벽 대응',
+      '클릭 한 번으로 시작하는 맞춤 분석',
+      '복잡한 기타 사건도 유연하게 처리'
     ],
     image: pick
   },
   {
     id: 'matching',
-    title: '2. 간단한 체크리스트와 상황 작성',
-    description: '버튼으로 간단한 체크리스트를 작성하고 현재 상황을 자유롭게 설명하세요.',
+    title: 'AI와 대화하듯 쉬운 상황 진단',
+    description: '법률 용어를 몰라도 괜찮습니다. 겪으신 일을 친구에게 말하듯 편안하게 적어주시면 AI가 핵심 쟁점을 파악합니다.',
     details: [
-      '대화형 질문으로 상황 파악',
-      '자세한 상황 입력으로 정확도 향상',
-      '모든 정보는 비공개로 안전하게 보관'
+      '직관적인 대화형 인터페이스',
+      '구체적인 상황 묘사로 분석 정확도 UP'
     ],
     image: checklist,
     reverse: true
   },
   {
     id: 'precedent',
-    title: '3. 유사 판례 5개 제공',
-    description: '입력하신 정보를 바탕으로 가장 유사한 판례 5개를 찾아드립니다.',
+    title: '데이터로 증명하는 유사 판례 매칭',
+    description: '내 사건은 법원에서 어떻게 판결 났을까요? 방대한 법률 데이터 속에서 가장 유사한 실제 판례를를 찾아드립니다.',
     details: [
-      'AI 기반 유사 판례 매칭',
-      '유사도 표시로 신뢰도 확인',
-      '판례 클릭 시 상세 정보 및 요약 제공'
+      'AI 알고리즘 기반 정밀 판례 매칭',
+      '사건 유사도 점수로 신뢰성 확인',
+      '판례 원문 및 핵심 쟁점 즉시 확인'
     ],
     image: pan
   },
   {
-    id: 'advice',
-    title: '4. 예상 합의금 및 해결 방안',
-    description: '유사 판례 데이터를 바탕으로 예상 합의금과 문제 해결 방안을 제시합니다.',
+    id: 'summary',
+    title: '3분 만에 이해하는 핵심 요약',
+    description: '수십 페이지에 달하는 복잡한 판결문, 읽다가 포기하지 마세요. 어려운 법률 용어를 걷어내고 핵심 내용만 쉽게 요약해 드립니다.',
     details: [
-      'AI 기반 합의금 예측',
-      '상황별 맞춤 해결 방안 조언',
-      '문서 선택 가이드 제공'
+      'AI 요약으로 판결 요지 즉시 파악',
+      '난해한 법률 용어를 일상 언어로 해설',
+      '사건의 승패 요인 한눈에 확인'
     ],
-    image: solu,
+    image: detail,
     reverse: true
   },
   {
-    id: 'draft',
-    title: '5. 법률 문서 자동 작성',
-    description: '합의서, 내용증명서, 고소장 중 선택하여 자동으로 문서를 작성하고 다운로드하세요.',
+    id: 'advice',
+    title: '데이터로 보는 내 사건의 승소 가능성',
+    description: '"얼마나 받을 수 있을까?" 막연한 추측 대신 눈에 보이는 데이터로 확인하세요. 유사 판례와 비교 분석하여 예상 형량부터 적정 합의금까지 구체적인 수치를 제시합니다.',
     details: [
-      '표준 법률 문서 양식 제공',
-      '입력 정보 자동 반영',
-      'PDF 다운로드 지원'
+      '내 사건 vs 유사 판례 5가지 지표 정밀 비교', 
+      '빅데이터 기반 예상 형량 분포 및 적정 합의금 산출', 
+      '판결을 꿰뚫는 AI 핵심 법리 판단과 근거 제공' 
     ],
-    image: 'https://picsum.photos/seed/editor/800/600'
+    image: solu
+  },
+  {
+    id: 'draft',
+    title: '법률 문서 자동 완성',
+    description: '내용증명부터 고소장까지, 빈칸만 채우면 끝납니다. 전문 변호사가 감수한 양식으로 완벽한 법률 문서를 1분 만에 작성하세요.',
+    details: [
+      '표준 법률 문서 서식 제공',
+      '분석된 정보를 반영한 빠른 문서 작성',
+      '원터치로 PDF 다운로드'
+    ],
+    image: 'https://picsum.photos/seed/editor/800/600',
+    reverse: true
   }
 ];
 
