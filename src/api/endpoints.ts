@@ -3,10 +3,10 @@ export const API_ENDPOINTS = {
   cases: {
     INFO: 'cases/', // 사건 정보 등록(POST)
     SUMMARY: 'cases/{precedents_id}', // 판결문 요약 보기(GET)
-    ANSWER: 'cases/answer/{precedents_id}', // 판결문 답변 보기(GET)
+    ANSWER: 'cases/answer/{precedents_id}/', // 판결문 답변 보기(Post)
     GETFILEDETAIL: 'cases/documents', // 판례 상세 정보 조회(GET)
-    CREATEFILE: 'cases/documents', // 문서 생성 시작(POST)
-    MODIFYFILE: 'cases/documents', // 문서 수정(PATCH)
+    CREATEFILE: 'cases/documents/', // 문서 생성 시작(POST)
+    MODIFYFILE: 'cases/documents/', // 문서 수정(PATCH)
   },
 
   // 사용자 (Users) - 기존 서비스용
