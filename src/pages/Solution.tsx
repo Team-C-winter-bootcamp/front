@@ -131,7 +131,7 @@ export default function Solution() {
     <Layout><div className="py-24 text-center"><AlertCircle className="mx-auto text-red-500 mb-4" size={48} /><h2 className="text-xl font-bold text-red-800">데이터 로드 실패</h2><p className="mt-2 text-slate-500">사건 번호나 ID가 올바르지 않습니다.</p></div></Layout>
   );
 
-  const pieColors = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#c084fc', '#818cf8'];
+  const pieColors = ['#6366f1', '#818cf8', '#a5b4fc'];
 
   return (
     <Layout>
