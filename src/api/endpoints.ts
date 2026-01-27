@@ -1,5 +1,5 @@
 export const API_ENDPOINTS = {
-  inits: { INIT: 'init' },
+  inits: { INIT: 'cases/init/' },
   cases: {
     INFO: 'cases/', // 사건 정보 등록(POST)
     SUMMARY: 'cases/{precedents_id}/', // 판결문 요약 보기(GET)

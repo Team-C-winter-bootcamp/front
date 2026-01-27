@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { CaseProvider } from './context/CaseContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
-const CaseLaw = lazy(() => import('./pages/CaseLaw'));
 const CaseCreation = lazy(() => import('./pages/CaseCreation'));
 const Solution = lazy(() => import('./pages/Solution'));
 const SearchResult = lazy(() => import('./pages/SearchResult'));
@@ -36,7 +35,6 @@ export function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/case" element={<CaseCreation />} />
             <Route path="/case/new" element={<CaseCreation />} />
-            <Route path="/case/:id/caselaw" element={<CaseLaw />} />
             <Route path="/judgment/:case_No" element={<JudmentDetail />} />
             <Route path="/search" element={<SearchResult />} />
             <Route path="/answer/:precedentsId" element={<Solution />} />

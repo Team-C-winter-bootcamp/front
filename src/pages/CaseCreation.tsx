@@ -1,160 +1,182 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
-import { Check } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { caseService } from '../api';
+import { Check, CalendarOff, Edit3, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { caseService, initService } from '../api';
 import { PostCaseInfoSuccess } from '../api/types';
 
-type Step = {
+// 1. 타입 정의
+type QuestionType = 'who' | 'when' | 'what' | 'want' | 'detail';
+
+interface QuestionItem {
+  type: QuestionType;
+  content: string;
+}
+
+interface CategoryData {
+  category_id: number;
+  name: string;
+  questions: QuestionItem[];
+}
+
+interface StepItem {
   id: number;
+  type: QuestionType;
   label: string;
   question: string;
   options: string[];
-};
-
-const steps: Step[] = [
-  {
-    id: 1,
-    label: '피해자 여부',
-    question: '1. 현 상황에서 귀하의 역할을 알려주실 수 있나요?',
-    options: ['저는 피해자/청구인입니다.', '저는 피의자입니다.', '저는 증인입니다.', '기타']
-  },
-  {
-    id: 2,
-    label: '보험여부',
-    question: '2. 겪고있는 사건과 연관된 보험을 가지고 있나요?',
-    options: ['네, 저에게 보험이 있습니다.', '상대방에게 보험이 있습니다.', '나와 상대방 모두 보험이 있습니다.', '잘모르겠습니다.']
-  },
-  {
-    id: 3,
-    label: '부상여부',
-    question: '3. 사건 중에 신체적 부상을 입은 사람이 있나요?',
-    options: ['네, 심각한 부상입니다.', '네, 경미한 부상입니다.', '부상이 없습니다.', '해당 없음']
-  },
-  {
-    id: 4,
-    label: '증거여부',
-    question: '4. 지금 사용 가능한 문서화된 증거(사진, 이메일, 경찰 보고서)가 있나요?',
-    options: ['네, 강력한 증거가 있습니다.', '일부 증거가 있습니다.', '서면 증거가 없습니다.', '나중에 가져올 수 있습니다.']
-  },
-  {
-    id: 5,
-    label: '세부사항',
-    question: '5. 내용을 공유해 주셔서 감사합니다. 이제 상황에 대해 자세히 설명해 주시겠어요?',
-    options: []
-  }
-];
+}
 
 export default function CaseCreation() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // 상태 관리
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
   const [detailText, setDetailText] = useState('');
+  const [customInput, setCustomInput] = useState(''); 
+  const [showCustomInput, setShowCustomInput] = useState(false); 
   const [isLoading, setIsLoading] = useState(false);
-  const [category, setCategory] = useState('기타');
+  const [isDataFetching, setIsDataFetching] = useState(true);
 
+  // 초기 데이터 로드
   useEffect(() => {
-    if (location.state?.category) {
-      setCategory(location.state.category);
-    }
-  }, [location.state]);
+    const fetchInitData = async () => {
+      try {
+        const response = await initService.getCategories();
+        setCategoryData(response as any);
+      } catch (error) {
+        console.error('데이터 로드 실패:', error);
+      } finally {
+        setIsDataFetching(false);
+      }
+    };
+    fetchInitData();
+  }, []);
 
-  const handleOptionClick = (option: string) => {
-    setSelectedOptions((prev) => [...prev, option]);
-    if (currentStep < steps.length - 1) {
+  // 단계별 질문 동적 구성
+  const dynamicSteps = useMemo<StepItem[]>(() => {
+    const currentCategoryName = location.state?.category || '기타';
+    const targetCategory = categoryData.find((c) => c.name === currentCategoryName);
+
+    if (!targetCategory) return [];
+
+    const typeOrder: Extract<QuestionType, 'who' | 'when' | 'what' | 'want'>[] = ['who', 'when', 'what', 'want'];
+    const labels: Record<string, string> = { who: '당사자', when: '시기', what: '사건 내용', want: '희망 결과' };
+    const questions: Record<string, string> = {
+      who: '본인의 역할을 선택해주세요.',
+      when: '사건이 발생한 날짜를 선택해주세요.',
+      what: '구체적인 피해 상황은 무엇인가요?',
+      want: '어떤 해결 결과를 원하시나요?'
+    };
+
+    const steps: StepItem[] = typeOrder.map((type, index) => {
+      const options = targetCategory.questions
+        .filter((q) => q.type === type)
+        .map((q) => q.content);
+
+      return {
+        id: index + 1,
+        type,
+        label: labels[type],
+        question: questions[type],
+        options: type === 'when' ? [] : [...options, '기타(직접 입력)']
+      };
+    });
+
+    steps.push({
+      id: 5,
+      type: 'detail',
+      label: '세부사항',
+      question: '상황에 대해 자세히 설명해 주세요.',
+      options: []
+    });
+
+    return steps;
+  }, [categoryData, location.state]);
+
+  const isDetailValid = detailText.trim().length >= 15;
+
+  const handleOptionClick = (type: QuestionType, value: string) => {
+    if (value === '기타(직접 입력)') {
+      setShowCustomInput(true);
+      setCustomInput('');
+      return;
+    }
+    
+    setSelectedValues((prev) => ({ ...prev, [type]: value }));
+    setShowCustomInput(false);
+    if (currentStep < dynamicSteps.length - 1) {
       setTimeout(() => setCurrentStep((prev) => prev + 1), 300);
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-      setSelectedOptions((prev) => prev.slice(0, -1));
-      if (currentStep === steps.length - 1) {
-        setDetailText('');
-      }
-    }
+  const handleCustomSubmit = () => {
+    if (customInput.trim().length === 0) return;
+    handleOptionClick(dynamicSteps[currentStep].type, customInput);
   };
 
   const handleNext = async () => {
-    if (currentStep === steps.length - 1 && detailText.trim().length >= 15) {
+    if (currentStep === dynamicSteps.length - 1 && isDetailValid) {
       setIsLoading(true);
       try {
         const requestData = {
-          category: category,
-          who: selectedOptions[0] || '미지정',
-          when: '사건 발생일 및 상세 내용 참조',
-          what: `${selectedOptions[1]} / ${selectedOptions[2]}`,
-          want: '유사 판례 검색 및 법률 조언 요청',
-          detail: `[증거 상황: ${selectedOptions[3]}]\n\n${detailText.trim()}`
+          category: location.state?.category || '기타',
+          who: selectedValues['who'] || '미지정',
+          when: selectedValues['when'] || '날짜 미상',
+          what: selectedValues['what'] || '미정',
+          want: selectedValues['want'] || '법률 조언 요청',
+          detail: detailText.trim()
         };
 
-        // API 호출 및 타입 캐스팅
         const response = await caseService.createCase(requestData) as PostCaseInfoSuccess;
 
-        // response.status가 'success'이고 내부에 data 객체가 있는지 확인
         if (response.status === 'success' && response.data) {
-          // types.ts 구조에 따라 response.data 내부에서 추출
-          const actualData = response.data;
-
           navigate('/search', { 
             state: { 
-              case_id: actualData.case_id,
-              results: actualData.results, 
-              totalCount: actualData.total_count,
+              case_id: response.data.case_id,
+              results: response.data.results, 
+              totalCount: response.data.total_count,
             } 
           });
-        } else {
-          alert('사건 등록에 실패했습니다. 데이터를 확인해주세요.');
         }
-      } catch (error: any) {
-        console.error('사건 등록 오류:', error);
-        let errorMessage = '사건 등록 중 오류가 발생했습니다.';
-        if (error?.message) {
-          errorMessage = error.message;
-        } else if (error?.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-        alert(errorMessage);
+      } catch (error) {
+        alert('사건 등록에 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const isNextDisabled = currentStep === steps.length - 1 && detailText.trim().length < 15;
+  if (isDataFetching) return <div className="h-screen flex items-center justify-center font-medium text-gray-500">정보를 구성 중입니다...</div>;
+  const currentStepData = dynamicSteps[currentStep];
 
   return (
     <Layout>
-      <div className="bg-white">
-        <div className="bg-white/95 border-b border-gray-200 py-4 shadow-sm">
+      <div className="bg-white min-h-screen">
+        {/* 프로그레스 바 */}
+        <div className="bg-white border-b border-gray-200 py-6">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center w-full">
-              {steps.map((step, index) => {
+              {dynamicSteps.map((step, index) => {
                 const isCompleted = index < currentStep;
                 const isActive = index === currentStep;
-
                 return (
                   <Fragment key={step.id}>
                     <div className="flex flex-col items-center flex-1">
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
-                          isCompleted
-                            ? 'bg-indigo-600 border-indigo-600 text-white'
-                            : isActive
-                            ? 'bg-white border-indigo-600 text-indigo-600'
-                            : 'bg-white border-gray-300 text-gray-400'
-                        }`}
-                      >
-                        {isCompleted ? <Check size={20} /> : <span>{step.id}</span>}
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                        isCompleted ? 'bg-indigo-600 border-indigo-600 text-white' : isActive ? 'bg-white border-indigo-600 text-indigo-600' : 'bg-white border-gray-300 text-gray-400'
+                      }`}>
+                        {isCompleted ? <Check size={18} /> : <span className="text-sm font-bold">{step.id}</span>}
                       </div>
-                      <span className={`text-sm mt-2 font-medium ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-500'}`}>
+                      <span className={`text-xs mt-2 font-medium ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-500'}`}>
                         {step.label}
                       </span>
                     </div>
-                    {index < steps.length - 1 && (
+                    {index < dynamicSteps.length - 1 && (
                       <div className={`flex-1 h-0.5 mx-2 ${isCompleted ? 'bg-indigo-600' : 'bg-gray-300'}`} />
                     )}
                   </Fragment>
@@ -163,81 +185,128 @@ export default function CaseCreation() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col max-w-5xl mx-auto w-full px-6 py-2">
-          <div className="bg-slate-50 rounded-2xl m-8 p-8 flex flex-col min-h-[360px] shadow-sm border border-slate-100">
-            {currentStep === 0 && (
-              <div className="mb-4">
-                <p className="text-xl font-bold text-gray-800 leading-relaxed">
-                  현재 겪고 계신 일에 대한 상황 파악을 위한 체크리스트입니다.<br />
-                  입력하신 정보는 철저히 비밀이 보장되니, 상황에 맞는 버튼을 선택해 주세요.
-                </p>
-              </div>
-            )}
 
-            <div className="mb-8">
-              <p className="text-2xl text-gray-900 font-bold mt-4 mb-4">{steps[currentStep].question}</p>
+        {/* 메인 컨텐츠 */}
+        <div className="max-w-4xl mx-auto px-6 py-10">
+          <div className="bg-slate-50 rounded-3xl p-8 shadow-sm border border-slate-100">
+            <div className="mb-4 inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider">
+              Step {currentStep + 1} / {dynamicSteps.length}
             </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">{currentStepData.question}</h2>
 
-            {currentStep < steps.length - 1 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {steps[currentStep].options.map((option, idx) => (
-                  <motion.button
-                    key={idx}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOptionClick(option)}
-                    className="p-6 text-left text-lg font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm"
-                  >
-                    {option}
-                  </motion.button>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <textarea
-                  value={detailText}
-                  onChange={(e) => setDetailText(e.target.value)}
-                  placeholder="상황에 대해 자세히 설명해 주세요. (15자 이상)"
-                  className="w-full px-4 py-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:outline-none min-h-[200px] resize-none text-lg"
-                />
-                {detailText.length > 0 && detailText.length < 15 && (
-                  <p className="text-sm text-red-500 font-medium">최소 15자 이상 작성해주세요. (현재 {detailText.length}자)</p>
-                )}
-               <div className="mt-6 p-4 bg-white border border-gray-100 rounded-lg shadow-sm">
-                 <p className="text-sm font-semibold text-gray-700 mb-2">작성 예시 (교통사고 상황):</p>
-                  <div className="text-sm text-gray-600 leading-relaxed font-normal whitespace-pre-line">
-                    {`2024년 1월 15일 오후 2시경, 강남역 사거리 인근에서 신호 대기를 위해 정차하고 있었습니다. 정차 후 약 10초 뒤, 후방에서 오던 승용차가 제 차의 범퍼를 강하게 들이받았습니다.
-가해 차량 운전자는 사고 직후 차에서 내려 사과를 했으나, 현장에서 보험 접수를 미루며 개인 합의를 요구했습니다. 하지만 차량 뒷범퍼 파손이 심하고, 사고 충격으로 인해 현재 목과 허리에 통증이 있어 병원 치료가 필요한 상황입니다.
-현장 사진과 블랙박스 영상은 모두 확보해 두었으며, 상대방의 과실 100%라고 생각되지만 상대방이 말을 바꾸고 있어 법적 대응을 준비하려 합니다.`}
+            <AnimatePresence mode="wait">
+              {showCustomInput ? (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
+                  <div className="relative">
+                    <input 
+                      autoFocus
+                      type="text"
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      placeholder="상황에 맞는 답변을 직접 입력해주세요."
+                      className="w-full p-5 text-lg border-2 border-indigo-600 rounded-2xl outline-none bg-white shadow-lg"
+                      onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
+                    />
+                    <Edit3 className="absolute right-5 top-5 text-indigo-300" size={24} />
                   </div>
-                </div>
-              </div>
-            )}
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowCustomInput(false)} className="flex-1 py-4 bg-gray-200 text-gray-600 rounded-2xl font-bold text-lg">취소</button>
+                    <button onClick={handleCustomSubmit} className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-indigo-100">입력 완료</button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div key={currentStep} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  {currentStepData.type === 'when' ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-full max-w-sm">
+                        <input 
+                          type="date" 
+                          className="w-full p-5 text-xl border-2 border-indigo-100 rounded-2xl focus:border-indigo-600 outline-none transition-all bg-white text-gray-700"
+                          onChange={(e) => setSelectedValues({ ...selectedValues, when: e.target.value })}
+                          value={selectedValues['when'] !== '날짜 미상' ? selectedValues['when'] || '' : ''}
+                        />
+                      </div>
+                      <div className="w-full max-w-sm flex flex-col gap-3">
+                        <button 
+                          onClick={() => handleOptionClick('when', selectedValues['when'])}
+                          className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg disabled:bg-gray-200 shadow-md"
+                          disabled={!selectedValues['when'] || selectedValues['when'] === '날짜 미상'}
+                        >
+                          이 날짜로 선택
+                        </button>
+                        <button 
+                          onClick={() => handleOptionClick('when', '날짜 미상')}
+                          className="w-full py-4 bg-white text-gray-500 border border-gray-200 rounded-2xl font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                        >
+                          <CalendarOff size={18} /> 날짜를 잘 모르겠습니다
+                        </button>
+                      </div>
+                    </div>
+                  ) : currentStepData.type === 'detail' ? (
+                    <div className="flex flex-col gap-3">
+                      <textarea
+                        value={detailText}
+                        onChange={(e) => setDetailText(e.target.value)}
+                        placeholder="상황을 자세히 적어주시면 AI가 더 정확한 분석을 도와드립니다."
+                        className={`w-full h-64 p-5 text-lg border-2 rounded-2xl focus:ring-4 focus:outline-none resize-none shadow-inner transition-all ${
+                          detailText.length > 0 && !isDetailValid 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-50' 
+                          : 'border-gray-200 focus:border-indigo-600 focus:ring-indigo-50'
+                        }`}
+                      />
+                      <div className="flex justify-between items-center px-1">
+                        <div className="min-h-[24px]">
+                          {detailText.length > 0 && !isDetailValid && (
+                            <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="text-sm text-red-500 font-semibold flex items-center gap-1">
+                              <AlertCircle size={14} /> 최소 15자 이상 작성해주세요. (현재 {detailText.length}자)
+                            </motion.p>
+                          )}
+                        </div>
+                        <span className={`text-sm font-bold ${isDetailValid ? 'text-indigo-600' : 'text-gray-400'}`}>
+                          {detailText.length} / 15자 이상
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {currentStepData.options.map((option, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ x: 10, backgroundColor: '#f5f7ff' }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleOptionClick(currentStepData.type, option)}
+                          className="p-5 text-left text-lg font-medium text-gray-700 bg-white border border-gray-200 rounded-2xl hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                        >
+                          {option}
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <div className="flex items-center justify-end mt-3 pt-3 border-t border-gray-200">
-            <div className="flex gap-4">
-              <button
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className={`px-8 py-3 rounded-xl text-lg font-medium transition-all ${
-                  currentStep === 0 ? 'bg-gray-100 text-gray-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          <div className="mt-8 flex justify-between items-center">
+            <button 
+              onClick={() => showCustomInput ? setShowCustomInput(false) : setCurrentStep(prev => prev - 1)} 
+              disabled={currentStep === 0 && !showCustomInput}
+              className="px-6 py-3 text-gray-500 font-medium disabled:opacity-30 hover:text-indigo-600 transition-colors"
+            >
+              {showCustomInput ? "선택지로 돌아가기" : "이전 단계로"}
+            </button>
+            {currentStep === dynamicSteps.length - 1 && !showCustomInput && (
+              <button 
+                onClick={handleNext} 
+                disabled={!isDetailValid || isLoading}
+                className={`px-12 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95 ${
+                  !isDetailValid || isLoading ? 'bg-gray-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100'
                 }`}
               >
-                Previous
+                {isLoading ? '사건 분석 중...' : '유사 판례 검색하기'}
               </button>
-              {currentStep === steps.length - 1 && (
-                <button
-                  onClick={handleNext}
-                  disabled={isNextDisabled || isLoading}
-                  className={`px-10 py-3 rounded-xl text-lg font-medium text-white transition-all ${
-                    isNextDisabled || isLoading ? 'bg-gray-300' : 'bg-indigo-600 hover:bg-indigo-700'
-                  }`}
-                >
-                  {isLoading ? '검색 중...' : 'Next'}
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
