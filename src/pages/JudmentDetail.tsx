@@ -107,6 +107,7 @@ const JudgmentDetailPage = () => {
 
   // 공통 텍스트 스타일 변수
   const sectionTitleStyle = "flex items-center gap-2 text-slate-900 font-bold text-xl mb-4";
+  const iconWrapperStyle = "p-1.5 bg-indigo-50/50 rounded-full text-indigo-600";
   const bodyTextStyle = "text-slate-600 text-[16px] leading-[1.8] tracking-tight";
 
   if (isLoading) {
@@ -141,7 +142,7 @@ const JudgmentDetailPage = () => {
             >
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight break-keep">
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight break-keep">
               {judgmentData.title}
             </h1>
           </div>
@@ -155,7 +156,7 @@ const JudgmentDetailPage = () => {
               <LayoutGroup>
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-10">
                   <div className="flex items-center gap-3 mb-8">
-                    <Sparkles size={24} className="text-indigo-600" />
+                    <div className={iconWrapperStyle}><Sparkles size={24} /></div>
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">AI 판례 분석</h2>
                   </div>
                   
@@ -163,7 +164,7 @@ const JudgmentDetailPage = () => {
                     <div className="space-y-8">
                       {/* 핵심 분석 요약 (기본 표시) */}
                       <motion.div layout>
-                        <div className={sectionTitleStyle}><Scale size={20} className="text-indigo-600" /> 핵심 분석 요약</div>
+                        <div className={sectionTitleStyle}><div className={iconWrapperStyle}><Scale size={20} /></div> 핵심 분석 요약</div>
                         <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50">
                           <p className="text-indigo-900 text-[18px] font-extrabold leading-relaxed break-keep">
                             {judgmentData.aiAnalysis.core}
@@ -185,12 +186,12 @@ const JudgmentDetailPage = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                               {/* 주요 사실관계 */}
                               <div>
-                                <div className={sectionTitleStyle}><AlignLeft size={20} className="text-indigo-600" /> 주요 사실관계</div>
+                                <div className={sectionTitleStyle}><div className={iconWrapperStyle}><AlignLeft size={20} /></div> 주요 사실관계</div>
                                 <p className={bodyTextStyle}>{judgmentData.aiAnalysis.fact}</p>
                               </div>
                               {/* 법적 판단 근거 */}
                               <div>
-                                <div className={sectionTitleStyle}><BookOpen size={20} className="text-indigo-600" /> 법적 판단 근거</div>
+                                <div className={sectionTitleStyle}><div className={iconWrapperStyle}><BookOpen size={20} /></div> 법적 판단 근거</div>
                                 <p className={bodyTextStyle}>{judgmentData.aiAnalysis.point}</p>
                               </div>
                             </div>
@@ -219,7 +220,7 @@ const JudgmentDetailPage = () => {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none z-10" 
+                              className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none z-10" 
                             />
                           )}
                         </AnimatePresence>
@@ -244,15 +245,15 @@ const JudgmentDetailPage = () => {
 
             {/* 2. 판결문 전문 (가독성 최적화) */}
             <section id="original-content">
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="px-8 py-6 bg-slate-50 border-b border-slate-100">
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
+                
+                <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
                   <div className={sectionTitleStyle.replace("mb-4", "mb-0")}>
-                    <FileText size={20} className="text-indigo-600" /> 판결문 전문
+                    <div className={iconWrapperStyle}><FileText size={20} /></div> 판결문 전문
                   </div>
                 </div>
                 
                 <div className="p-8 md:p-12">
-                  {/* 가독성을 위해 font-sans 유지, 행간(leading-9)과 자간(tracking-tight)을 넉넉히 조정 */}
                   <div className="text-slate-800 leading-[2.1] text-[17px] md:text-[18px] tracking-normal font-normal text-left whitespace-pre-wrap break-keep">
                     {judgmentData.judgment.reasons}
                   </div>
@@ -260,7 +261,7 @@ const JudgmentDetailPage = () => {
                   <div className="mt-16 flex justify-center opacity-20">
                     <div className="h-[1px] w-24 bg-slate-400" />
                   </div>
-                </div>
+                </div>  
               </div>
             </section>
           </div>
@@ -274,7 +275,15 @@ const JudgmentDetailPage = () => {
                   { icon: Link2, label: '링크', action: () => { navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다.'); } },
                   { icon: isBookmarked ? BookmarkCheck : Bookmark, label: '저장', action: handleToggleBookmark, active: isBookmarked }
                 ].map((item, i) => (
-                  <button key={i} onClick={item.action} className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all border ${item.active ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100'}`}>
+                  <button 
+                    key={i} 
+                    onClick={item.action} 
+                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all border active:scale-95 ${
+                      item.active 
+                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200' 
+                        : 'bg-slate-50 border-transparent text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100'
+                    }`}
+                  >
                     <item.icon size={20} />
                     <span className="text-[12px] font-bold">{item.label}</span>
                   </button>
@@ -283,7 +292,7 @@ const JudgmentDetailPage = () => {
 
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm border-b border-slate-50 pb-3">
-                  <Info size={16} className="text-indigo-600" /> 사건 상세 정보
+                  <div className={iconWrapperStyle.replace("p-1.5", "p-1")}><Info size={14} /></div> 사건 상세 정보
                 </div>
                 {[
                   { label: '담당 법원', value: judgmentData.judgment.court },
@@ -291,7 +300,7 @@ const JudgmentDetailPage = () => {
                   { label: '선고 날짜', value: judgmentData.judgment.judgment_date },
                 ].map((info, i) => (
                   <div key={i} className="flex flex-col gap-1">
-                    <span className="text-[12px] font-bold text-slate-300 uppercase tracking-wider">{info.label}</span>
+                    <span className="text-[12px] font-medium text-slate-500 uppercase tracking-wider">{info.label}</span>
                     <span className="text-[15px] font-semibold text-slate-700">{info.value}</span>
                   </div>
                 ))}

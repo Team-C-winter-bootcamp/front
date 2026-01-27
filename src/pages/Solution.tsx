@@ -227,9 +227,9 @@ export default function Solution() {
             <div className="md:col-span-2 relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
               <div className="relative bg-indigo-600 rounded-3xl p-10 text-white text-center shadow-2xl">
-                <span className="inline-block px-4 py-1.5 bg-indigo-500/50 rounded-full text-sm font-bold uppercase mb-2 tracking-wider">AI 권고 합의금</span>
-                <div className="text-4xl font-black leading-tight mb-2">{caseDetail.outcome_prediction?.expected_compensation}</div>
-                <div className="text-base font-medium opacity-80 mb-6 italic">{caseDetail.outcome_prediction?.expected_result}</div>
+                <span className="inline-block px-4 py-1.5 bg-indigo-500/50 rounded-full text-sm font-bold uppercase mb-5 tracking-wider">AI 권고 합의금</span>
+                <div className="text-2xl font-black leading-tight mb-4">{caseDetail.outcome_prediction?.expected_compensation}</div>
+                <div className="text-base font-medium opacity-80 italic">{caseDetail.outcome_prediction?.expected_result}</div>
               </div>
             </div>
           </div>
