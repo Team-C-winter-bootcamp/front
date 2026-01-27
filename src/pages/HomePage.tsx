@@ -119,7 +119,7 @@ export default function HomePage() {
               title="기타"
               description="사건이 어디에 해당하는지 확실하지 않나요? 직접 상황을 설명해 주세요."
               icon={<Sparkles size={24} />}
-              onClick={() => navigate('case', { state: { category: '기타' } })}
+              onClick={() => navigate('/case', { state: { category: '기타' } })}
             />
           </motion.div>
         </motion.div>
