@@ -16,13 +16,16 @@ export type DocType = 'complaint' | 'notice' | 'agreement';
 export const initService = {
   getCategories: async (): Promise<GetCategoriesResponse> => {
     try {
-      const response = await apiClient.get<GetCategoriesResponse>(API_ENDPOINTS.inits.INIT);
+      const response = await apiClient.get<GetCategoriesResponse>(API_ENDPOINTS.inits.INIT, {
+        timeout: 60000,
+      });
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
     }
   },
 };
+  
 export const caseService = {
   /**
    * 내 사건 정보 저장 (POST)
@@ -58,7 +61,9 @@ export const caseService = {
    */
   getCaseDetail: async (precedentsId: string, userCaseId: number): Promise<GetCaseDetailResponse> => {
     try {
-      const endpoint = `cases/answer/${precedentsId}/`;
+      const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, {
+        precedents_id: precedentsId,
+      });
       const response = await apiClient.post<GetCaseDetailResponse>(endpoint, {
         timeout: 60000,
         case_id: userCaseId
@@ -69,18 +74,17 @@ export const caseService = {
     }
   },
 
-
   /**
    * AI 법률 문서 초안 생성 (POST)
-   * 분리된 엔드포인트(/api/documents/{docType})를 동적으로 호출합니다.
+   * 분리된 엔드포인트(/api/documents/{docType}/)를 동적으로 호출합니다.
    */
   generateDocument: async (
     docType: DocType, 
     data: { case_id: number; precedent: string }
   ): Promise<GenerateDocumentResponse> => {
     try {
-      // 엔드포인트를 타입에 따라 결정 (예: documents/complaint)
-      const endpoint = `documents/${docType}`;
+      // 엔드포인트를 타입에 따라 결정 (예: documents/complaint/)
+      const endpoint = `documents/${docType}/`;
       const response = await apiClient.post<GenerateDocumentResponse>(endpoint, data);
       return response.data;
     } catch (error: any) {
@@ -97,11 +101,11 @@ export const caseService = {
     data: { document_id: number; user_request: string }
   ): Promise<GenerateDocumentResponse> => {
     try {
-      const endpoint = `documents/${docType}`;
+      const endpoint = `documents/${docType}/`;
       const response = await apiClient.patch<GenerateDocumentResponse>(endpoint, data);
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
-    } 
+    }
   },
 };
