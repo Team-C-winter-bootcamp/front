@@ -153,7 +153,7 @@ export default function AgreeDocument() {
                 </button>
                 <button 
                   onClick={() => navigate('/')}
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600"
                   title="홈으로 가기"
                 >
                   <Home size={20} />
@@ -165,10 +165,10 @@ export default function AgreeDocument() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
+              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
-              <Button onClick={() => window.location.reload()} size="sm" variant="outline">
+              <Button onClick={() => window.location.reload()} size="md" variant="outline">
                 <RotateCcw className="w-4 h-4 mr-2" /> 초기화
               </Button>
             </div>
@@ -199,7 +199,7 @@ export default function AgreeDocument() {
               {chatMessages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
-                    {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
+                    {msg.role === 'ai' && <div className="text-[14px] font-bold text-indigo-600 mb-1">LAWDING</div>}
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
