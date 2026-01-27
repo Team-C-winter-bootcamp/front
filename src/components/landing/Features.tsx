@@ -100,24 +100,24 @@ const Features = () => {
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-24 reveal">
-          <h2 className="text-4xl font-extrabold mb-4">강력한 주요 기능</h2>
+          <h2 className="text-4xl font-extrabold mb-4 text-slate-900">강력한 주요 기능</h2>
           <div className="w-16 h-1 bg-indigo-600 mx-auto rounded-full"></div>
         </div>
 
         {features.map((feature, idx) => (
           <div 
             key={feature.id} 
-            className={`flex flex-col ${feature.reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-16 mb-32 last:mb-0 reveal`}
+            className={`flex flex-col ${feature.reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-start gap-16 mb-32 last:mb-0 reveal`}
           >
             <div className="flex-1">
               <span className="text-indigo-600 font-bold text-sm tracking-widest uppercase">Feature 0{idx + 1}</span>
-              <h3 className="text-3xl font-bold mt-2 mb-6">{feature.title}</h3>
-              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+              <h3 className="text-3xl font-bold mt-2 mb-6 text-slate-900">{feature.title}</h3>
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl">
                 {feature.description}
               </p>
               <ul className="space-y-4">
                 {feature.details.map((detail, dIdx) => (
-                  <li key={dIdx} className="flex items-center gap-3 text-slate-700">
+                  <li key={dIdx} className="flex items-center gap-3 text-slate-700 text-base">
                     <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
                     </div>

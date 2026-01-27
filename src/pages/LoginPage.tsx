@@ -19,7 +19,7 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center py-10">
       <button 
         onClick={() => navigate('/')} 
-        className="mb-8 hover:opacity-80 transition-opacity"
+        className="mb-6 hover:opacity-80 transition-opacity"
       >
         <img 
           src={logotextb}  
@@ -64,7 +64,7 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold shadow-lg shadow-indigo-200 transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold shadow-md shadow-indigo-200/60 transition"
           >
             로그인
           </button>

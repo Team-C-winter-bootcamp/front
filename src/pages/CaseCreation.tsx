@@ -129,7 +129,7 @@ export default function CaseCreation() {
   return (
     <Layout>
       <div className="bg-white">
-        <div className="bg-white border-b border-gray-200 py-4">
+        <div className="bg-white/95 border-b border-gray-200 py-4 shadow-sm">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center w-full">
               {steps.map((step, index) => {
@@ -164,7 +164,7 @@ export default function CaseCreation() {
           </div>
         </div>
         <div className="flex flex-col max-w-5xl mx-auto w-full px-6 py-2">
-          <div className="bg-slate-50 rounded-2xl p-6 flex flex-col shadow-sm border border-slate-100">
+          <div className="bg-slate-50 rounded-2xl m-8 p-8 flex flex-col min-h-[360px] shadow-sm border border-slate-100">
             {currentStep === 0 && (
               <div className="mb-4">
                 <p className="text-xl font-bold text-gray-800 leading-relaxed">
@@ -174,8 +174,8 @@ export default function CaseCreation() {
               </div>
             )}
 
-            <div className="mb-4">
-              <p className="text-2xl text-gray-900 font-bold">{steps[currentStep].question}</p>
+            <div className="mb-8">
+              <p className="text-2xl text-gray-900 font-bold mt-4 mb-4">{steps[currentStep].question}</p>
             </div>
 
             {currentStep < steps.length - 1 ? (
@@ -215,8 +215,7 @@ export default function CaseCreation() {
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-            <span className="text-lg text-indigo-600 font-semibold">Step {currentStep + 1} / {steps.length}</span>
+          <div className="flex items-center justify-end mt-3 pt-3 border-t border-gray-200">
             <div className="flex gap-4">
               <button
                 onClick={handlePrevious}

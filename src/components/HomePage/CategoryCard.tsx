@@ -16,7 +16,7 @@ export function CategoryCard({
 }: CategoryCardProps) {
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-indigo-600"
+      className="cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 hover:border-indigo-600"
       onClick={onClick}
     >
       <div className="flex items-start space-x-4">
@@ -25,7 +25,7 @@ export function CategoryCard({
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+          <p className="text-sm text-slate-700 leading-relaxed">{description}</p>
         </div>
       </div>
     </Card>

@@ -78,13 +78,13 @@ export default function HomePage() {
               duration: 0.3 // duration 단축으로 더 빠른 로딩
             }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
             변호사 상담이 망설여질 땐?<br className="hidden md:block" />
               <span className="text-indigo-600">해답은 LAWDING</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-slate-600 leading-relaxed mb-8 max-w-2xl mx-auto">
   변호사 선임 비용과 복잡한 절차 때문에 혼자 끙끙 앓고 계셨나요?<br className="hidden md:block" />
-  부담 없이 상황을 진단하고 <span className="text-gray-700 font-semibold">최적의 법적 대응책</span>을 미리 확인해 보세요.
+  부담 없이 상황을 진단하고 <span className="text-slate-700 font-semibold">최적의 법적 대응책</span>을 미리 확인해 보세요.
 </p>
             <Button
               size="lg"

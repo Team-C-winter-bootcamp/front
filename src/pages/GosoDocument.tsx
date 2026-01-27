@@ -137,7 +137,7 @@ export default function GosoDocument() {
 
   return (
     <Layout>
-      <div className="h-[calc(100vh-65px)] -mt-5 bg-white flex flex-col overflow-hidden relative">
+      <div className="h-[calc(100vh-65px)] -mt-5 bg-slate-50 flex flex-col overflow-hidden relative">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
@@ -145,7 +145,7 @@ export default function GosoDocument() {
               <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700">
+              <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
               <Button onClick={() => window.location.reload()} size="sm" variant="outline">

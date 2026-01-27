@@ -7,14 +7,14 @@ import {
   FileText, Info, ChevronDown, Sparkles, Loader2, Gavel, Scale,
   AlignLeft, BookOpen
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { caseService } from '../api';
 import { GetPrecedentDetailResponse } from '../api/types';
 
 const JudgmentDetailPage = () => {
   const navigate = useNavigate();
   const { case_No: precedentId } = useParams<{ case_No: string }>();
-  const [isAiExpanded, setIsAiExpanded] = useState(true);
+  const [isAiExpanded, setIsAiExpanded] = useState(false);
   
   const [precedentDetail, setPrecedentDetail] = useState<GetPrecedentDetailResponse | null>(() => {
     if (precedentId) {
@@ -122,9 +122,8 @@ const JudgmentDetailPage = () => {
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] font-sans selection:bg-indigo-100">
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-start items-center px-6 md:px-12 py-4 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
         <button onClick={() => navigate('/')} className="text-2xl font-black tracking-tighter text-indigo-600">LAWDING</button>
-        <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"><ChevronLeft size={24} /></button>
       </header>
 
       <div className="pt-28 max-w-6xl mx-auto px-4 md:px-8 pb-24">
@@ -133,9 +132,19 @@ const JudgmentDetailPage = () => {
             <span className="bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-widest">{judgmentData.judgmentType}</span>
             <span className="text-slate-400 text-sm font-medium">{judgmentData.summaryText}</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight break-keep">
-            {judgmentData.title}
-          </h1>
+          <div className="flex items-start gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="mt-1 p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+              aria-label="이전 페이지로 돌아가기"
+              title="이전 페이지로 돌아가기"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight break-keep">
+              {judgmentData.title}
+            </h1>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -143,64 +152,94 @@ const JudgmentDetailPage = () => {
             
             {/* 1. AI 분석 섹션 */}
             <section id="ai-summary">
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-10">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
+              <LayoutGroup>
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-10">
+                  <div className="flex items-center gap-3 mb-8">
                     <Sparkles size={24} className="text-indigo-600" />
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">AI 판례 분석</h2>
                   </div>
-                  <button onClick={() => setIsAiExpanded(!isAiExpanded)} className="text-slate-400 p-1 hover:bg-slate-50 rounded-md transition-colors">
-                    <motion.div animate={{ rotate: isAiExpanded ? 180 : 0 }}><ChevronDown size={20} /></motion.div>
-                  </button>
-                </div>
-                
-                <AnimatePresence>
-                  {isAiExpanded && judgmentData.aiAnalysis && (
-                    <motion.div 
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="space-y-10"
-                    >
-                      {/* 핵심 분석 요약 */}
-                      <div>
+                  
+                  {judgmentData.aiAnalysis && (
+                    <div className="space-y-8">
+                      {/* 핵심 분석 요약 (기본 표시) */}
+                      <motion.div layout>
                         <div className={sectionTitleStyle}><Scale size={20} className="text-indigo-600" /> 핵심 분석 요약</div>
                         <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50">
                           <p className="text-indigo-900 text-[18px] font-extrabold leading-relaxed break-keep">
                             {judgmentData.aiAnalysis.core}
                           </p>
                         </div>
+                      </motion.div>
+
+                      {/* 확장 가능한 영역 */}
+                      <div className="relative">
+                        <motion.div
+                          layout
+                          animate={{ 
+                            height: isAiExpanded ? 'auto' : '180px',
+                          }}
+                          transition={{ duration: 0.5, ease: [0.04, 0.62, 0.23, 0.98] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="space-y-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              {/* 주요 사실관계 */}
+                              <div>
+                                <div className={sectionTitleStyle}><AlignLeft size={20} className="text-indigo-600" /> 주요 사실관계</div>
+                                <p className={bodyTextStyle}>{judgmentData.aiAnalysis.fact}</p>
+                              </div>
+                              {/* 법적 판단 근거 */}
+                              <div>
+                                <div className={sectionTitleStyle}><BookOpen size={20} className="text-indigo-600" /> 법적 판단 근거</div>
+                                <p className={bodyTextStyle}>{judgmentData.aiAnalysis.point}</p>
+                              </div>
+                            </div>
+
+                            {/* 판결 결과 및 태그 */}
+                            <div className="pt-8 border-t border-slate-100 flex flex-col gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600"><Gavel size={20} /></div>
+                                <span className="text-xl font-black text-slate-900">{judgmentData.aiAnalysis.verdict}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {judgmentData.aiAnalysis.tags.map((tag, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-500 rounded-md text-[12px] font-bold">
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* 페이드 아웃 효과 (닫혀있을 때만) */}
+                        <AnimatePresence>
+                          {!isAiExpanded && (
+                            <motion.div 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none z-10" 
+                            />
+                          )}
+                        </AnimatePresence>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* 주요 사실관계 */}
-                        <div>
-                          <div className={sectionTitleStyle}><AlignLeft size={20} className="text-indigo-600" /> 주요 사실관계</div>
-                          <p className={bodyTextStyle}>{judgmentData.aiAnalysis.fact}</p>
-                        </div>
-                        {/* 법적 판단 근거 */}
-                        <div>
-                          <div className={sectionTitleStyle}><BookOpen size={20} className="text-indigo-600" /> 법적 판단 근거</div>
-                          <p className={bodyTextStyle}>{judgmentData.aiAnalysis.point}</p>
-                        </div>
-                      </div>
-
-                      {/* 판결 결과 및 태그 */}
-                      <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-slate-100 rounded-lg text-slate-900"><Gavel size={20} /></div>
-                          <span className="text-xl font-black text-slate-900">{judgmentData.aiAnalysis.verdict}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {judgmentData.aiAnalysis.tags.map((tag, idx) => (
-                            <span key={idx} className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-500 rounded-md text-[12px] font-bold">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
+                      <motion.div layout className="pt-2 flex justify-center relative z-20">
+                        <button
+                          onClick={() => setIsAiExpanded((prev) => !prev)}
+                          className="text-slate-700 font-semibold text-sm flex items-center gap-2 hover:text-indigo-600 transition-colors"
+                        >
+                          {isAiExpanded ? '접기' : '더 보기'}
+                          <motion.div animate={{ rotate: isAiExpanded ? 200 : 0 }}>
+                            <ChevronDown size={18} />
+                          </motion.div>
+                        </button>
+                      </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
-              </div>
+                </div>
+              </LayoutGroup>
             </section>
 
             {/* 2. 판결문 전문 (가독성 최적화) */}
@@ -237,7 +276,7 @@ const JudgmentDetailPage = () => {
                 ].map((item, i) => (
                   <button key={i} onClick={item.action} className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all border ${item.active ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100'}`}>
                     <item.icon size={20} />
-                    <span className="text-[11px] font-bold">{item.label}</span>
+                    <span className="text-[12px] font-bold">{item.label}</span>
                   </button>
                 ))}
               </div>
@@ -252,7 +291,7 @@ const JudgmentDetailPage = () => {
                   { label: '선고 날짜', value: judgmentData.judgment.judgment_date },
                 ].map((info, i) => (
                   <div key={i} className="flex flex-col gap-1">
-                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">{info.label}</span>
+                    <span className="text-[12px] font-bold text-slate-300 uppercase tracking-wider">{info.label}</span>
                     <span className="text-[15px] font-semibold text-slate-700">{info.value}</span>
                   </div>
                 ))}

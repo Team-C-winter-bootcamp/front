@@ -140,7 +140,7 @@ const SearchResultsPage = () => {
                   onClick={() => handleResultClick(result.case_No)}
                   className={`group relative rounded-2xl p-4 transition-all duration-300 cursor-pointer border-2 ${
                     isSelected 
-                      ? 'bg-indigo-50/80 border-indigo-500 shadow-xl z-10' 
+                      ? 'bg-indigo-50/80 border-indigo-500 ring-1 ring-indigo-200 shadow-xl z-10' 
                       : 'bg-white border-gray-200 shadow-sm hover:border-slate-200'
                   }`}
                 >
@@ -157,7 +157,7 @@ const SearchResultsPage = () => {
                     {result.title}
                     <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
                   </h3>
-                  <p className="text-sm text-slate-500 line-clamp-2 mb-4">{result.content}</p>
+                  <p className="text-sm text-slate-500 line-clamp-2 mb-4 leading-relaxed">{result.content}</p>
 
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-50 text-slate-400 border border-slate-100">{result.caseType}</span>
