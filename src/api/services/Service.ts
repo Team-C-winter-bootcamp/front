@@ -58,9 +58,7 @@ export const caseService = {
    */
   getCaseDetail: async (precedentsId: string, userCaseId: number): Promise<GetCaseDetailResponse> => {
     try {
-      const endpoint = replaceParams(API_ENDPOINTS.cases.ANSWER, {
-        precedents_id: precedentsId,
-      });
+      const endpoint = `cases/answer/${precedentsId}/`;
       const response = await apiClient.post<GetCaseDetailResponse>(endpoint, {
         timeout: 60000,
         case_id: userCaseId
@@ -70,6 +68,7 @@ export const caseService = {
       throw error.response?.data || error;
     }
   },
+
 
   /**
    * AI 법률 문서 초안 생성 (POST)
