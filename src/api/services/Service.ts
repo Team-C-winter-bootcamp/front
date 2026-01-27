@@ -23,7 +23,6 @@ export const initService = {
     }
   },
 };
-  
 export const caseService = {
   /**
    * 내 사건 정보 저장 (POST)
