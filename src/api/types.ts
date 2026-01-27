@@ -90,15 +90,21 @@ export type PostCaseInfoResponse =
 // ==========================================
 // 3. SUMMARY (판례 상세 및 AI 분석)
 // ==========================================
+export type PrecedentSummary = {
+  core_summary: string;
+  key_fact: string;
+  verdict: string;
+  legal_point: string;
+  tags: string[];
+};
+
 export type PrecedentDetailData = {
   case_no: string;
-  case_title: string;
-  case_name: string;
+  case_name: string;   // 백엔드 필드명에 맞춤
   court: string;
   judgment_date: string;
-  issue: string;
-  content: string;
-  summary : string;
+  content: string;     // 판례 전문
+  summary: PrecedentSummary; // string에서 객체 타입으로 변경
 };
 
 export type GetPrecedentDetailSuccess = {
