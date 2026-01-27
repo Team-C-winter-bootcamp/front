@@ -3,9 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/ui/Layout';
-import { 
-  ChevronRight, Landmark, Calendar, Search, CheckCircle2 
-} from 'lucide-react';
+import { ChevronRight, Landmark, Calendar, Search, CheckCircle2 } from 'lucide-react';
+import PrecedentSelectionAlertModal from '../components/AlertModal/PrecedentSelectionAlertModal';
 
 // 1. 데이터 인터페이스 정의
 export interface SearchResult {
@@ -28,6 +27,7 @@ const SearchResultsPage = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [caseId, setCaseId] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
 
   // 2. 데이터 초기화 및 매핑
   useEffect(() => {
@@ -78,38 +78,43 @@ const SearchResultsPage = () => {
 
 
   const handleGoToPredict = () => {  
-  // 1. 타겟 판례 번호 결정
-  const targetCaseNo = selectedIds.length > 0 
-    ? selectedIds[selectedIds.length - 1] 
-    : searchResults[0]?.case_No;
+    if (selectedIds.length === 0) {
+      setIsAlertOpen(true);
+      return;
+    }
 
-  if (!targetCaseNo) {
-    alert("분석할 판례를 선택해주세요.");
-    return;
-  }
+    // 1. 타겟 판례 번호 결정
+    const targetCaseNo = selectedIds[selectedIds.length - 1];
 
-  // [중요] 여기서 caseId가 null인지 콘솔로 찍어보세요.
-  console.log("현재 페이지의 caseId 상태:", caseId);
+    if (!targetCaseNo) {
+      setIsAlertOpen(true);
+      return;
+    }
 
-  if (!caseId) {
-    alert("내 사건 정보를 찾을 수 없습니다. 다시 시작해주세요.");
-    return;
-  }
+    // [중요] 여기서 caseId가 null인지 콘솔로 찍어보세요.
+    console.log("현재 페이지의 caseId 상태:", caseId);
 
-  // 2. navigate 시 변수명 통일 (Solution.tsx에서 받을 이름과 일치)
-  navigate(`/answer/${encodeURIComponent(targetCaseNo)}`, {
-    state: { 
-      caseId: caseId, 
-      precedentsId: targetCaseNo 
-    },
-  });
-};
+    if (!caseId) {
+      alert("내 사건 정보를 찾을 수 없습니다. 다시 시작해주세요.");
+      return;
+    }
+
+    // 2. navigate 시 변수명 통일 (Solution.tsx에서 받을 이름과 일치)
+    navigate(`/answer/${encodeURIComponent(targetCaseNo)}`, {
+      state: { 
+        caseId: caseId, 
+        precedentsId: targetCaseNo 
+      },
+    });
+  };
+
+  const isSelectionEmpty = selectedIds.length === 0;
 
   return (
     <Layout>
       <main className="min-h-screen bg-slate-50/50 pt-[20px] pb-20">
-        <div className="max-w-3xl mx-auto px-4">
-          <header className="mb-10">
+        <div className="max-w-5xl mx-auto px-4">
+          <header className="mb-7">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold mb-3">
               <Search size={14} />
               <span>AI 분석 완료</span>
@@ -182,7 +187,11 @@ const SearchResultsPage = () => {
             <Button
               size="lg"
               onClick={handleGoToPredict}
-              className="group bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-7 rounded-2xl font-black text-xl shadow-2xl transition-all"
+              className={`group px-10 py-7 rounded-2xl font-black text-xl transition-all shadow-2xl ${
+                isSelectionEmpty 
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed hover:bg-slate-300' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              }`}
             >
               내 사건 결과 예측하기
               <ChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
@@ -190,6 +199,11 @@ const SearchResultsPage = () => {
           </div>
         </div>
       </main>
+
+      <PrecedentSelectionAlertModal 
+        isOpen={isAlertOpen} 
+        onClose={() => setIsAlertOpen(false)} 
+      />
     </Layout>
   );
 };

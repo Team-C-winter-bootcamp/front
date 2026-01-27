@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
-import { Download, ArrowUp, RotateCcw, Loader2 } from 'lucide-react';
+import { Download, ArrowUp, RotateCcw, Loader2, ChevronLeft, Home } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { caseService } from '../api';
@@ -136,13 +136,31 @@ export default function GosoDocument() {
   }, [isResizing]);
 
   return (
-    <Layout>
-      <div className="h-[calc(100vh-65px)] -mt-5 bg-slate-50 flex flex-col overflow-hidden relative">
+    <Layout showNav={false}>
+      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">고소장 작성</h1>
-              <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-1 mr-2">
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+                  title="뒤로 가기"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+                  title="홈으로 가기"
+                >
+                  <Home size={20} />
+                </button>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">고소장 작성</h1>
+                <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">

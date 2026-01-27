@@ -94,12 +94,32 @@ export default function Solution() {
 
   const compensationTrendData = useMemo(() => {
     const rawData = caseDetail?.outcome_prediction?.compensation_distribution || [];
-    const colors = ['#e0e7ff', '#c7d2fe', '#a5b4fc', '#818cf8'];
-    return rawData.map((item, index) => ({
-      ...item,
-      count: Number(item.count) || 0,
-      fill: (item.is_target === "true" || item.is_target === true) ? '#6366f1' : colors[index % colors.length]
-    }));
+    
+    // 1. 값(count) 기준으로 내림차순 정렬된 인덱스 맵 생성
+    const sortedIndices = rawData
+      .map((item, index) => ({ index, count: Number(item.count) || 0 }))
+      .sort((a, b) => b.count - a.count);
+    
+    // 2. 진한색부터 연한색 순서 (Indigo 계열)
+    const colors = [
+      '#4338ca', // indigo-700
+      '#4f46e5', // indigo-600
+      '#6366f1', // indigo-500
+      '#818cf8', // indigo-400
+      '#a5b4fc', // indigo-300
+      '#c7d2fe', // indigo-200
+      '#e0e7ff', // indigo-100
+    ];
+
+    // 3. 각 데이터 항목에 순위에 맞는 색상 할당
+    return rawData.map((item, index) => {
+      const rank = sortedIndices.findIndex(si => si.index === index);
+      return {
+        ...item,
+        count: Number(item.count) || 0,
+        fill: colors[Math.min(rank, colors.length - 1)]
+      };
+    });
   }, [caseDetail]);
 
   const recommendedDocument = useMemo(() => {
@@ -142,7 +162,7 @@ export default function Solution() {
         </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2 bg-white border-slate-200 shadow-sm">
+          <Card className="lg:col-span-2 bg-white border-slate-200 shadow-sm border-l-4 border-l-indigo-500">
             <div className="flex items-center gap-2 mb-6"><Scale className="text-indigo-600" /> <h2 className="font-bold text-lg text-slate-800">사건 성격 대조 분석</h2></div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -158,7 +178,7 @@ export default function Solution() {
             </div>
           </Card>
 
-          <Card className="bg-white border border-slate-200 shadow-sm flex flex-col">
+          <Card className="bg-white border border-slate-200 shadow-sm flex flex-col border-l-4 border-l-indigo-500">
             <div className="flex items-center gap-2 mb-6 text-slate-800"><Gavel className="text-indigo-500" /> <h2 className="font-bold text-lg">예상 형량 분포</h2></div>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
@@ -186,16 +206,17 @@ export default function Solution() {
           </Card>
         </div>
 
-        <Card className="p-3 bg-white border-slate-200 mb-8 shadow-sm">
-          <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
-            <div className="md:col-span-2 h-72">
+        <Card className="p-2 bg-white border-slate-200 mb-8 shadow-sm border-l-4 border-l-indigo-500">
+          <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> 
+          <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-center">
+            <div className="md:col-span-3 h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={compensationTrendData}>
                   <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 12, fontWeight: 600 }} />
                   <YAxis hide domain={[0, 'dataMax + 2']} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={55}>
+                  <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={65}>
                     {compensationTrendData.map((entry, index) => (
                       <Cell key={`bar-cell-${index}`} fill={entry.fill} />
                     ))}
@@ -203,11 +224,11 @@ export default function Solution() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="relative group">
+            <div className="md:col-span-2 relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              <div className="relative bg-indigo-600 rounded-3xl p-8 text-white text-center shadow-2xl">
-                <span className="inline-block px-3 py-1 bg-indigo-500/50 rounded-full text-[10px] font-bold uppercase mb-4">AI 권고 합의금</span>
-                <div className="text-3xl font-black leading-tight mb-2">{caseDetail.outcome_prediction?.expected_compensation}</div>
+              <div className="relative bg-indigo-600 rounded-3xl p-10 text-white text-center shadow-2xl">
+                <span className="inline-block px-4 py-1.5 bg-indigo-500/50 rounded-full text-sm font-bold uppercase mb-2 tracking-wider">AI 권고 합의금</span>
+                <div className="text-4xl font-black leading-tight mb-2">{caseDetail.outcome_prediction?.expected_compensation}</div>
                 <div className="text-base font-medium opacity-80 mb-6 italic">{caseDetail.outcome_prediction?.expected_result}</div>
               </div>
             </div>
@@ -221,34 +242,38 @@ export default function Solution() {
               <h2 className="font-bold text-lg">AI 핵심 법리 판단</h2>
             </div>
             <div className="bg-slate-50 rounded-2xl h-[calc(100%-4rem)] overflow-auto p-4">
-              <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-wrap font-medium">{caseDetail.legal_foundation?.logic}</p>
+              <p className="text-slate-700 leading-relaxed text-md whitespace-pre-wrap font-medium">{caseDetail.legal_foundation?.logic}</p>
             </div>
           </Card>
 
-          <Card className="bg-white border-slate-200 shadow-sm h-full">
+          <Card className="bg-white border-slate-200 shadow-sm h-full border-l-4 border-l-indigo-500">
             <div className="flex items-center gap-2 mb-6 text-slate-800">
               <FileText className="text-indigo-500" size={20} />
               <h2 className="font-bold text-lg">참조 판례 정보</h2>
             </div>
             <div className="space-y-4">
               {caseDetail.legal_foundation?.relevant_precedents.map((prec, idx) => (
-                <div key={idx} className="border border-slate-100 rounded-2xl p-4 hover:border-indigo-200 transition-colors">
+                <motion.div 
+                  key={idx} 
+                  whileHover={{ y: -4 }}
+                  className="border border-slate-100 rounded-2xl p-4 hover:border-indigo-500 hover:shadow-md transition-all duration-300 group bg-white"
+                >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-bold text-indigo-600 text-sm">{prec.case_number}</span>
-                    <span className="text-[10px] font-black text-slate-400">PRECEDENT</span>
+                    <span className="font-bold text-slate-900 group-hover:text-indigo-600 text-md transition-colors">{prec.case_number}</span>
+                    <span className="text-[11px] font-black text-slate-400">PRECEDENT</span>
                   </div>
                   <ul className="space-y-2">
                     {prec.key_points.map((point, pIdx) => (
-                      <li key={pIdx} className="flex gap-2 text-xs text-slate-500 leading-snug"><span className="text-indigo-400 font-bold">•</span>{point}</li>
+                      <li key={pIdx} className="flex gap-2 text-sm text-slate-500 leading-snug"><span className="text-indigo-400 font-bold">•</span>{point}</li>
                     ))}
                   </ul>
-                </div>
+                </motion.div>
               ))}
             </div>
           </Card>
         </div>
 
-        <Card className="bg-white border-slate-200 mb-12 shadow-sm p-8">
+        <Card className="bg-white border-slate-200 mb-12 shadow-sm p-8 border-l-4 border-l-indigo-500">
           <div className="text-center mb-12"><h2 className="text-2xl font-black text-slate-900 mb-2 underline decoration-indigo-500 underline-offset-8">필요 문서 즉시 작성</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -258,7 +283,14 @@ export default function Solution() {
             ].map((doc) => {
               const isRec = recommendedDocument === doc.type;
               return (
-                <div key={doc.type} className={`relative rounded-3xl p-8 border transition-all flex flex-col hover:scale-[1.02] duration-300 ${isRec ? 'border-indigo-500 bg-white shadow-xl ring-2 ring-indigo-500/10' : 'border-slate-100 bg-slate-50 opacity-80'}`}>
+                <div 
+                  key={doc.type} 
+                  className={`relative rounded-3xl p-8 border transition-all flex flex-col hover:scale-[1.02] duration-300 group
+                    ${isRec 
+                      ? 'border-indigo-500 bg-white shadow-xl ring-2 ring-indigo-500/10' 
+                      : 'border-slate-100 bg-slate-50 opacity-80 hover:opacity-100 hover:bg-white hover:border-indigo-500 hover:shadow-xl'
+                    }`}
+                >
                   {isRec && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg"><Star size={12} fill="white" /> AI 추천</div>}
                   <div className={`w-14 h-14 ${doc.color} rounded-2xl flex items-center justify-center mb-6`}>{<doc.icon size={28} />}</div>
                   <h3 className="text-lg font-black text-slate-900 mb-2">{doc.title}</h3>
@@ -272,7 +304,11 @@ export default function Solution() {
                   
                   <button 
                     onClick={() => handleDocumentSelect(doc.type as any)} 
-                    className={`mt-auto w-full py-4 rounded-2xl text-sm font-black transition-all ${isRec ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'}`}
+                    className={`mt-auto w-full py-4 rounded-2xl text-sm font-black transition-all 
+                      ${isRec 
+                        ? 'bg-indigo-600 text-white shadow-lg' 
+                        : 'bg-slate-200 text-slate-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg'
+                      }`}
                   >
                     작성 시작하기
                   </button>

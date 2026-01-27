@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
-import { Download, ArrowUp, RotateCcw, Loader2 } from 'lucide-react';
+import { Download, ArrowUp, RotateCcw, Loader2, ChevronLeft, Home } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { caseService } from '../api';
@@ -138,13 +138,31 @@ export default function ProofDocument() {
   }, [isResizing]);
 
   return (
-    <Layout>
-      <div className="h-[calc(100vh-65px)] -mt-5 bg-slate-50 flex flex-col overflow-hidden relative">
+    <Layout showNav={false}>
+      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">내용증명 작성</h1>
-              <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-1 mr-2">
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+                  title="뒤로 가기"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
+                  title="홈으로 가기"
+                >
+                  <Home size={20} />
+                </button>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">내용증명 작성</h1>
+                <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleDownloadPDF} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
@@ -176,16 +194,18 @@ export default function ProofDocument() {
           <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
              <div className="w-10 h-1 bg-gray-300 rounded-full" />
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-            {chatMessages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
-                   {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
-                   <p className="whitespace-pre-wrap">{msg.content}</p>
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div className="max-w-4xl mx-auto space-y-4">
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                    {msg.role === 'ai' && <div className="text-[10px] font-bold text-indigo-600 mb-1">AI 변호사</div>}
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
+              ))}
+              {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
+            </div>
           </div>
           <div className="p-4 border-t bg-white">
             <div className="max-w-4xl mx-auto flex gap-2">
