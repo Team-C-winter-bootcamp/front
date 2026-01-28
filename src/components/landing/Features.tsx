@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { FeatureSection } from '../../types/landing';
 import { CheckCircle2, Search, FileText, BarChart3, MessageSquare, ShieldCheck } from 'lucide-react';
-import pick from '../../assets/pick.webp';
-import checklist from '../../assets/checklist.webp';
+import pick from '../../assets/pick.gif';
+import checklist from '../../assets/checklist.gif';
 import pan from '../../assets/pan.webp';
 import solu from '../../assets/solu.webp';
 import detail from '../../assets/detail.webp';
