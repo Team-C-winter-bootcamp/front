@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Card } from '../components/ui/Card';
-import { Scale, Gavel, TrendingDown, AlertCircle, FileText, Mail, Check, Star, Loader2, Info} from 'lucide-react';
+import { Scale, Gavel, TrendingDown, AlertCircle, FileText, Mail, Check, Star, Loader2, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { caseService } from '../api';
 import { 
@@ -95,10 +95,14 @@ export default function Solution() {
   const compensationTrendData = useMemo(() => {
     const rawData = caseDetail?.outcome_prediction?.compensation_distribution || [];
     
+    // 데이터를 안전하게 숫자로 변환
+    const processedData = rawData.map(item => ({
+      ...item,
+      count: Number(item.count) || 0
+    }));
+
     // 1. 값(count) 기준으로 내림차순 정렬된 인덱스 맵 생성
-    const sortedIndices = rawData
-      .map((item, index) => ({ index, count: Number(item.count) || 0 }))
-      .sort((a, b) => b.count - a.count);
+    const sortedIndices = [...processedData].sort((a, b) => b.count - a.count);
     
     // 2. 진한색부터 연한색 순서 (Indigo 계열)
     const colors = [
@@ -112,11 +116,10 @@ export default function Solution() {
     ];
 
     // 3. 각 데이터 항목에 순위에 맞는 색상 할당
-    return rawData.map((item, index) => {
-      const rank = sortedIndices.findIndex(si => si.index === index);
+    return processedData.map((item) => {
+      const rank = sortedIndices.findIndex(si => si.range === item.range);
       return {
         ...item,
-        count: Number(item.count) || 0,
         fill: colors[Math.min(rank, colors.length - 1)]
       };
     });
@@ -167,10 +170,24 @@ export default function Solution() {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarGrid stroke="#cbd5e1" strokeWidth={1} />
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fontWeight: 800, fill: '#1e293b' }} />
-                  <Radar name="내 사건" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
-                  <Radar name="유사 판례" dataKey="B" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.2} />
+                  <Radar 
+                    name="내 사건" 
+                    dataKey="A" 
+                    stroke="#4338ca" 
+                    strokeWidth={3} 
+                    fill="#6366f1" 
+                    fillOpacity={0.5} 
+                  />
+                  <Radar 
+                    name="유사 판례" 
+                    dataKey="B" 
+                    stroke="#94a3b8" 
+                    strokeWidth={2} 
+                    fill="#cbd5e1" 
+                    fillOpacity={0.2} 
+                  />
                   <Tooltip />
                   <Legend align="right" verticalAlign="middle" layout="vertical" iconType="circle" />
                 </RadarChart>
@@ -206,15 +223,15 @@ export default function Solution() {
           </Card>
         </div>
 
-        <Card className="p-2 bg-white border-slate-200 mb-8 shadow-sm border-l-4 border-l-indigo-500">
+        <Card className="p-8 bg-white border-slate-200 mb-8 shadow-sm border-l-4 border-l-indigo-500">
           <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> 
           <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-center">
             <div className="md:col-span-3 h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={compensationTrendData}>
+                <BarChart data={compensationTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 12, fontWeight: 600 }} />
-                  <YAxis hide domain={[0, 'dataMax + 2']} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} />
                   <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={65}>
                     {compensationTrendData.map((entry, index) => (
@@ -295,7 +312,6 @@ export default function Solution() {
                   <div className={`w-14 h-14 ${doc.color} rounded-2xl flex items-center justify-center mb-6`}>{<doc.icon size={28} />}</div>
                   <h3 className="text-lg font-black text-slate-900 mb-2">{doc.title}</h3>
                   
-                  {/* AI 추천 이유 UI 복구 */}
                   {isRec && (
                     <div className="mb-8 p-3 bg-indigo-50 rounded-xl border border-indigo-100 text-[11px] text-indigo-700 font-bold italic">
                       💡 추천 이유: {doc.reason}

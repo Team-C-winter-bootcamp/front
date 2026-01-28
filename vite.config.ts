@@ -21,6 +21,22 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: 'http://localhost:8000',
           changeOrigin: true,
+          rewrite: (path) => {
+            const newPath = path.replace(/^\/api/, ''); // /api를 제거
+            console.log(`[Proxy] ${path} -> http://localhost:8000${newPath}`);
+            return newPath;
+          },
+          configure: (proxy, _options) => {
+            proxy.on('error', (err, _req, _res) => {
+              console.log('[Proxy Error]', err);
+            });
+            proxy.on('proxyReq', (proxyReq, req, _res) => {
+              console.log('[Proxy Request]', req.method, req.url, '->', proxyReq.path);
+            });
+            proxy.on('proxyRes', (proxyRes, req, _res) => {
+              console.log('[Proxy Response]', req.url, '->', proxyRes.statusCode);
+            });
+          },
         },
       },
     },
