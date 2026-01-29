@@ -4,9 +4,15 @@ import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
 import { Download, ArrowUp, RotateCcw, Loader2, ChevronLeft, Home } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf'; // 소문자 jspdf로 수정
 import { caseService } from '../api';
 import ReactMarkdown from 'react-markdown';
+
+// Location state 타입 정의
+interface LocationState {
+  case_id?: string | number;
+  precedent_id?: string | number;
+}
 
 export default function AgreeDocument() {
   const location = useLocation();
@@ -23,7 +29,10 @@ export default function AgreeDocument() {
   const documentRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const { case_id, precedent_id } = (location.state as any) || {};
+  // 안전하게 state 가져오기
+  const state = location.state as LocationState;
+  const case_id = state?.case_id;
+  const precedent_id = state?.precedent_id;
 
   useEffect(() => {
     const initDocument = async () => {
@@ -44,6 +53,7 @@ export default function AgreeDocument() {
           setChatMessages([{ role: 'ai', content: '분석된 판례를 바탕으로 합의서 초안을 작성했습니다. 수정 사항을 말씀해주세요!' }]);
         }
       } catch (error) {
+        console.error(error);
         alert('합의서 초안 생성 중 오류가 발생했습니다.');
       } finally {
         setIsGenerating(false);
@@ -68,6 +78,7 @@ export default function AgreeDocument() {
         setChatMessages((prev) => [...prev, { role: 'ai', content: '요청하신 내용을 반영하여 합의서를 업데이트했습니다.' }]);
       }
     } catch (error) {
+      console.error(error);
       alert('문서 수정 중 오류가 발생했습니다.');
     } finally {
       setIsStreaming(false);
@@ -110,7 +121,10 @@ export default function AgreeDocument() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
+  const handleMouseDown = (e: React.MouseEvent) => { 
+    e.preventDefault(); 
+    setIsResizing(true); 
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -149,10 +163,10 @@ export default function AgreeDocument() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
+              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60 text-sm">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
-              <Button onClick={() => window.location.reload()} size="md" variant="outline">
+              <Button onClick={() => window.location.reload()} size="md" variant="outline" className="text-sm">
                 <RotateCcw className="w-4 h-4 mr-2" /> 초기화
               </Button>
             </div>
@@ -170,16 +184,14 @@ export default function AgreeDocument() {
               <div className="font-serif text-slate-900 text-[11pt] leading-[1.8]">
                 <ReactMarkdown
                   components={{
-                    h1: ({...props}) => <h1 className="text-3xl font-bold mb-10 text-center border-b-2 pb-5" {...props} />,
-                    // h2: 세로 선 제거
-                    h2: ({...props}) => <h2 className="text-xl font-bold mt-10 mb-4" {...props} />,
-                    // h3: font-bold 제거 및 색상 조절
-                    h3: ({...props}) => <h3 className="text-lg font-normal mt-6 mb-2 text-slate-800 underline underline-offset-4" {...props} />,
-                    p: ({...props}) => <p className="mb-4 text-justify" {...props} />,
-                    ul: ({...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
-                    ol: ({...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
-                    li: ({...props}) => <li className="mb-1" {...props} />,
-                    strong: ({...props}) => <strong className="font-bold text-black" {...props} />,
+                    h1: ({node, ...props}) => <h1 className="text-3xl font-bold mb-10 text-center border-b-2 pb-5" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-10 mb-4 text-black" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-lg font-normal mt-6 mb-2 text-slate-800 underline underline-offset-4" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-4 text-justify" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
+                    li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold text-black" {...props} />,
                     hr: () => <hr className="my-8 border-gray-300" />,
                   }}
                 >
@@ -210,7 +222,7 @@ export default function AgreeDocument() {
           <div className="p-4 border-t bg-white">
             <div className="max-w-4xl mx-auto flex gap-2">
               <input className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="수정하고 싶은 내용을 입력하세요..." />
-              <button onClick={handleSend} disabled={isStreaming || chatInput.trim().length < 5} className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm"><ArrowUp size={20} /></button>
+              <button onClick={handleSend} disabled={isStreaming || chatInput.trim().length < 5} className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm transition-colors cursor-pointer"><ArrowUp size={20} /></button>
             </div>
           </div>
         </div>
