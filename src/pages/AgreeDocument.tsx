@@ -4,7 +4,7 @@ import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
 import { Download, ArrowUp, RotateCcw, Loader2, ChevronLeft, Home } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import jsPDF from 'jsPDF';
 import { caseService } from '../api';
 import ReactMarkdown from 'react-markdown';
 
@@ -168,29 +168,28 @@ export default function AgreeDocument() {
           ) : (
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
               <div className="font-serif text-slate-900 text-[11pt] leading-[1.8]">
-                {/* --- 마크다운 스타일 직접 매핑 부분 --- */}
                 <ReactMarkdown
                   components={{
-                    h1: ({...props}) => <h1 className="text-3xl font-bold mb-8 text-center border-b-2 pb-4" {...props} />,
-                    h2: ({...props}) => <h2 className="text-xl font-bold mt-10 mb-4 border-l-4 border-indigo-500 pl-3" {...props} />,
-                    h3: ({...props}) => <h3 className="text-lg font-bold mt-6 mb-2" {...props} />,
+                    h1: ({...props}) => <h1 className="text-3xl font-bold mb-10 text-center border-b-2 pb-5" {...props} />,
+                    // h2: 세로 선 제거
+                    h2: ({...props}) => <h2 className="text-xl font-bold mt-10 mb-4" {...props} />,
+                    // h3: font-bold 제거 및 색상 조절
+                    h3: ({...props}) => <h3 className="text-lg font-normal mt-6 mb-2 text-slate-800 underline underline-offset-4" {...props} />,
                     p: ({...props}) => <p className="mb-4 text-justify" {...props} />,
                     ul: ({...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
                     ol: ({...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
                     li: ({...props}) => <li className="mb-1" {...props} />,
-                    strong: ({...props}) => <strong className="font-bold text-indigo-900" {...props} />,
+                    strong: ({...props}) => <strong className="font-bold text-black" {...props} />,
                     hr: () => <hr className="my-8 border-gray-300" />,
                   }}
                 >
                   {documentContent}
                 </ReactMarkdown>
-                {/* ---------------------------------- */}
               </div>
             </div>
           )}
         </div>
 
-        {/* 채팅 영역 (기존 유지) */}
         <div ref={chatContainerRef} className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-lg" style={{ height: `${chatHeight}px` }}>
           <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
              <div className="w-10 h-1 bg-gray-300 rounded-full" />
