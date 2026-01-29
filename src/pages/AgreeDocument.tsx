@@ -10,7 +10,6 @@ import ReactMarkdown from 'react-markdown';
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 const rightAlignLineRegex = /^\s*(작성일:|발신인:|갑:|을:)/;
 
-// Vercel 빌드 에러 방지용 타입 정의
 interface LocationState {
   case_id?: string | number;
   precedent_id?: string | number;
@@ -162,12 +161,12 @@ export default function AgreeDocument() {
     }
     if (displayedLengthRef.current >= documentContent.length) return;
     const interval = setInterval(() => {
-      displayedLengthRef.current += 1;
+      displayedLengthRef.current += 2;
       setDisplayedContent(documentContent.slice(0, displayedLengthRef.current));
       if (displayedLengthRef.current >= documentContent.length) {
         clearInterval(interval);
       }
-    }, 15);//타이핑 속도 
+    }, 10);
     return () => clearInterval(interval);
   }, [documentContent]);
 
@@ -215,33 +214,27 @@ export default function AgreeDocument() {
 
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
-
     try {
       const canvas = await html2canvas(documentRef.current, { 
         scale: 2, 
         useCORS: true,
         backgroundColor: "#ffffff"
       });
-      
       const imgData = canvas.toDataURL('image/png');
       const imgWidth = 210; 
       const pageHeight = 297; 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
       let heightLeft = imgHeight;
       let position = 0;
       const pdf = new jsPDF('p', 'mm', 'a4');
-
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-
       while (heightLeft > 0) {
         position -= pageHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
-
       pdf.save(`합의서_${case_id || 'draft'}.pdf`);
     } catch (error) {
       console.error(error);
@@ -249,10 +242,7 @@ export default function AgreeDocument() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => { 
-    e.preventDefault(); 
-    setIsResizing(true); 
-  };
+  const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -278,20 +268,16 @@ export default function AgreeDocument() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex gap-1 mr-2">
-                <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition" title="뒤로 가기">
-                  <ChevronLeft size={20} />
-                </button>
-                <button onClick={() => navigate('/')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600" title="홈으로 가기">
-                  <Home size={20} />
-                </button>
+                <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"><ChevronLeft size={20} /></button>
+                <button onClick={() => navigate('/')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600"><Home size={20} /></button>
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">합의서 작성</h1>
                 <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
               </div>
             </div>
-            <div className="flex gap-2 text-sm">
-              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">
+            <div className="flex gap-2 text-sm font-sans">
+              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md transition-colors">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
               <Button onClick={() => window.location.reload()} size="md" variant="outline">
@@ -302,27 +288,33 @@ export default function AgreeDocument() {
         </header>
 
         <div ref={contentScrollRef} className="flex-1 bg-slate-100 p-8 overflow-auto pb-40">
-          {isGenerating ? (
+          {isGenerating && displayedContent.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center">
               <Loader2 className="animate-spin text-indigo-500 mb-4" size={48} />
               <p className="font-bold text-slate-600 text-lg">AI가 합의서를 작성 중입니다...</p>
             </div>
           ) : (
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
-              <div className="font-serif text-slate-900 text-[11pt] leading-[1.8] whitespace-pre-wrap">
+              <div className="font-serif text-slate-900 text-[11pt] leading-[1.8]">
                 <ReactMarkdown
                   components={{
-                    p: ({ children }) => {
-                      const plainText = Children.toArray(children)
-                        .map((child) => (typeof child === 'string' ? child : ''))
-                        .join('');
+                    h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-6 text-center" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-8 mb-4" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-lg mt-6 mb-2" {...props} />,
+                    p: ({node, children, ...props}) => {
+                      const plainText = Children.toArray(children).map(child => typeof child === 'string' ? child : '').join('');
                       const isRightAligned = rightAlignLineRegex.test(plainText);
                       return (
-                        <p className={isRightAligned ? 'text-right' : undefined}>
+                        <p className={`mb-4 text-justify ${isRightAligned ? 'text-right' : ''}`} {...props}>
                           {children}
                         </p>
                       );
                     },
+                    ul: ({node, ...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
+                    li: ({node, ...props}) => <li className="mb-1 text-justify" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold text-black" {...props} />,
+                    hr: () => <hr className="my-8 border-gray-300" />,
                   }}
                 >
                   {displayedContent}
@@ -341,18 +333,18 @@ export default function AgreeDocument() {
               {chatMessages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] p-3 rounded-xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
-                    {msg.role === 'ai' && <div className="text-[14px] font-bold text-indigo-600 mb-1">LAWDING</div>}
+                    {msg.role === 'ai' && <div className="text-[14px] font-bold text-indigo-600 mb-1 font-sans">LAWDING</div>}
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
               ))}
-              {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2">문서를 업데이트하고 있습니다...</div>}
+              {isStreaming && <div className="text-xs text-indigo-500 animate-pulse ml-2 font-medium font-sans">문서를 업데이트하고 있습니다...</div>}
             </div>
           </div>
-          <div className="p-4 border-t bg-white">
+          <div className="p-4 border-t bg-white font-sans">
             <div className="max-w-4xl mx-auto flex gap-2">
               <input 
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" 
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm transition-all" 
                 value={chatInput} 
                 onChange={(e) => setChatInput(e.target.value)} 
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
@@ -360,8 +352,8 @@ export default function AgreeDocument() {
               />
               <button 
                 onClick={handleSend} 
-                disabled={isStreaming || chatInput.trim().length < 5} 
-                className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm cursor-pointer"
+                disabled={isStreaming || isGenerating || chatInput.trim().length < 5} 
+                className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm cursor-pointer transition-colors"
               >
                 <ArrowUp size={20} />
               </button>
