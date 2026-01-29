@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { caseService, initService } from '../api';
 import { PostCaseInfoSuccess } from '../api/types';
 
-// 1. 타입 정의
+// 1. 타입 정의 
+//테스트으으으
 type QuestionType = 'who' | 'when' | 'what' | 'want' | 'detail';
 
 interface QuestionItem {
@@ -432,3 +433,5 @@ export default function CaseCreation() {
     </Layout>
   );
 }
+
+//테스트하는거입니다.
