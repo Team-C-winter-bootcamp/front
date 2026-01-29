@@ -9,6 +9,12 @@ import ReactMarkdown from 'react-markdown';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
+// Vercel 빌드 에러 방지용 타입 정의
+interface LocationState {
+  case_id?: string | number;
+  precedent_id?: string | number;
+}
+
 type SseCallbacks = {
   onChunk: (chunk: string) => void;
   onComplete: (result: any) => void;
@@ -101,7 +107,9 @@ export default function ProofDocument() {
   const streamBufferRef = useRef('');
   const initRequestedRef = useRef(false);
 
-  const { case_id, precedent_id } = (location.state as any) || {};
+  const state = location.state as LocationState;
+  const case_id = state?.case_id;
+  const precedent_id = state?.precedent_id;
 
   useEffect(() => {
     const initDocument = async () => {
