@@ -10,6 +10,11 @@ import ReactMarkdown from 'react-markdown';
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 const rightAlignLineRegex = /^\s*(작성일:|발신인:|갑:|을:)/;
 
+type LocationState = {
+  case_id?: number;
+  precedent_id?: number | string;
+};
+
 type SseCallbacks = {
   onChunk: (chunk: string) => void;
   onComplete: (result: any) => void;
