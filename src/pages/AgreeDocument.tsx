@@ -74,37 +74,30 @@ export default function AgreeDocument() {
     }
   };
 
-  // --- [수정된 부분] PDF 다중 페이지 저장 로직 ---
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
 
     try {
-      // 1. html2canvas로 전체 내용을 캡처
       const canvas = await html2canvas(documentRef.current, { 
         scale: 2, 
         useCORS: true,
-        backgroundColor: "#ffffff" // 배경 흰색 고정
+        backgroundColor: "#ffffff"
       });
       
       const imgData = canvas.toDataURL('image/png');
-      
-      // 2. A4 크기 기준 계산 (mm)
       const imgWidth = 210; 
       const pageHeight = 297; 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       let heightLeft = imgHeight;
       let position = 0;
-
       const pdf = new jsPDF('p', 'mm', 'a4');
 
-      // 3. 첫 페이지 출력
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
-      // 4. 내용이 남았다면 페이지 추가 루프
       while (heightLeft > 0) {
-        position -= pageHeight; // 이미지를 위로 올림
+        position -= pageHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
@@ -116,7 +109,6 @@ export default function AgreeDocument() {
       alert('PDF 저장 중 오류가 발생했습니다.');
     }
   };
-  // ---------------------------------------------
 
   const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
 
@@ -144,18 +136,10 @@ export default function AgreeDocument() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex gap-1 mr-2">
-                <button 
-                  onClick={() => navigate(-1)}
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
-                  title="뒤로 가기"
-                >
+                <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition" title="뒤로 가기">
                   <ChevronLeft size={20} />
                 </button>
-                <button 
-                  onClick={() => navigate('/')}
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600"
-                  title="홈으로 가기"
-                >
+                <button onClick={() => navigate('/')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600" title="홈으로 가기">
                   <Home size={20} />
                 </button>
               </div>
@@ -183,21 +167,30 @@ export default function AgreeDocument() {
             </div>
           ) : (
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
-              <div className="font-serif text-slate-900 text-[11pt] leading-[1.8] whitespace-pre-wrap">
+              <div className="font-serif text-slate-900 text-[11pt] leading-[1.8]">
+                {/* --- 마크다운 스타일 직접 매핑 부분 --- */}
                 <ReactMarkdown
                   components={{
-                    h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-6 text-center border-b-2 pb-2" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-8 mb-4" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-lg font-bold mt-6 mb-2" {...props} />,
-                    p: ({node, ...props}) => <p className="mb-4" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-bold border-b border-slate-400" {...props} />,
+                    h1: ({...props}) => <h1 className="text-3xl font-bold mb-8 text-center border-b-2 pb-4" {...props} />,
+                    h2: ({...props}) => <h2 className="text-xl font-bold mt-10 mb-4 border-l-4 border-indigo-500 pl-3" {...props} />,
+                    h3: ({...props}) => <h3 className="text-lg font-bold mt-6 mb-2" {...props} />,
+                    p: ({...props}) => <p className="mb-4 text-justify" {...props} />,
+                    ul: ({...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
+                    ol: ({...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
+                    li: ({...props}) => <li className="mb-1" {...props} />,
+                    strong: ({...props}) => <strong className="font-bold text-indigo-900" {...props} />,
+                    hr: () => <hr className="my-8 border-gray-300" />,
                   }}
                 >
+                  {documentContent}
+                </ReactMarkdown>
+                {/* ---------------------------------- */}
               </div>
             </div>
           )}
         </div>
 
+        {/* 채팅 영역 (기존 유지) */}
         <div ref={chatContainerRef} className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-lg" style={{ height: `${chatHeight}px` }}>
           <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
              <div className="w-10 h-1 bg-gray-300 rounded-full" />
