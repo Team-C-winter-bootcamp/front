@@ -140,6 +140,11 @@ export default function Solution() {
 
   const pieColors = ['#6366f1', '#818cf8', '#a5b4fc'];
 
+  const maxSentence = useMemo(() => {
+    if (pieData.length === 0) return null;
+    return [...pieData].sort((a, b) => b.value - a.value)[0];
+  }, [pieData]);
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-6 py-12 font-sans">
@@ -190,19 +195,30 @@ export default function Solution() {
                 <PieChart>
                   <Pie 
                     data={pieData} 
-                    innerRadius={60} 
-                    outerRadius={80} 
+                    innerRadius={65} 
+                    outerRadius={85} 
                     paddingAngle={5} 
                     dataKey="value" 
                     stroke="none"
-                    label={({ percent }) => percent ? `${(percent * 100).toFixed(0)}%` : ''}
-                    labelLine={false}
+                    label={({ name, percent }) => percent ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                    labelLine={true}
                   >
                     {pieData.map((_, i) => (
                       <Cell key={`pie-cell-${i}`} fill={pieColors[i % pieColors.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
+                  {maxSentence && (
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      <tspan x="50%" dy="-0.1em" fontSize="24" fontWeight="900" fill="#4f46e5">{maxSentence.value}%</tspan>
+                      <tspan x="50%" dy="1.5em" fontSize="12" fontWeight="800" fill="#64748b">{maxSentence.name}</tspan>
+                    </text>
+                  )}
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -222,7 +238,7 @@ export default function Solution() {
 
         <Card className="p-8 bg-white border-slate-200 mb-8 shadow-sm border-l-4 border-l-indigo-500">
           <div className="flex items-center gap-2 mb-10 text-slate-800"><TrendingDown className="text-indigo-600" /> 
-          <h2 className="font-bold text-xl">적정 합의금 산출 근거</h2></div>
+          <h2 className="font-bold text-xl">적정 합의금 산출</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-center">
             <div className="md:col-span-3 h-72">
               <ResponsiveContainer width="100%" height="100%">
