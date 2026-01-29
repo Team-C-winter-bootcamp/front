@@ -184,7 +184,15 @@ export default function AgreeDocument() {
           ) : (
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
               <div className="font-serif text-slate-900 text-[11pt] leading-[1.8] whitespace-pre-wrap">
-                <ReactMarkdown>{documentContent}</ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-6 text-center border-b-2 pb-2" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-8 mb-4" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-lg font-bold mt-6 mb-2" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-4" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold border-b border-slate-400" {...props} />,
+                  }}
+                >
               </div>
             </div>
           )}
