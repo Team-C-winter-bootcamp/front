@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 import { caseService } from '../api';
 import ReactMarkdown from 'react-markdown';
 
-// Location state 타입 정의 (Vercel 빌드 에러 방지용)
+// Location state 타입 정의
 interface LocationState {
   case_id?: string | number;
   precedent_id?: string | number;
@@ -144,7 +144,7 @@ export default function AgreeDocument() {
 
   return (
     <Layout showNav={false}>
-      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative">
+      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative text-slate-900">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -161,8 +161,8 @@ export default function AgreeDocument() {
                 <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
+            <div className="flex gap-2 text-sm">
+              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
               <Button onClick={() => window.location.reload()} size="md" variant="outline">
@@ -201,7 +201,6 @@ export default function AgreeDocument() {
           )}
         </div>
 
-        {/* 채팅 UI 생략 (기존과 동일) */}
         <div ref={chatContainerRef} className="bg-white border-t border-gray-200 flex flex-col absolute bottom-0 w-full z-10 shadow-lg" style={{ height: `${chatHeight}px` }}>
           <div onMouseDown={handleMouseDown} className="h-1.5 bg-gray-100 hover:bg-indigo-300 cursor-ns-resize transition-colors flex items-center justify-center">
              <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -220,4 +219,25 @@ export default function AgreeDocument() {
             </div>
           </div>
           <div className="p-4 border-t bg-white">
-            <div className
+            <div className="max-w-4xl mx-auto flex gap-2">
+              <input 
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" 
+                value={chatInput} 
+                onChange={(e) => setChatInput(e.target.value)} 
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
+                placeholder="수정하고 싶은 내용을 입력하세요..." 
+              />
+              <button 
+                onClick={handleSend} 
+                disabled={isStreaming || chatInput.trim().length < 5} 
+                className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm cursor-pointer"
+              >
+                <ArrowUp size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
