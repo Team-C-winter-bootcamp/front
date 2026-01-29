@@ -1,18 +1,91 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Children } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
 import { Download, ArrowUp, RotateCcw, Loader2, ChevronLeft, Home } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { caseService } from '../api';
 import ReactMarkdown from 'react-markdown';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const rightAlignLineRegex = /^\s*(작성일:|발신인:)/;
+
+type SseCallbacks = {
+  onChunk: (chunk: string) => void;
+  onComplete: (result: any) => void;
+  onError: (err: unknown) => void;
+};
+
+async function fetchSSE(
+  url: string,
+  payload: any,
+  callbacks: SseCallbacks,
+  method: 'POST' | 'PATCH' = 'POST'
+) {
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.body) throw new Error('ReadableStream not supported.');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split('\n\n');
+      buffer = blocks.pop() || '';
+
+      for (const block of blocks) {
+        const trimmed = block.trim();
+        if (!trimmed) continue;
+
+        let eventName = 'message';
+        let dataStr = '';
+
+        for (const line of trimmed.split('\n')) {
+          if (line.startsWith('event:')) eventName = line.replace('event:', '').trim();
+          if (line.startsWith('data:')) dataStr += line.replace('data:', '').trim();
+        }
+
+        if (!dataStr) continue;
+
+        try {
+          const data = JSON.parse(dataStr);
+          if (eventName === 'message') {
+            callbacks.onChunk(data.content ?? data.chunk ?? '');
+          } else if (eventName === 'done') {
+            callbacks.onComplete(data.result ?? data);
+          } else if (eventName === 'error') {
+            callbacks.onError(data.error ?? data.message ?? 'unknown error');
+          }
+        } catch (e) {
+          console.error('SSE Parse Error:', e);
+        }
+      }
+    }
+  } catch (error) {
+    callbacks.onError(error);
+  }
+}
 
 export default function GosoDocument() {
   const location = useLocation();
   const navigate = useNavigate();
   const [chatInput, setChatInput] = useState('');
   const [documentContent, setDocumentContent] = useState('');
+  const [displayedContent, setDisplayedContent] = useState('');
   const [documentId, setDocumentId] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -22,6 +95,9 @@ export default function GosoDocument() {
 
   const documentRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
+  const displayedLengthRef = useRef(0);
+  const initRequestedRef = useRef(false);
 
   const { case_id, precedent_id } = (location.state as any) || {};
 
@@ -32,46 +108,86 @@ export default function GosoDocument() {
         navigate(-1);
         return;
       }
+      if (initRequestedRef.current) return;
+      initRequestedRef.current = true;
       setIsGenerating(true);
-      try {
-        const response = await caseService.generateDocument('complaint', {
+      setDocumentContent('');
+      await fetchSSE(
+        `${API_BASE}/documents/complaint/`,
+        {
           case_id: Number(case_id),
           precedent: String(precedent_id),
-        });
-        if (response && response.document_id) {
-          setDocumentId(response.document_id);
-          setDocumentContent(response.content);
-          setChatMessages([{ role: 'ai', content: '분석된 법리를 바탕으로 고소장 초안을 작성했습니다. 수정 사항을 말씀해주세요!' }]);
-        }
-      } catch (error) {
-        alert('고소장 초안 생성 중 오류가 발생했습니다.');
-      } finally {
-        setIsGenerating(false);
-      }
+        },
+        {
+          onChunk: (chunk) => {
+            setDocumentContent((prev) => prev + chunk);
+          },
+          onComplete: (result) => {
+            if (result?.document_id) setDocumentId(result.document_id);
+            setChatMessages([{ role: 'ai', content: '분석된 법리를 바탕으로 고소장 초안을 작성했습니다. 수정 사항을 말씀해주세요!' }]);
+            setIsGenerating(false);
+          },
+          onError: () => {
+            alert('고소장 초안 생성 중 오류가 발생했습니다.');
+            setIsGenerating(false);
+          },
+        },
+        'POST'
+      );
     };
     initDocument();
   }, [case_id, precedent_id, navigate]);
 
+  useEffect(() => {
+    if (documentContent.length === 0) {
+      displayedLengthRef.current = 0;
+      setDisplayedContent('');
+      return;
+    }
+    if (displayedLengthRef.current >= documentContent.length) return;
+    const interval = setInterval(() => {
+      displayedLengthRef.current += 1;
+      setDisplayedContent(documentContent.slice(0, displayedLengthRef.current));
+      if (displayedLengthRef.current >= documentContent.length) {
+        clearInterval(interval);
+      }
+    }, 15);//타이핑 속도 
+    return () => clearInterval(interval);
+  }, [documentContent]);
+
+  useEffect(() => {
+    if (!contentScrollRef.current) return;
+    contentScrollRef.current.scrollTop = contentScrollRef.current.scrollHeight;
+  }, [displayedContent]);
+
   const handleSend = async () => {
-    if (chatInput.trim().length < 5 || !documentId) return;
+    if (isStreaming || isGenerating || chatInput.trim().length < 5 || !documentId) return;
     const userMessage = chatInput.trim();
     setChatMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
     setChatInput('');
     setIsStreaming(true);
-    try {
-      const response = await caseService.updateDocument('complaint', {
+    setDocumentContent('');
+    await fetchSSE(
+      `${API_BASE}/documents/complaint/`,
+      {
         document_id: documentId,
         user_request: userMessage,
-      });
-      if (response && response.content) {
-        setDocumentContent(response.content);
-        setChatMessages((prev) => [...prev, { role: 'ai', content: '요청하신 내용을 반영하여 고소장을 수정했습니다.' }]);
-      }
-    } catch (error) {
-      alert('문서 수정 중 오류가 발생했습니다.');
-    } finally {
-      setIsStreaming(false);
-    }
+      },
+      {
+        onChunk: (chunk) => {
+          setDocumentContent((prev) => prev + chunk);
+        },
+        onComplete: () => {
+          setChatMessages((prev) => [...prev, { role: 'ai', content: '요청하신 내용을 반영하여 고소장을 수정했습니다.' }]);
+          setIsStreaming(false);
+        },
+        onError: () => {
+          alert('문서 수정 중 오류가 발생했습니다.');
+          setIsStreaming(false);
+        },
+      },
+      'PATCH'
+    );
   };
 
   const handleDownloadPDF = async () => {
@@ -173,7 +289,7 @@ export default function GosoDocument() {
           </div>
         </header>
 
-        <div className="flex-1 bg-slate-100 p-8 overflow-auto pb-40">
+        <div ref={contentScrollRef} className="flex-1 bg-slate-100 p-8 overflow-auto pb-40">
           {isGenerating ? (
             <div className="h-full flex flex-col items-center justify-center">
               <Loader2 className="animate-spin text-indigo-500 mb-4" size={48} />
@@ -182,7 +298,23 @@ export default function GosoDocument() {
           ) : (
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-[20mm] min-h-[297mm]" ref={documentRef}>
               <div className="font-serif text-slate-900 text-[11pt] leading-[1.8] whitespace-pre-wrap">
-                <ReactMarkdown>{documentContent}</ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => {
+                      const plainText = Children.toArray(children)
+                        .map((child) => (typeof child === 'string' ? child : ''))
+                        .join('');
+                      const isRightAligned = rightAlignLineRegex.test(plainText);
+                      return (
+                        <p className={isRightAligned ? 'text-right' : undefined}>
+                          {children}
+                        </p>
+                      );
+                    },
+                  }}
+                >
+                  {displayedContent}
+                </ReactMarkdown>
               </div>
             </div>
           )}
