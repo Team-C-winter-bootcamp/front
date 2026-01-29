@@ -142,7 +142,7 @@ const JudgmentDetailPage = () => {
             >
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight break-keep">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight tracking-tight break-keep">
               {judgmentData.title}
             </h1>
           </div>
@@ -165,8 +165,14 @@ const JudgmentDetailPage = () => {
                       {/* 핵심 분석 요약 (기본 표시) */}
                       <motion.div layout>
                         <div className={sectionTitleStyle}><div className={iconWrapperStyle}><Scale size={20} /></div> 핵심 분석 요약</div>
-                        <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50">
-                          <p className="text-indigo-900 text-[18px] font-extrabold leading-relaxed break-keep">
+                        <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50 border-l-4 border-l-indigo-500 relative overflow-hidden group">
+                          {/* Shimmer effect animation */}
+                          <motion.div 
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full"
+                            animate={{ x: ['100%', '-100%'] }}
+                            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                          />
+                          <p className="text-indigo-900 text-[18px] font-extrabold leading-relaxed break-keep relative z-10">
                             {judgmentData.aiAnalysis.core}
                           </p>
                         </div>
@@ -199,7 +205,7 @@ const JudgmentDetailPage = () => {
                             {/* 판결 결과 및 태그 */}
                             <div className="pt-8 border-t border-slate-100 flex flex-col gap-4">
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600"><Gavel size={20} /></div>
+                                <div className="p-1.5 bg-indigo-50/50 rounded-full text-indigo-600"><Gavel size={20} /></div>
                                 <span className="text-xl font-black text-slate-900">{judgmentData.aiAnalysis.verdict}</span>
                               </div>
                               <div className="flex flex-wrap gap-2">
@@ -226,13 +232,13 @@ const JudgmentDetailPage = () => {
                         </AnimatePresence>
                       </div>
 
-                      <motion.div layout className="pt-2 flex justify-center relative z-20">
+                      <motion.div layout className="pt-6 flex justify-center relative z-20">
                         <button
                           onClick={() => setIsAiExpanded((prev) => !prev)}
-                          className="text-slate-700 font-semibold text-sm flex items-center gap-2 hover:text-indigo-600 transition-colors"
+                          className="px-8 py-3 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-all font-bold text-sm flex items-center gap-2 shadow-sm border border-indigo-100/50 active:scale-95"
                         >
-                          {isAiExpanded ? '접기' : '더 보기'}
-                          <motion.div animate={{ rotate: isAiExpanded ? 200 : 0 }}>
+                          {isAiExpanded ? '접기' : 'AI 분석 내용 더 보기'}
+                          <motion.div animate={{ rotate: isAiExpanded ? 180 : 0 }}>
                             <ChevronDown size={18} />
                           </motion.div>
                         </button>

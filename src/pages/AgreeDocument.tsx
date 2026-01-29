@@ -100,7 +100,9 @@ export default function AgreeDocument() {
   const streamBufferRef = useRef('');
   const initRequestedRef = useRef(false);
 
-  const { case_id, precedent_id } = (location.state as any) || {};
+  const state = location.state as LocationState;
+  const case_id = state?.case_id;
+  const precedent_id = state?.precedent_id;
 
   useEffect(() => {
     const initDocument = async () => {
@@ -205,37 +207,30 @@ export default function AgreeDocument() {
     );
   };
 
-  // --- [수정된 부분] PDF 다중 페이지 저장 로직 ---
   const handleDownloadPDF = async () => {
     if (!documentRef.current) return;
 
     try {
-      // 1. html2canvas로 전체 내용을 캡처
       const canvas = await html2canvas(documentRef.current, { 
         scale: 2, 
         useCORS: true,
-        backgroundColor: "#ffffff" // 배경 흰색 고정
+        backgroundColor: "#ffffff"
       });
       
       const imgData = canvas.toDataURL('image/png');
-      
-      // 2. A4 크기 기준 계산 (mm)
       const imgWidth = 210; 
       const pageHeight = 297; 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       let heightLeft = imgHeight;
       let position = 0;
-
       const pdf = new jsPDF('p', 'mm', 'a4');
 
-      // 3. 첫 페이지 출력
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
-      // 4. 내용이 남았다면 페이지 추가 루프
       while (heightLeft > 0) {
-        position -= pageHeight; // 이미지를 위로 올림
+        position -= pageHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
@@ -247,9 +242,11 @@ export default function AgreeDocument() {
       alert('PDF 저장 중 오류가 발생했습니다.');
     }
   };
-  // ---------------------------------------------
 
-  const handleMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setIsResizing(true); };
+  const handleMouseDown = (e: React.MouseEvent) => { 
+    e.preventDefault(); 
+    setIsResizing(true); 
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -270,23 +267,15 @@ export default function AgreeDocument() {
 
   return (
     <Layout showNav={false}>
-      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative">
+      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden relative text-slate-900">
         <header className="border-b border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex gap-1 mr-2">
-                <button 
-                  onClick={() => navigate(-1)}
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition"
-                  title="뒤로 가기"
-                >
+                <button onClick={() => navigate(-1)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition" title="뒤로 가기">
                   <ChevronLeft size={20} />
                 </button>
-                <button 
-                  onClick={() => navigate('/')}
-                  className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600"
-                  title="홈으로 가기"
-                >
+                <button onClick={() => navigate('/')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition hover:text-indigo-600" title="홈으로 가기">
                   <Home size={20} />
                 </button>
               </div>
@@ -295,8 +284,8 @@ export default function AgreeDocument() {
                 <p className="text-xs text-gray-500 mt-1">참조판례: {precedent_id || 'N/A'}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200/60">
+            <div className="flex gap-2 text-sm">
+              <Button onClick={handleDownloadPDF} size="md" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">
                 <Download className="w-4 h-4 mr-2" /> PDF 저장
               </Button>
               <Button onClick={() => window.location.reload()} size="md" variant="outline">
@@ -356,8 +345,20 @@ export default function AgreeDocument() {
           </div>
           <div className="p-4 border-t bg-white">
             <div className="max-w-4xl mx-auto flex gap-2">
-              <input className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="수정하고 싶은 내용을 입력하세요..." />
-              <button onClick={handleSend} disabled={isStreaming || chatInput.trim().length < 5} className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm"><ArrowUp size={20} /></button>
+              <input 
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm shadow-sm" 
+                value={chatInput} 
+                onChange={(e) => setChatInput(e.target.value)} 
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
+                placeholder="수정하고 싶은 내용을 입력하세요..." 
+              />
+              <button 
+                onClick={handleSend} 
+                disabled={isStreaming || chatInput.trim().length < 5} 
+                className="bg-indigo-600 text-white p-3 rounded-xl disabled:bg-slate-200 shadow-sm cursor-pointer"
+              >
+                <ArrowUp size={20} />
+              </button>
             </div>
           </div>
         </div>

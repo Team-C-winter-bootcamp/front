@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
 import { FeatureSection } from '../../types/landing';
 import { CheckCircle2, Search, FileText, BarChart3, MessageSquare, ShieldCheck } from 'lucide-react';
-import pick from '../../assets/pick.webp';
-import checklist from '../../assets/checklist.webp';
-import pan from '../../assets/pan.webp';
-import solu from '../../assets/solu.webp';
-import detail from '../../assets/detail.webp';
+import pick from '../../assets/pick.gif';
+import checklist from '../../assets/checklist.gif';
+import pan from '../../assets/pan.gif';
+import solu from '../../assets/solu.gif';
+import detail from '../../assets/detail.gif';
+import document from '../../assets/document.gif';
 
 const features: (FeatureSection & { icon: any })[] = [
   {
@@ -78,7 +79,7 @@ const features: (FeatureSection & { icon: any })[] = [
       '분석된 정보를 반영한 빠른 문서 작성',
       '원터치로 PDF 다운로드'
     ],
-    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070&auto=format&fit=crop',
+    image: document,
     reverse: true,
     icon: CheckCircle2
   }
