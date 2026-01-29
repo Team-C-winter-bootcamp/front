@@ -143,14 +143,32 @@ export default function Solution() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-6 py-12 font-sans">
-        <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight italic underline decoration-indigo-500 underline-offset-8">법례 심층 분석 결과</h1>
-          <p className="text-slate-500 mt-6 text-sm font-medium tracking-wide">사건번호 {precedentsId} 기반 정밀 솔루션</p>
+        <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4 border border-indigo-100 shadow-sm">
+            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            Precision Analysis
+          </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">법례 심층 분석 결과</h1>
+          <p className="text-slate-500 mt-4 text-base font-medium">사건번호 {precedentsId} 기반 정밀 솔루션</p>
         </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2 bg-white border-slate-200 shadow-sm border-l-4 border-l-indigo-500">
-            <div className="flex items-center gap-2 mb-6"><Scale className="text-indigo-600" /> <h2 className="font-bold text-lg text-slate-800">사건 성격 대조 분석</h2></div>
+          <Card className="lg:col-span-2 bg-white border-slate-100 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Scale className="text-indigo-600" /> 
+                <h2 className="font-bold text-lg text-slate-800">사건 성격 대조 분석</h2>
+              </div>
+              <div className="group/tooltip relative">
+                <Info size={18} className="text-slate-300 cursor-help hover:text-indigo-500 transition-colors" />
+                <div className="absolute right-0 top-8 w-64 p-4 bg-slate-800 text-white text-[13px] rounded-2xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 shadow-2xl leading-relaxed border border-white/10">
+                  <p className="font-bold mb-1.5 text-indigo-300 flex items-center gap-1.5">
+                    <Info size={12} /> 그래프 해석 가이드
+                  </p>
+                  각 축은 사건의 주요 요소를 나타내며, <span className="text-indigo-300 font-bold">면적이 넓을수록</span> 해당 요소가 판결에 미치는 영향력이 큼을 의미합니다. 파란색 면적(내 사건)이 회색 면적(유사 판례)과 겹치거나 넓은 부분을 유심히 확인하세요.
+                </div>
+              </div>
+            </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
@@ -165,12 +183,21 @@ export default function Solution() {
             </div>
           </Card>
 
-          <Card className="bg-white border border-slate-200 shadow-sm flex flex-col border-l-4 border-l-indigo-500">
+          <Card className="bg-white border border-slate-100 shadow-sm flex flex-col">
             <div className="flex items-center gap-2 mb-6 text-slate-800"><Gavel className="text-indigo-500" /> <h2 className="font-bold text-lg">예상 형량 분포</h2></div>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={pieData} innerRadius={65} outerRadius={85} paddingAngle={8} dataKey="value" stroke="none">
+                  <Pie 
+                    data={pieData} 
+                    innerRadius={60} 
+                    outerRadius={80} 
+                    paddingAngle={5} 
+                    dataKey="value" 
+                    stroke="none"
+                    label={({ percent }) => percent ? `${(percent * 100).toFixed(0)}%` : ''}
+                    labelLine={false}
+                  >
                     {pieData.map((_, i) => (
                       <Cell key={`pie-cell-${i}`} fill={pieColors[i % pieColors.length]} />
                     ))}
@@ -234,7 +261,7 @@ export default function Solution() {
             </div>
           </Card>
 
-          <Card className="bg-white border-slate-200 shadow-sm h-full border-l-4 border-l-indigo-500">
+          <Card className="bg-white border-slate-100 shadow-sm h-full overflow-hidden">
             <div className="flex items-center gap-2 mb-6 text-slate-800">
               <FileText className="text-indigo-500" size={20} />
               <h2 className="font-bold text-lg">참조 판례 정보</h2>
@@ -257,7 +284,7 @@ export default function Solution() {
           </Card>
         </div>
 
-        <Card className="bg-white border-slate-200 mb-12 shadow-sm p-8 border-l-4 border-l-indigo-500">
+        <Card className="bg-white border-slate-100 mb-12 shadow-sm p-8 overflow-hidden">
           <div className="text-center mb-12"><h2 className="text-2xl font-black text-slate-900 mb-2 underline decoration-indigo-500 underline-offset-8">필요 문서 즉시 작성</h2></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[

@@ -125,7 +125,7 @@ const SearchResultsPage = () => {
 
   return (
     <Layout>
-      <main className="min-h-screen bg-white relative pt-10 pb-32">
+      <main className="min-h-screen bg-white relative pt-[70px] pb-32">
         {/* 배경 패턴 */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" 
              style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
@@ -204,7 +204,7 @@ const SearchResultsPage = () => {
                       onClick={() => handleResultClick(result.case_No)}
                       className={`group relative rounded-[2rem] p-6 transition-all duration-500 cursor-pointer border-2 ${
                         isSelected 
-                          ? 'bg-white border-indigo-500 shadow-[0_20px_50px_-12px_rgba(79,70,229,0.15)] ring-4 ring-indigo-50/50' 
+                          ? 'bg-indigo-50 border-indigo-500 shadow-[0_20px_50px_-12px_rgba(79,70,229,0.15)] ring-4 ring-indigo-50/50' 
                           : 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:border-indigo-200'
                       }`}
                     >
@@ -305,7 +305,7 @@ const SearchResultsPage = () => {
               exit={{ y: 100, opacity: 0 }}
               className="fixed bottom-8 left-0 right-0 z-50 px-6 pointer-events-none"
             >
-              <div className="max-w-3xl mx-auto bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] flex items-center justify-between pointer-events-auto">
+              <div className="max-w-3xl mx-auto bg-slate-700/100 backdrop-blur-xl border border-white/10 p-4 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] flex items-center justify-between pointer-events-auto">
                 <div className="flex items-center gap-4 pl-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                     <CheckCircle2 size={24} strokeWidth={2.5} />
