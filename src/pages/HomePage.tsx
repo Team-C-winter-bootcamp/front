@@ -101,7 +101,7 @@ export default function HomePage() {
               </h1>
               <p className="text-xl md:text-2xl text-slate-500 leading-relaxed mb-12 max-w-3xl mx-auto font-medium">
                 변호사 선임 비용과 복잡한 절차 때문에 혼자 고민하지 마세요.<br className="hidden md:block" />
-                LAWDING AI가 당신의 상황을 <span className="text-slate-900 font-bold underline underline-offset-4 decoration-indigo-200">6만 건의 판례데이터를 기반으로</span>정밀 진단하고 
+                LAWDING AI가 당신의 상황을 <span className="text-slate-900 font-bold underline underline-offset-4 decoration-indigo-200">6만 건의 판례데이터</span>를 기반으로 정밀 진단하고 
                 <span className="text-slate-900 font-bold underline underline-offset-4 decoration-indigo-200">최적의 법적 대응책</span>을 제시합니다.
               </p>
               
